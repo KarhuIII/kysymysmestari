@@ -175,23 +175,32 @@ async function getProfile() {
  * Update profile
  */
 async function updateProfileData(updates) {
-    if (!currentUser) {
-        return { error: { message: 'Ei kirjautunut' } };
+    try {
+        if (!currentUser) {
+            return { error: { message: 'Ei kirjautunut' } };
+        }
+
+        // Remove username from updates if present (username is immutable)
+        if (updates.username) {
+            delete updates.username;
+        }
+
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .update(updates)
+            .eq('id', currentUser.id)
+            .select()
+            .maybeSingle();
+
+        if (error) {
+            console.error('Profile update error:', error);
+        }
+
+        return { data, error };
+    } catch (err) {
+        console.error('Profile update EXCEPTION:', err);
+        return { error: { message: 'Virhe profiilin päivityksessä: ' + err.message } };
     }
-
-    // Remove username from updates if present (username is immutable)
-    if (updates.username) {
-        delete updates.username;
-    }
-
-    const { data, error } = await supabaseClient
-        .from('profiles')
-        .update(updates)
-        .eq('id', currentUser.id)
-        .select()
-        .maybeSingle();
-
-    return { data, error };
 }
 
 /**
@@ -396,6 +405,7 @@ function showUnauthenticatedUI() {
     document.querySelectorAll('.auth-guest').forEach(el => el.classList.remove('hidden'));
     document.getElementById('auth-screen')?.classList.remove('hidden');
     document.getElementById('lobby-screen')?.classList.add('hidden');
+    document.getElementById('main-nav')?.style.setProperty('display', 'none');
 }
 
 // Initialize - check for existing session

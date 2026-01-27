@@ -53,6 +53,24 @@ window.addEventListener('authStateChange', (e) => {
     }
 });
 
+// Handle Guest Login event (from auth_ui.js) - similar to authStateChange but forced for guest
+window.addEventListener('guestLogin', (e) => {
+    const { guestId } = e.detail;
+    console.log('👤 Guest login detected:', guestId);
+    
+    if (guestId !== myPersistentId) {
+        myPersistentId = guestId;
+        socket.disconnect();
+        socket = io({
+            auth: {
+                token: myPersistentId
+            }
+        });
+        setupSocketListeners();
+        console.log('🆔 Updated Persistent ID (Guest):', myPersistentId);
+    }
+});
+
 console.log('🆔 Initial Persistent ID:', myPersistentId);
 
 // Game state

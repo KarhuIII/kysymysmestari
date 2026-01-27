@@ -72,7 +72,8 @@ function hideAuthError(element) {
 
 // Login handler
 if (loginBtn) {
-    loginBtn.addEventListener('click', async () => {
+    loginBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); // Prevent form submission
         hideAuthError(loginError);
         
         const email = loginEmailInput.value.trim();
@@ -93,13 +94,17 @@ if (loginBtn) {
         
         if (error) {
             showAuthError(loginError, error.message || 'Kirjautuminen epäonnistui');
+        } else {
+            // Success - update UI immediately without reload
+            window.auth.initAuth();
         }
     });
 }
 
 // Register handler
 if (registerBtn) {
-    registerBtn.addEventListener('click', async () => {
+    registerBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); // Prevent form submission
         hideAuthError(registerError);
         
         const username = registerUsernameInput.value.trim();
@@ -142,24 +147,34 @@ if (registerBtn) {
         registerBtn.textContent = 'Rekisteröidy';
         
         if (error) {
-            showAuthError(registerError, error.message || 'Rekisteröinti epäonnistui');
+            let errorMsg = error.message || 'Rekisteröinti epäonnistui';
+            
+            // Handle rate limit specifically
+            if (error.status === 429 || errorMsg.includes('Too Many Requests')) {
+                errorMsg = 'Liian monta yritystä. Odota hetki ennen uutta yritystä.';
+            }
+            
+            showAuthError(registerError, errorMsg);
         } else if (data.session) {
             // User is auto-logged in (email confirmation disabled)
             showAuthError(registerError, '');
             registerError.classList.add('hidden');
-            window.location.reload(); // Reload to show logged-in state
+            window.auth.initAuth(); // Update UI immediately
         } else {
             // Email confirmation required
             showAuthError(registerError, '');
             registerError.classList.add('hidden');
             alert('Rekisteröinti onnistui! Tarkista sähköpostisi vahvistaaksesi tilin.');
+            // Switch to login tab
+            document.querySelector('.auth-tab[data-tab="login"]').click();
         }
     });
 }
 
 // Google login
 if (googleLoginBtn) {
-    googleLoginBtn.addEventListener('click', async () => {
+    googleLoginBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
         const { error } = await window.auth.signInWithOAuth('google');
         if (error) {
             showAuthError(loginError, error.message || 'Google-kirjautuminen epäonnistui');
@@ -169,7 +184,8 @@ if (googleLoginBtn) {
 
 // Guest play - use old localStorage-based ID with Guest_xxxxxxx format
 if (guestPlayBtn) {
-    guestPlayBtn.addEventListener('click', () => {
+    guestPlayBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         // Generate new Guest ID if needed
         let guestId = localStorage.getItem('kysymysmestari_player_id');
         if (!guestId || !guestId.startsWith('Guest_')) {
@@ -186,17 +202,34 @@ if (guestPlayBtn) {
         // Store guest flag
         localStorage.setItem('isGuest', 'true');
         
-        // Reload to connect with new ID
-        window.location.reload();
+        // Update UI manually
+        const userInfoBar = document.getElementById('user-info-bar');
+        if (userInfoBar) {
+            userInfoBar.classList.remove('hidden');
+            document.getElementById('user-display-name').textContent = 'Vieras';
+            document.getElementById('logout-btn').textContent = 'Poistu';
+        }
+        
+        // Force socket reconnection if needed, or just let client.js handle it
+        // client.js listens for authStateChange, but for guest mode we might need to trigger it manually or just reload socket
+        // Ideally, we emit an event that client.js listens to
+        window.dispatchEvent(new CustomEvent('guestLogin', { detail: { guestId } }));
     });
 }
 
 // Logout handler
 if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
+    logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
         await window.auth.signOut();
         localStorage.removeItem('isGuest');
-        window.location.reload();
+        // Return to auth screen immediately
+        window.auth.initAuth(); 
+        // Force refresh of the page ONLY if we need to clear complex state that initAuth doesn't handle,
+        // but try to avoid it. For now, let's reload only if absolutely necessary, but preferred is SPA.
+        // If we really want to clear memory:
+        // window.location.reload(); 
+        // BUT, the goal is to fix Android issues, so let's try SPA transition first.
     });
 }
 
