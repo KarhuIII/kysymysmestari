@@ -143,8 +143,14 @@ if (registerBtn) {
         
         if (error) {
             showAuthError(registerError, error.message || 'Rekisteröinti epäonnistui');
+        } else if (data.session) {
+            // User is auto-logged in (email confirmation disabled)
+            showAuthError(registerError, '');
+            registerError.classList.add('hidden');
+            window.location.reload(); // Reload to show logged-in state
         } else {
-            showAuthError(registerError, ''); // Clear
+            // Email confirmation required
+            showAuthError(registerError, '');
             registerError.classList.add('hidden');
             alert('Rekisteröinti onnistui! Tarkista sähköpostisi vahvistaaksesi tilin.');
         }

@@ -164,7 +164,13 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO public.profiles (id, username)
-    VALUES (NEW.id, 'user_' || LEFT(NEW.id::text, 8));
+    VALUES (
+        NEW.id, 
+        COALESCE(
+            NEW.raw_user_meta_data->>'username', 
+            'user_' || LEFT(NEW.id::text, 8)
+        )
+    );
     
     INSERT INTO public.player_data (user_id)
     VALUES (NEW.id);

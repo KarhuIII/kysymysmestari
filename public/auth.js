@@ -49,14 +49,6 @@ async function signUp(email, password, username) {
             return { error };
         }
 
-        // Update username after signup
-        if (data.user) {
-            await supabaseClient
-                .from('profiles')
-                .update({ username: username })
-                .eq('id', data.user.id);
-        }
-
         return { data };
     } catch (err) {
         console.error('SignUp error:', err);
