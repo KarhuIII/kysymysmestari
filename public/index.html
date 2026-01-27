@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kysymysmestari - 1v1 Tietovisa</title>
+  <link rel="stylesheet" href="theme.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1 id="game-title">🎯 Kysymysmestari</h1>
+
+    <!-- Auth Screen (shown when not logged in) -->
+    <div id="auth-screen" class="screen">
+      <div class="auth-container">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Kirjaudu</button>
+          <button class="auth-tab" data-tab="register">Rekisteröidy</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" class="auth-form">
+          <div class="input-group-vertical">
+            <label for="login-email">Sähköposti</label>
+            <input type="email" id="login-email" placeholder="sinun@email.fi" autocomplete="email">
+          </div>
+          <div class="input-group-vertical">
+            <label for="login-password">Salasana</label>
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button id="login-btn" class="btn btn-primary btn-block">Kirjaudu sisään</button>
+          
+          <div class="auth-divider">
+            <span>tai</span>
+          </div>
+          
+          <div class="oauth-buttons">
+            <button id="google-login-btn" class="btn btn-oauth google">
+              <span class="oauth-icon">🔵</span> Google
+            </button>
+          </div>
+          
+          <p class="auth-error hidden" id="login-error"></p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="auth-form hidden">
+          <div class="input-group-vertical">
+            <label for="register-username">Käyttäjänimi</label>
+            <input type="text" id="register-username" placeholder="Mestari123" maxlength="30" autocomplete="username">
+            <small>3-30 merkkiä, kirjaimia, numeroita ja alaviivoja</small>
+          </div>
+          <div class="input-group-vertical">
+            <label for="register-email">Sähköposti</label>
+            <input type="email" id="register-email" placeholder="sinun@email.fi" autocomplete="email">
+          </div>
+          <div class="input-group-vertical">
+            <label for="register-password">Salasana</label>
+            <input type="password" id="register-password" placeholder="Vähintään 6 merkkiä" autocomplete="new-password">
+          </div>
+          <div class="input-group-vertical">
+            <label for="register-password-confirm">Vahvista salasana</label>
+            <input type="password" id="register-password-confirm" placeholder="Salasana uudelleen" autocomplete="new-password">
+          </div>
+          <button id="register-btn" class="btn btn-primary btn-block">Rekisteröidy</button>
+          
+          <p class="auth-error hidden" id="register-error"></p>
+        </div>
+
+        <!-- Guest Option -->
+        <div class="guest-option">
+          <p>Haluatko kokeilla ensin?</p>
+          <button id="guest-play-btn" class="btn btn-secondary btn-block">Pelaa vieraana</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dev tools removed - using proper auth now -->
+
+    <!-- User Info Bar (shown when logged in) -->
+    <div id="user-info-bar" class="user-info-bar auth-required hidden">
+      <div class="user-info">
+        <div id="user-avatar" class="mini-avatar">👤</div>
+        <span id="user-display-name">Pelaaja</span>
+      </div>
+      <button id="logout-btn" class="btn btn-ghost small">Kirjaudu ulos</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="main-nav" class="nav-bar">
+      <button class="nav-btn active" data-target="lobby-screen">Peli</button>
+      <button class="nav-btn" data-target="profile-screen">Profiili</button>
+      <button class="nav-btn" data-target="deck-manage-screen">Pakka</button>
+    </nav>
+
+
+    <!-- Connection Status -->
+    <div id="connection-status" class="status">
+      <span id="status-text">Yhdistetään...</span>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="lobby-screen" class="screen">
+      <div id="lobby-main-grid" class="lobby-grid">
+        <!-- Create Section -->
+        <div class="lobby-col create-section">
+          <h2>Luo peli</h2>
+          <div class="create-card">
+            <p class="section-desc">Aloita uusi peli ja kutsu ystäväsi.</p>
+            <button id="create-game-btn" class="btn btn-primary btn-block">Luo uusi peli</button>
+          </div>
+          
+          <div id="room-code-display" class="room-code hidden">
+            <p>Huonekoodi:</p>
+            <h3 id="room-code"></h3>
+            <div class="waiting-spinner"></div>
+            <p class="waiting">Odotetaan vastustajaa...</p>
+          </div>
+        </div>
+
+        <!-- Join Section -->
+        <div class="lobby-col join-section">
+          <h2>Liity peliin</h2>
+          
+          <div class="join-card">
+            <h4 class="sub-title">Syötä koodi</h4>
+            <div class="input-group">
+              <input type="text" id="room-code-input" placeholder="HUONE" maxlength="6">
+              <button id="join-game-btn" class="btn btn-secondary">Liity</button>
+            </div>
+          </div>
+
+          <div class="join-card server-list-cta">
+            <h4 class="sub-title">Selaa pelejä</h4>
+            <p class="section-desc">Löydä avoimia pelejä ja haasta muita pelaajia.</p>
+            <button id="open-server-modal-btn" class="btn btn-primary btn-block">Selaa avoimia pelejä</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Integrated Server List Section -->
+      <div id="lobby-server-list-section" class="lobby-server-section hidden">
+        <div class="section-header">
+            <button id="back-to-lobby-btn" class="btn btn-secondary small">← Takaisin</button>
+            <h3>🌐 Avoimet Pelit</h3>
+            <button id="refresh-lobby-list-btn" class="btn btn-ghost small">Päivitä</button>
+        </div>
+        <div id="lobby-server-list" class="server-list-slim">
+            <p class="empty-list">Etsitään pelejä...</p>
+        </div>
+      </div>
+      
+      <!-- Debug Console -->
+      <div id="debug-console" class="debug-console">
+        <div class="debug-header">Debug Log</div>
+        <div id="debug-log" class="debug-log"></div>
+      </div>
+    </div>
+
+    <!-- Profile Screen -->
+    <div id="profile-screen" class="screen hidden">
+      <h2>Pelaajaprofiili</h2>
+      
+      <!-- Profile Edit Section (auth-required) -->
+      <div class="profile-edit-section auth-required">
+        <div class="profile-header">
+          <div class="avatar-section">
+            <div id="profile-avatar" class="profile-avatar">👤</div>
+            <label for="avatar-upload" class="btn btn-secondary small">Vaihda kuva</label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+          </div>
+          
+          <div class="profile-form">
+            <div class="input-group-vertical">
+              <label for="profile-username" style="color: #666;">Käyttäjänimi</label>
+              <input type="text" id="profile-username" maxlength="30" readonly style="background-color: rgba(0, 0, 0, 0.7) !important; color: #666 !important; cursor: not-allowed; border: 1px solid rgba(255, 255, 255, 0.05);">
+            </div>
+            <div class="input-group-vertical">
+              <label for="profile-display-name">Näyttönimi</label>
+              <input type="text" id="profile-display-name" placeholder="Sanna M." maxlength="50">
+            </div>
+            <div class="input-group-vertical">
+              <label for="profile-bio">Bio</label>
+              <textarea id="profile-bio" placeholder="Kerro itsestäsi..." maxlength="200" rows="2"></textarea>
+            </div>
+            <div class="input-group-vertical">
+              <label for="profile-country">Maa</label>
+              <select id="profile-country">
+                <option value="">Valitse maa</option>
+                <option value="FI">🇫🇮 Suomi</option>
+                <option value="SE">🇸🇪 Ruotsi</option>
+                <option value="NO">🇳🇴 Norja</option>
+                <option value="DK">🇩🇰 Tanska</option>
+                <option value="EE">🇪🇪 Viro</option>
+                <option value="US">🇺🇸 USA</option>
+                <option value="GB">🇬🇧 UK</option>
+                <option value="DE">🇩🇪 Saksa</option>
+              </select>
+            </div>
+            <button id="save-profile-btn" class="btn btn-primary">Tallenna muutokset</button>
+            <p class="profile-message hidden" id="profile-save-message"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Section -->
+      <h3>📊 Tilastot</h3>
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-wins">0</div>
+          <div class="stat-label">Voitot</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-losses">0</div>
+          <div class="stat-label">Häviöt</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-games">0</div>
+          <div class="stat-label">Pelit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-winrate">0%</div>
+          <div class="stat-label">Voitto-%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-best-streak">0</div>
+          <div class="stat-label">Paras putki</div>
+        </div>
+      </div>
+
+      <h3>📜 Pelihistoria</h3>
+      <div id="history-list" class="history-list">
+        <p>Ladataan historiaa...</p>
+      </div>
+    </div>
+
+    <!-- Deck Management Screen -->
+    <div id="deck-manage-screen" class="screen hidden">
+      <h2>Pakan Hallinta</h2>
+      <p class="info-text">Valitse kortit, joita haluat käyttää pelissä.</p>
+      <div class="deck-stats">
+        <span>Valittu: <span id="active-deck-count">0</span></span>
+        <button id="save-deck-btn" class="btn btn-primary small">Tallenna pakka</button>
+      </div>
+      <div class="deck-controls" style="margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <div class="sort-controls">
+            <span>Järjestä:</span>
+            <button id="sort-name-btn" class="btn btn-secondary small">A-Ö</button>
+            <button id="sort-diff-btn" class="btn btn-secondary small">Vaikeus</button>
+            <button id="sort-cat-btn" class="btn btn-secondary small">Kategoria</button>
+        </div>
+        <div class="filter-controls" style="margin-left: auto;">
+             <span>Näytä:</span>
+             <select id="filter-cat-select" style="padding: 5px; border-radius: 4px;">
+                 <option value="all">Kaikki</option>
+                 <option value="maantieto">Maantieto</option>
+                 <option value="kulttuuri">Kulttuuri</option>
+                 <option value="tiede">Tiede</option>
+                 <option value="avaruus">Avaruus</option>
+                 <option value="historia">Historia</option>
+                 <option value="aliens">Aliens</option>
+                 <option value="urheilu">Urheilu</option>
+                 <option value="viihde">Viihde</option>
+                 <option value="yleistieto">Yleistieto</option>
+             </select>
+        </div>
+      </div>
+      <div id="collection-grid" class="collection-grid">
+        <!-- Cards will be rendered here -->
+      </div>
+
+      <h3>Erikoiskortit (Valitse max 3)</h3>
+      <div id="special-collection-grid" class="collection-grid">
+        <!-- Special cards rendered here -->
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+
+    <div id="game-screen" class="screen hidden theme-ethereal">
+      
+      <!-- Close/Surrender Button -->
+      <button id="surrender-btn" class="close-modal" style="top:15px; right:15px; width:40px; height:40px; font-size:1.5rem; background:rgba(255, 71, 87, 0.2); border:1px solid rgba(255, 71, 87, 0.5);" title="Luovuta peli">✕</button>
+
+      <!-- HUD: Scores & Status -->
+      <div class="scores-bar">
+          <div style="text-align:center;">
+              <div class="player-avatar">👤</div>
+              <div class="score-pill" id="my-score">0</div>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; align-items:center;">
+              <div class="vs-badge">VS</div>
+              <div id="turn-indicator" class="turn-indicator-pill">ODOTETAAN...</div>
+          </div>
+
+          <div style="text-align:center;">
+              <div class="player-avatar opponent">🤖</div>
+              <div class="score-pill" id="opponent-score">0</div>
+          </div>
+      </div>
+
+      <!-- ACTIVE PLAY AREA (Center) -->
+      <div class="active-card-area">
+          
+          <!-- Waiting Message -->
+          <div id="waiting-message" class="waiting-message hidden">
+              <p>Odotetaan vastustajaa...</p>
+          </div>
+
+          <!-- Question Area (The "Card" being played) -->
+          <div id="question-area" class="question-area hidden">
+              <!-- Content injected by JS, ideally should look like a card now -->
+              <h3 id="question-text" style="color:white; text-align:center; font-size:1.5rem; margin-bottom:20px;"></h3>
+              <div id="answer-options" class="answer-options"></div>
+          </div>
+
+          <!-- Special Event Overlay -->
+          <div id="special-card-event" class="special-event hidden">
+              <p id="special-event-text"></p>
+          </div>
+
+          <!-- Result Overlay -->
+          <div id="answer-result" class="answer-result hidden">
+              <div id="result-message"></div>
+              <button id="continue-btn" class="btn btn-primary" style="margin-top:20px;">Jatka</button>
+          </div>
+          
+          <!-- Special Cards Layout: Now inside active area flow to prevent overlap but absolutely positioned to right? 
+               User asked to prevent overlap even on narrow screens. 
+               Safe bet: Separate container BELOW answers or TO THE RIGHT.
+               Let's put it as a sibling to question-area but styled in CSS to be "sidebar" or "bottom-bar".
+               Actually, I will remove the inline styles here and handle it in CSS.
+          -->
+      <!-- Special Cards -->
+      <div id="special-hand-area" class="special-hand-area">
+        <div id="special-cards" class="special-cards"></div>
+      </div>
+      </div>
+
+      <!-- PLAYER HAND (Bottom) -->
+      <div id="deck-area" class="hand-area hidden">
+           <div id="deck-cards" class="deck-cards" style="width:100%; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;"></div>
+      </div>
+
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="screen hidden">
+      <h2 id="game-over-title"></h2>
+      <div class="final-scores">
+        <p>Sinä: <span id="final-my-score"></span></p>
+        <p>Vastustaja: <span id="final-opponent-score"></span></p>
+      </div>
+
+      <!-- Question Selection (for winner only) -->
+      <div id="question-selection" class="question-selection hidden">
+        <h3>Valitse korkeintaan 3 kysymystä pakkaasi!</h3>
+        <p class="selection-info">Nämä ovat kysymyksiä joihin vastasit oikein pelin aikana.</p>
+        <p id="selection-count">Valittu: 0/3</p>
+        <div id="available-questions" class="available-questions"></div>
+        <button id="confirm-selection-btn" class="btn btn-primary">Vahvista valinnat</button>
+      </div>
+
+      <!-- Loser message -->
+      <div id="loser-message" class="hidden">
+        <p>Hyvä peli! Yritä uudelleen.</p>
+      </div>
+
+      <!-- Selection confirmed message -->
+      <div id="selection-confirmed" class="hidden">
+        <p id="selection-result"></p>
+      </div>
+
+      <button id="new-game-btn" class="btn btn-primary">Uusi peli</button>
+    </div>
+    
+    <!-- Join Approval Modal (Host) -->
+    <div id="approval-modal" class="modal hidden">
+        <div class="modal-content glass-panel" style="background: var(--surface-card, #1e272e); text-align: center; max-width: 400px; width: 90%; padding: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Liittymispyyntö</h3>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
+            <p id="approval-message" style="margin-bottom: 2rem; color: var(--text-secondary);">Pelaaja X haluaa liittyä peliin.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="approval-reject-btn" class="btn btn-secondary" style="border-color: #ff4757; color: #ff4757;">Hylkää</button>
+                <button id="approval-accept-btn" class="btn btn-primary" style="min-width: 100px;">Hyväksy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Waiting Modal (Joiner) -->
+    <div id="join-waiting-modal" class="modal hidden">
+         <div class="modal-content glass-panel" style="background: var(--surface-card, #1e272e); text-align: center; max-width: 400px; width: 90%; padding: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Liitytään peliin...</h3>
+            <div class="waiting-spinner" style="margin: 0 auto 1.5rem auto; width: 40px; height: 40px; border-width: 3px;"></div>
+            <p id="join-waiting-text" style="color: var(--text-secondary);">Odotetaan pelin pitäjän vahvistusta.</p>
+        </div>
+    </div>
+
+    <!-- Full Card Modal -->
+    <div id="card-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-card-modal">&times;</span>
+            <div id="full-card-container">
+                <!-- Full card will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Server List Modal removed, now integrated in Lobby -->
+  </div>
+
+  <style>
+      /* Simple Modal Styles */
+      .modal {
+          position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+          background-color: rgba(0,0,0,0.8);
+          display: flex; justify-content: center; align-items: center;
+      }
+      .modal.hidden { display: none; }
+      .modal-content {
+          background-color: transparent;
+          padding: 20px;
+          border-radius: 10px;
+          position: relative;
+          width: fit-content;
+      }
+      .close-modal {
+          color: #aaa; float: right; font-size: 28px; font-weight: bold;
+          position: absolute; top: -10px; right: -10px; cursor: pointer; z-index: 1001;
+          background: rgba(0,0,0,0.5); width: 30px; height: 30px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+      }
+      .close-modal:hover, .close-modal:focus { color: white; text-decoration: none; cursor: pointer; }
+  </style>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="auth.js"></script>
+  <script src="auth_ui.js"></script>
+  <script src="client.js"></script>
+</body>
+
+</html>

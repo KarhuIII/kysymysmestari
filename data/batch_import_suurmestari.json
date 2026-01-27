@@ -1,0 +1,682 @@
+[
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on Planck-vakio arvoltaan?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "6.626 × 10^-34 J⋅s",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "6.626 × 10^-27 J⋅s",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "3.626 × 10^-34 J⋅s",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "6.626 × 10^-31 J⋅s",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "c92d65a9-3245-4dc6-aca8-c2bd384c5614"
+  },
+  {
+    "language": "fi",
+    "category": "matematiikka",
+    "category_label": "Matematiikka",
+    "text": "Kuka kehitti Gödelin epätäydellisyyslauseet?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Kurt Gödel",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Bertrand Russell",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "David Hilbert",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Alfred North Whitehead",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "03ed60c5-0f3a-4bd2-bb05-0164a9d0dd0e"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on neutriinojen massavaje efekti?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Neutriino-oskillaatio",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Neutriino-interferenssi",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Neutriino-dekohereenssi",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Neutriino-dispersio",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "5398834a-f2fc-4edd-8b7c-457859dc7a29"
+  },
+  {
+    "language": "fi",
+    "category": "matematiikka",
+    "category_label": "Matematiikka",
+    "text": "Mikä on Riemann-hypoteesin keskeisin väite?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Kaikki ei-triviaalit nollakohdat sijaitsevat kriittisellä suoralla",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kaikki parilliset luvut ovat alkulukujen summia",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Äärettömyys on laskettavissa",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Kompleksiluvut ovat reaalilukujen ylijoukko",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "cb47f4da-b0bc-4e3e-ab27-b82615545be1"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on kvanttikromodynamiikan kytkentävakio αs arvoltaan noin 1 GeV energiassa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "0.3",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "0.1",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "0.03",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1.0",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "de54628e-6032-402f-8356-fc8d209da48c"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuinka monta eri Pokémonia oli alkuperäisessä Red/Blue -pelissä?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "151",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "150",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "200",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "100",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "42b85c0f-bdf6-4325-840a-0925db2e9b35"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuinka monta erilaista LEGO-palikkaa oli käytössä ensimmäisessä LEGO Historian sarjassa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "6",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "5",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "8",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "10",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "49a4a2b3-c90d-4f00-ad78-d57384cd61d4"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Mikä on Ihmemaan Liisan lemmikkieläimen nimi?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Dinah",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Cheshire",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Rex",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Fido",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "feb759d5-1e2d-4aba-87fe-63618d0d1d05"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta erilaista eläintä esiintyy Leijonakuningas-elokuvan alussa Jylhäkalliolla?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "10",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "5",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "15",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "20",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "b9d42264-34c0-4347-8b0b-8171cebd79fa"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuinka monta jalkaa on Muumipapan purjeveneessä?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "0",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "2",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "6",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "b9e2e9a8-3ad8-49ac-8ecc-c09b94c193f8"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta kultakalaa on 'Pienen merenneidon' Arielin akvaariossa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "1",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "2",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "5",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "10",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "91082887-ef34-41b2-ab8a-219ff8a176c0"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta jalkaa on Nalle Puhilla?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "2",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "3",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "5",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "51a9b263-2dac-4aba-96f0-06c2785cd1b6"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta lentävää eläintä esiintyy Dumbo-elokuvassa alussa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "3",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "2",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "4",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "31334e2c-241b-4d7e-a72d-e048ee21ba31"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuinka monta tikkua Pinocchion nenä kasvaa, kun hän valehtelee elokuvassa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "3-4",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "5-6",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "7",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "4c72148f-de2a-49bb-95a7-7e6b732ec181"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on Planckin vakion tarkka arvo SI-järjestelmässä?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "6.62607015 × 10^-34 J·s",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "6.626 × 10^-32 J·s",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "3.14159 × 10^-34 J·s",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1.602 × 10^-19 J·s",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "b2da88da-24e1-464c-a128-3b0e9d07c224"
+  },
+  {
+    "language": "fi",
+    "category": "matematiikka",
+    "category_label": "Matematiikka",
+    "text": "Mikä on Riemannin hypoteesin merkitys kompleksitasolle?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Kaikki ei-triviaalit nollakohdat ζ(s) sijaitsevat Re(s) = 1/2",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kaikki nollakohdat ovat kokonaislukuja",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Kaikki nollakohdat ovat reaalisia",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Kaikki nollakohdat ovat rationaalisia",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "5fbbdffb-3ab6-4af0-95d9-8df54e457349"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on Navier-Stokesin yhtälön perusmuoto incompressible fluid -tapauksessa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "ρ(∂v/∂t + v·∇v) = -∇p + μ∇²v + f",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "F = ma",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "∇²ψ + k²ψ = 0",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "E = mc^2",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "919858b9-b5e6-4db4-9b54-98703e943feb"
+  },
+  {
+    "language": "fi",
+    "category": "matematiikka",
+    "category_label": "Matematiikka",
+    "text": "Mikä on Gödelin epätäydellisyyslauseen pääväite muodollisessa järjestelmässä?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Jokaisessa riittävän voimakkaassa konsistentissa järjestelmässä on väittämiä, joita ei voida todistaa tai kumota sen sisällä",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kaikki totuudet voidaan todistaa",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Kaikki väitteet ovat epätäydellisiä",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Kaikki järjestelmät ovat ristiriitaisia",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "8f54ec95-dc18-466b-96fb-f079838dfb28"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on Standardimallin Higgsin bosonin ominaispaino?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Noin 125 GeV/c²",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "91 GeV/c²",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "0.511 MeV/c²",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "173 GeV/c²",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "85fc3fbf-ce81-49a5-be18-d72dd52fa818"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on Schrödingerin yhtälön ajallinen riippumaton muoto?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Hψ = Eψ",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "iħ(∂ψ/∂t) = Hψ",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "E = mc^2",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "F = ma",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "81d93c73-9935-4c90-bad7-4b833d45df8a"
+  }
+]

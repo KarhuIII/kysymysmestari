@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game UI Themes - Kysymysmestari</title>
+    <link rel="stylesheet" href="card_styles.css">
+    <style>
+        body {
+            background: #1e1e1e;
+            color: #eee;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #a29bfe; margin-bottom: 40px; }
+        
+        .theme-container {
+            margin-bottom: 80px;
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+            background: #111;
+        }
+        .theme-label {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fab1a0;
+            border-bottom: 2px solid #fab1a0;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* --- MOCK COMPONENT STYLES --- */
+        .mock-screen {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #444;
+            border-radius: 8px;
+        }
+
+        /* THEME 1: ETHEREAL IMMERSION */
+        .theme-ethereal .mock-screen {
+            background: radial-gradient(circle at center, #2d3436, #000);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .theme-ethereal .scores-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 40px;
+            box-sizing: border-box;
+            align-items: center;
+        }
+        .theme-ethereal .player-avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; border: 2px solid white;
+        }
+        .theme-ethereal .vs-badge {
+            font-size: 3rem; font-weight: 900;
+            background: -webkit-linear-gradient(#fab1a0, #ff7675);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-style: italic;
+        }
+        .theme-ethereal .score-pill {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .theme-ethereal .turn-indicator {
+            background: rgba(0, 184, 148, 0.2);
+            color: #00b894;
+            padding: 5px 15px;
+            border-radius: 15px;
+            border: 1px solid #00b894;
+            margin-top: -30px; /* Pull up */
+        }
+        .theme-ethereal .active-card-area {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            perspective: 1000px;
+        }
+        .theme-ethereal .hand-area {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* THEME 2: NEON ARCADE */
+        .theme-arcade .mock-screen {
+            background: #130f40;
+            background-image: 
+                linear-gradient(rgba(19, 15, 64, 0.9), rgba(19, 15, 64, 0.9)),
+                repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,255,255,0.1) 20px),
+                repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255,255,255,0.1) 20px);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            align-items: center;
+        }
+        .theme-arcade .top-hud {
+            background: #30336b;
+            border-bottom: 4px solid #f0932b;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .theme-arcade .arcade-score {
+            font-family: 'Courier New', monospace;
+            color: #f0932b;
+            font-size: 2rem;
+            text-shadow: 2px 2px #000;
+            background: #000;
+            padding: 5px 15px;
+            border: 2px solid #535c68;
+            border-radius: 4px;
+        }
+        .theme-arcade .battle-zone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        }
+        .theme-arcade .hand-rail {
+            background: #22a6b3;
+            padding: 10px;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            border-top: 4px solid #7ed6df;
+        }
+
+        /* THEME 3: CLEAN MINIMALIST */
+        .theme-minimal .mock-screen {
+            background: #dfe6e9; /* Light theme base */
+            color: #2d3436;
+            display: flex;
+            flex-direction: column;
+        }
+        .theme-minimal .header {
+            padding: 20px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .theme-minimal .player-info h3 { margin: 0; font-size: 1.2rem; }
+        .theme-minimal .player-info .score { font-size: 2rem; font-weight: 300; color: #6c5ce7; }
+        .theme-minimal .main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .theme-minimal .question-card {
+            background: white;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+        }
+        .theme-minimal .bottom-bar {
+            background: white;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            border-top: 1px solid #b2bec3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Vaihtoehtoiset Pelinäkymät</h1>
+    <p style="text-align:center; color:#888;">Nämä ovat luonnoksia koko pelinäkymän asettelusta ja tunnelmasta. Kortteina käytetään jo valittua Slim Row / Ethereal -tyyliä.</p>
+
+    <!-- THEME 1 -->
+    <div class="theme-container theme-ethereal">
+        <div class="theme-label">A. Ethereal Glass (Immersiivinen)</div>
+        <p>Tumma, lasimainen ja moderni. Sopii hyvin yhteen Ethereal-korttien kanssa. Fokus tunnelmassa.</p>
+        
+        <div class="mock-screen">
+            <!-- Hud -->
+            <div class="scores-bar">
+                <div style="text-align:center;">
+                    <div class="player-avatar">👤</div>
+                    <div class="score-pill">3</div>
+                </div>
+                
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="vs-badge">VS</div>
+                    <div class="turn-indicator">Sinun vuorosi</div>
+                </div>
+
+                <div style="text-align:center;">
+                    <div class="player-avatar" style="background: linear-gradient(45deg, #ff7675, #fab1a0); border-color:#fab1a0;">🤖</div>
+                    <div class="score-pill">2</div>
+                </div>
+            </div>
+
+            <!-- Active Play Area -->
+            <div class="active-card-area">
+                <!-- Example of Active Question being played -->
+                <div class="card-wrapper tcg-ethereal category-tiede" style="transform: scale(1.2) rotate(-2deg);">
+                    <div class="ethereal-inner">
+                        <div class="ethereal-category">TIEDE</div>
+                        <div class="ethereal-circle">⚛️</div>
+                        <div class="ethereal-question">Mikä on veden kemiallinen kaava?</div>
+                        <div class="ethereal-footer">
+                            <span>ID: 152a</span>
+                            <span>Lvl 1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hand Area -->
+            <div class="hand-area">
+                <!-- Slim Row style used as "Hand" -->
+                <div class="mini-row category-maantieto" style="width: 250px; background: rgba(45, 52, 54,0.8);">
+                    <div class="mini-icon">🌍</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">MAANTIETO</div>
+                        <div class="mini-q">Suomen pääkaupunki?</div>
+                    </div>
+                </div>
+                <div class="mini-row category-historia" style="width: 250px; background: rgba(45, 52, 54,0.8);">
+                    <div class="mini-icon">📜</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">HISTORIA</div>
+                        <div class="mini-q">Itsenäistymisvuosi?</div>
+                    </div>
+                </div>
+                <div class="mini-row category-urheilu" style="width: 250px; background: rgba(45, 52, 54,0.8);">
+                    <div class="mini-icon">🏆</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">URHEILU</div>
+                        <div class="mini-q">Olympialaiset 1952?</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- THEME 2 -->
+    <div class="theme-container theme-arcade">
+        <div class="theme-label">B. Neon Arcade (Retro/Action)</div>
+        <p>Retrompi, pelimäisempi. Selkeät pistetaulut ja ruudukko-tausta. "Battle"-fiilis.</p>
+        
+        <div class="mock-screen">
+            <div class="top-hud">
+                <div style="text-align:center">
+                    <div style="color:#7ed6df; font-weight:bold; margin-bottom:5px;">PLAYER 1</div>
+                    <div class="arcade-score">03</div>
+                </div>
+                <div style="align-self:center; color: white; font-weight:bold; font-size:1.5rem;">ROUND 2</div>
+                <div style="text-align:center">
+                    <div style="color:#ff7979; font-weight:bold; margin-bottom:5px;">OPPONENT</div>
+                    <div class="arcade-score">02</div>
+                </div>
+            </div>
+
+            <div class="battle-zone">
+                <!-- Opponent card (Hidden) -->
+                 <div class="card-wrapper tcg-classic" style="transform: scale(0.8);">
+                    <div class="tcg-frame">
+                        <div class="tcg-art" style="background:#555;">?</div>
+                    </div>
+                 </div>
+                 
+                 <div style="color:white; font-size:2rem; font-weight:bold;">VS</div>
+
+                 <!-- Your Played Card -->
+                 <div class="card-wrapper tcg-modern category-avaruus">
+                     <div class="tcg-bg"></div>
+                     <div class="tcg-content">
+                         <div class="tcg-badge">AVARUUS</div>
+                         <div style="flex-grow:1;"></div>
+                         <div class="tcg-text">Montako kuuta Marsilla on?</div>
+                     </div>
+                 </div>
+            </div>
+
+            <div class="hand-rail">
+                 <!-- Using Tile style for hand here -->
+                 <div class="mini-tile category-urheilu selected">
+                    <div class="mini-tile-icon">🏆</div>
+                </div>
+                <div class="mini-tile category-historia">
+                    <div class="mini-tile-icon">📜</div>
+                </div>
+                <div class="mini-tile category-avaruus">
+                    <div class="mini-tile-icon">👽</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- THEME 3 -->
+    <div class="theme-container theme-minimal">
+        <div class="theme-label">C. Clean Focus (Selkeä)</div>
+        <p>Vaalea, minimalistinen, ei häiriötekijöitä. Maksimaalinen luettavuus.</p>
+        
+        <div class="mock-screen">
+            <div class="header">
+                <div class="player-info">
+                    <h3>Sinä</h3>
+                    <div class="score">3</div>
+                </div>
+                <div style="color:#b2bec3; font-weight:bold;">KIERROS 4</div>
+                <div class="player-info" style="text-align:right;">
+                    <h3>Vastustaja</h3>
+                    <div class="score">2</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="question-card">
+                    <h2 style="color:#6c5ce7; text-transform:uppercase; margin-bottom:20px; font-size:1rem; letter-spacing:2px;">Kulttuuri</h2>
+                    <h1 style="font-size:1.8rem; margin-bottom:30px;">Kuka on kirjoittanut Tuntemattoman sotilaan?</h1>
+                    <div style="display:grid; gap:10px;">
+                        <button class="btn btn-secondary" style="width:100%; text-align:left; padding:15px;">A. Mika Waltari</button>
+                        <button class="btn btn-primary" style="width:100%; text-align:left; padding:15px;">B. Väinö Linna</button>
+                        <button class="btn btn-secondary" style="width:100%; text-align:left; padding:15px;">C. Aleksis Kivi</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-bar">
+                <div class="mini-row category-maantieto" style="width: 200px; box-shadow:none; border:1px solid #dfe6e9;">
+                    <div class="mini-icon">🌍</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">MAANTIETO</div>
+                    </div>
+                </div>
+                 <div class="mini-row category-tiede" style="width: 200px; box-shadow:none; border:1px solid #dfe6e9;">
+                    <div class="mini-icon">⚛️</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">TIEDE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

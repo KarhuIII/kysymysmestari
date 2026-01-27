@@ -1,0 +1,1013 @@
+[
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on Suomen pääkaupunki?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 1,
+        "text": "Helsinki",
+        "is_correct": true
+      },
+      {
+        "idx": 2,
+        "text": "Turku",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Tampere",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "card_type": "extra",
+    "id": "2684ca2c-ade8-4e1c-b898-ce88ba8234e1"
+  },
+  {
+    "language": "fi",
+    "category": "yleistieto",
+    "category_label": "Yleistieto",
+    "text": "Mitä väriä saat kun sekoitat sinistä ja keltaista?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Vihreä",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Violetti",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Oranssi",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Harmaa",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "card_type": "classic",
+    "id": "8707e05a-1141-4492-a4af-f534b99aa572"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta jalkaa hämähäkillä on?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "8",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "6",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "10",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "card_type": "holo",
+    "id": "611a382e-ee39-4073-aa08-a3656db0906f"
+  },
+  {
+    "language": "fi",
+    "category": "matematiikka",
+    "category_label": "Matematiikka",
+    "text": "Mikä on 2 + 3?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "5",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "6",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "7",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "b4209f05-bdda-48ca-9cf3-351c44eee7f2"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on vesimolekyylin kemiallinen kaava?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "H₂O",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "CO₂",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "O₂",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "NaCl",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "51f0c0bb-58e5-4973-9ee0-1773620a30b5"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä vuodenaika tulee talven jälkeen?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 1,
+        "text": "Kevät",
+        "is_correct": true
+      },
+      {
+        "idx": 2,
+        "text": "Kesä",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Syksy",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "34652c83-a314-41cb-8c84-1838cb16933e"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Mikä on elefantin suuri roikkuva nenä?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Kärsä",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Nenä",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Sarvi",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Torvi",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "card_type": "holo",
+    "id": "f3706d05-eac6-420c-9f64-ac7de7d1dfbf"
+  },
+  {
+    "language": "fi",
+    "category": "yleistieto",
+    "category_label": "Yleistieto",
+    "text": "Mikä on viikon seitsemäs päivä?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 1,
+        "text": "Sunnuntai",
+        "is_correct": true
+      },
+      {
+        "idx": 2,
+        "text": "Maanantai",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Lauantai",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "card_type": "extra",
+    "id": "6d19e6fa-b1d4-4688-9cc0-d711ef270f3b"
+  },
+  {
+    "language": "fi",
+    "category": "matematiikka",
+    "category_label": "Matematiikka",
+    "text": "Mikä on 5 x 5?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "25",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "10",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "15",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "20",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "c2de2023-3833-4dda-8e1f-d85bd691affe"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Mikä on ihmiskehon suurin elin?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Iho",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Maksa",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Aivot",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Keuhkot",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "5da6ef94-8f9f-4ff7-b83a-034b90edfb2d"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuka on kuuluisa taidemaalari, joka maalasi \"Mona Lisa\"-teoksen?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Leonardo da Vinci",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Pablo Picasso",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Vincent van Gogh",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Claude Monet",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "card_type": "classic",
+    "id": "3e6d45e6-699e-42ae-9a7a-e874c0a348ba"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Mikä on Suomen kansalliseläin?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Karhu",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Leijona",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Susi",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Joutsen",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "95e597f3-9742-4e96-91ad-255ea320b8ef"
+  },
+  {
+    "language": "fi",
+    "category": "historia",
+    "category_label": "Historia",
+    "text": "Missä maassa sijaitsee Suuri Gizan pyramidi?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Egypti",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kiina",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Meksiko",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Kreikka",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "3fe83021-1f56-4607-a3fc-e0ae6a63f7e3"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on Ruotsin pääkaupunki?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Tukholma",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Pariisi",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Oslo",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Tallinna",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "6b78751d-e910-4fc6-9c52-8307fdfa3721"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on maailman suurin valtameri?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Tyynimeri",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Atlantti",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Intian valtameri",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Jäämeri",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "30850488-c822-4f84-b857-d772f068c380"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä on planeettamme ainoa luonnollinen satelliitti?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Kuu",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Mars",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "ISS",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Kepler",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "c72764d8-bc38-4961-9f0e-35b06c744cd7"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on maailman suurin maa pinta-alaltaan?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Venäjä",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kanada",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Kiina",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Yhdysvallat",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "80912ccd-0f1f-44df-b25a-a543a20ab138"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on Ranskan pääkaupunki?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Pariisi",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Lontoo",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Berliini",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Madrid",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "923914a0-f6e1-4d4e-857b-049d0576c922"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on maailman korkein vuori?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Mount Everest",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "K2",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Kangchenjunga",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Lhotse",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "8774ca66-13e3-4afa-8cac-686db375cff9"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä on planeettamme aurinkokunnan suurin planeetta?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Jupiter",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Saturnus",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Uranus",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Neptunus",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "9878cfc4-e1c5-4c75-aa9c-e69fc0878efa"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuka on kirjoittanut 'Romeo ja Julia'?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "William Shakespeare",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kalle Päätalo",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Martti Ahtisaari",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Jane Austen",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "1c4da163-500b-4621-9767-cc0196868e37"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Missä kaupungissa järjestettiin kesäolympialaiset 2016?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Rio de Janeiro",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Tokio",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Lontoo",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Beijing",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "cb474c92-ab0e-4b5e-b929-ba148768bfb4"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuinka monta pelaajaa on jalkapallojoukkueessa kentällä samanaikaisesti?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "11",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "10",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "12",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "9",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "457b1b08-8ba3-436e-9cb8-434e5d251c9e"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä maa voitti jalkapallon maailmanmestaruuden 2018?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Ranska",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kroatia",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Brasilia",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Saksa",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "19775e8e-4b00-4c57-8261-9cf31b03d733"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuinka monta pelaajaa on lentopallojoukkueessa kentällä?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "6",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "5",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "7",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "4",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "1a01d39a-4c8a-4875-b801-fb2e05e28a6a"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Missä maassa pesäpallo on kansallislaji?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Suomi",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "USA",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Japani",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Kanada",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "38d2bfa0-7439-4e00-992d-4ba88a56763e"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuinka monta erää on jääkiekko-ottelussa?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "3",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "2",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "5",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "a08ac2fe-be3b-4b60-bc77-60ad40db5977"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuka on tunnettu jamaikalainen pikajuoksija, voittanut olympiakultaa?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Usain Bolt",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Yohan Blake",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Justin Gatlin",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Asafa Powell",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "753ad4d4-ae03-42c1-a3c7-b30a3353fac6"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuinka monta pelaajaa on koripallojoukkueessa kentällä?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "5",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "6",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "4",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "7",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "b24f9180-c409-40a3-a64a-dda3d94b0238"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Missä maassa järjestettiin talviolympialaiset 2018?",
+    "difficulty": 2,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Etelä-Korea",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Japani",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Venäjä",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Norja",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "0400df90-e386-46e6-955f-d5c3552939b9"
+  }
+]

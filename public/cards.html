@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korttityylit - Master Collection</title>
+    <link rel="stylesheet" href="theme.css">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Bangers&family=Outfit:wght@300;700&family=Share+Tech+Mono&family=Rye&family=Architects+Daughter&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            color: #dfe6e9;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #888; margin-top: 10px; }
+        
+        /* THE MAIN GRID */
+        .master-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 40px;
+            padding: 20px;
+        }
+
+        /* Showcased Card Container */
+        .showcase-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .style-label {
+            font-size: 1.2rem;
+            color: #aaa;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Common Card Wrapper for Hover Effects */
+        .card-wrapper {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            transform-style: preserve-3d;
+        }
+        .card-wrapper:hover {
+            transform: translateY(-15px) scale(1.05);
+            z-index: 100;
+        }
+
+        /* =========================================================================
+           STYLE 1: CLASSIC TCG (Paper / Magic style)
+           ========================================================================= */
+        .tcg-classic {
+            width: 280px; aspect-ratio: 2.5/3.5; background: #1e272e; border-radius: 12px; padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
+        }
+        .tcg-classic-frame { background: linear-gradient(160deg, #f5f6fa 0%, #d2dae2 100%); height: 100%; border-radius: 8px; padding: 5px; display: flex; flex-direction: column; gap: 5px; }
+        .tcg-classic-header { background: var(--category-color); color: white; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(0,0,0,0.3); }
+        .tcg-classic-art { height: 140px; background: #808e9b; border: 2px solid #576574; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 4rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .tcg-classic-body { background: rgba(255,255,255,0.9); border: 1px solid #bdc3c7; flex-grow: 1; border-radius: 4px; padding: 10px; font-size: 0.9rem; color: #333; text-align: center; display: flex; align-items: center; justify-content: center; line-height: 1.4; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
+
+        /* =========================================================================
+           STYLE 2: MODERN FULL-ART (Mobile Game style)
+           ========================================================================= */
+        .tcg-modern { width: 280px; aspect-ratio: 2.5/3.5; border-radius: 18px; position: relative; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.6); background: #2d3436; border: 4px solid #DFE6E9; }
+        .tcg-modern-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, var(--category-color), #2d3436 90%); opacity: 0.8; }
+        .tcg-modern-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .tcg-modern-badge { background: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; color: var(--category-color); align-self: flex-start; margin-bottom: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .tcg-modern-text { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; color: white; font-size: 1.1rem; text-align: center; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); }
+
+        /* =========================================================================
+           STYLE 3: CYBER DATA (Sci-Fi / Matrix)
+           ========================================================================= */
+        .tcg-cyber { width: 280px; aspect-ratio: 2.5/3.5; background: #000; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); padding: 2px; box-shadow: 0 0 20px rgba(var(--rgb-color), 0.4); position: relative;}
+        .tcg-cyber::before { content: ''; position: absolute; inset: 0; background: var(--category-color); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+        .tcg-cyber-inner { background: #0a0a0a; height: 100%; display: flex; flex-direction: column; overflow: hidden; font-family: 'Share Tech Mono', monospace;  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+        .tcg-cyber-header { padding: 12px; border-bottom: 1px solid var(--category-color); display: flex; justify-content: space-between; color: var(--category-color); font-size: 0.9rem; text-transform: uppercase; background: rgba(var(--rgb-color), 0.1); }
+        .tcg-cyber-art { height: 120px; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(var(--rgb-color), 0.2) 2px, rgba(var(--rgb-color), 0.2) 4px); display:flex; align-items:center; justify-content:center; color: var(--category-color); font-size: 3rem; text-shadow: 0 0 10px var(--category-color); border-bottom: 1px solid var(--category-color); }
+        .tcg-cyber-body { padding: 20px; color: #eee; font-size: 0.9rem; flex-grow: 1; line-height: 1.6; }
+        
+        /* =========================================================================
+           STYLE 4: EPIC FANTASY (RPG / Parchment)
+           ========================================================================= */
+        .tcg-fantasy { width: 280px; aspect-ratio: 2.5/3.5; background: #2c1810; border-radius: 12px; padding: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); position: relative; font-family: 'Cinzel', serif; border: 2px solid #5d4037; }
+        .fantasy-frame { height: 100%; border: 4px solid #a1887f; position: relative; background: radial-gradient(#d7ccc8, #a1887f); display: flex; flex-direction: column; box-shadow: inset 0 0 30px rgba(0,0,0,0.7); border-radius: 4px; }
+        .fantasy-header { text-align: center; padding: 8px 0; background: #3e2723; color: #ffd700; font-weight: bold; font-size: 1rem; border-bottom: 4px double #8d6e63; margin-top: 5px; letter-spacing: 2px; }
+        .fantasy-art-box { height: 140px; margin: 10px 20px; background: #222; border: 2px solid #5d4037; box-shadow: inset 0 0 15px black; display: flex; justify-content: center; align-items: center; font-size: 3rem; color: #ffd700; }
+        .fantasy-text-box { margin: 5px 15px 15px 15px; background: rgba(255,255,255,0.7); padding: 10px; border: 1px solid #5d4037; font-weight: 600; font-size: 0.95rem; color: #3e2723; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', serif; }
+        
+        /* =========================================================================
+           STYLE 5: COMIC POP (Energetic)
+           ========================================================================= */
+        .tcg-comic { width: 280px; aspect-ratio: 2.5/3.5; background: white; border: 5px solid black; box-shadow: 15px 15px 0px rgba(0,0,0,0.9); position: relative; font-family: 'Bangers', cursive; overflow: hidden; transform: rotate(-2deg); }
+        .tcg-comic:hover { transform: rotate(0deg) scale(1.05); }
+        .comic-bg { position: absolute; inset: 0; background-image: radial-gradient(var(--category-color) 25%, transparent 25%); background-size: 15px 15px; opacity: 0.2; }
+        .comic-header { background: var(--category-color); color: white; padding: 8px 15px; transform: skew(-3deg); border: 3px solid black; box-shadow: 5px 5px 0px black; font-size: 1.8rem; letter-spacing: 1px; text-align: center; margin: 15px -10px 20px -10px; width: 110%; position: relative; z-index: 5; }
+        .comic-bubble { background: white; border: 4px solid black; border-radius: 30px; padding: 20px; font-family: 'Segoe UI', sans-serif; font-weight: 800; font-size: 1.1rem; color: black; text-align: center; box-shadow: 8px 8px 0px rgba(0,0,0,0.1); margin: auto 15px 30px 15px; position: relative; z-index: 2; }
+
+        /* =========================================================================
+           STYLE 6: ETHEREAL HOLO (Glassmorphism)
+           ========================================================================= */
+        .tcg-ethereal { width: 280px; aspect-ratio: 2.5/3.5; border-radius: 24px; padding: 2px; background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1)); box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(20px); font-family: 'Outfit', sans-serif; }
+        .tcg-ethereal::before { content: ''; position: absolute; inset: -2px; border-radius: 26px; background: linear-gradient(45deg, var(--category-color), #fff, var(--category-color)); background-size: 200% 200%; animation: etherealGlow 3s ease infinite; z-index: -1; opacity: 0.8; filter: blur(5px); }
+        @keyframes etherealGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .ethereal-inner { background: rgba(15, 15, 20, 0.8); height: 100%; border-radius: 22px; padding: 25px; display: flex; flex-direction: column; color: white; position: relative; box-sizing: border-box; }
+        .ethereal-circle { width: 120px; height: 120px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: radial-gradient(circle, var(--category-color) 0%, transparent 60%); box-shadow: 0 0 40px var(--category-color); }
+        .ethereal-question { font-size: 1.2rem; font-weight: 300; text-align: center; line-height: 1.5; }
+
+        /* =========================================================================
+           STYLE 7: STEAMPUNK (Brass & Gears - NEW!)
+           ========================================================================= */
+        .tcg-steampunk { width: 280px; aspect-ratio: 2.5/3.5; background: #2f271d; border-radius: 20px; padding: 10px; box-shadow: 10px 10px 30px rgba(0,0,0,0.7); position: relative; font-family: 'Rye', serif;  border: 4px solid #4e342e; }
+        /* Brass plating */
+        .steampunk-plate {
+            background: linear-gradient(135deg, #cd7f32 0%, #ffe0b2 50%, #8d6e63 100%);
+            height: 100%; border-radius: 12px; padding: 5px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column;
+        }
+        .steampunk-inner {
+            background: #4e342e; /* Leather color */
+            border: 2px dashed #a1887f;
+            flex-grow: 1;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gear {
+            width: 40px; height: 40px; 
+            border: 5px dashed #cd7f32; border-radius: 50%;
+            position: absolute; top: -10px; right: -10px;
+            animation: spin 10s linear infinite;
+            background: #8d6e63;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* =========================================================================
+           STYLE 8: BLUEPRINT (Technical - NEW!)
+           ========================================================================= */
+        .tcg-blueprint { width: 280px; aspect-ratio: 2.5/3.5; background: #0c4da2; box-shadow: 0 10px 20px rgba(0,0,0,0.4); position: relative; font-family: 'Architects Daughter', cursive; color: white; padding: 20px; box-sizing: border-box; }
+        /* Grid background */
+        .tcg-blueprint::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+        .blueprint-content { border: 3px solid white; height: 100%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; z-index: 1; }
+        .blueprint-title { border: 2px solid white; padding: 5px; text-transform: uppercase; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        .blueprint-sketch { flex-grow: 1; border: 1px dashed rgba(255,255,255,0.5); margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 3rem; opacity: 0.8; }
+        .blueprint-measure { position: absolute; bottom: 5px; right: 5px; font-size: 0.7rem; opacity: 0.7; }
+
+        /* Helpers */
+        .category-maantieto { --category-color: #4834d4; --rgb-color: 72, 52, 212; }
+        .category-historia { --category-color: #eb4d4b; --rgb-color: 235, 77, 75; }
+        .category-tiede { --category-color: #6ab04c; --rgb-color: 106, 176, 76; }
+        .category-avaruus { --category-color: #2d3436; --rgb-color: 45, 52, 54; }
+        .category-urheilu { --category-color: #f0932b; --rgb-color: 240, 147, 43; }
+        .category-kulttuuri { --category-color: #e056fd; --rgb-color: 224, 86, 253; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ULTIMATE CARD SHOWCASE</h1>
+        <p>Valitse pelille lopullinen tyylisuunta (Kaikki 8 versiota)</p>
+    </header>
+
+    <div class="master-grid">
+        
+        <!-- 1. CLASSIC -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-classic category-maantieto">
+                <div class="tcg-classic-frame">
+                    <div class="tcg-classic-header"><span>MAANTIETO</span><span>HP 10</span></div>
+                    <div class="tcg-classic-art">🌍</div>
+                    <div class="tcg-classic-body">Mikä on Suomen pääkaupunki?</div>
+                </div>
+            </div>
+            <div class="style-label">1. Classic TCG</div>
+        </div>
+
+        <!-- 2. MODERN -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-modern category-historia">
+                <div class="tcg-modern-bg"></div>
+                <div class="tcg-modern-content">
+                    <div class="tcg-modern-badge">HISTORIA</div>
+                    <div class="tcg-modern-text">Minä vuonna Suomi itsenäistyi?</div>
+                </div>
+            </div>
+            <div class="style-label">2. Modern App</div>
+        </div>
+
+        <!-- 3. CYBER -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-cyber category-tiede">
+                <div class="tcg-cyber-inner">
+                    <div class="tcg-cyber-header">TIEDE_NET</div>
+                    <div class="tcg-cyber-art">⚛️</div>
+                    <div class="tcg-cyber-body">>> DATA_QUERY:<br>MIKÄ ON VEDEN KAAVA?</div>
+                </div>
+            </div>
+            <div class="style-label">3. Cyber Data</div>
+        </div>
+
+        <!-- 4. FANTASY -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-fantasy category-kulttuuri">
+                <div class="fantasy-frame">
+                    <div class="fantasy-header">Kulttuuri</div>
+                    <div class="fantasy-art-box">🎨</div>
+                    <div class="fantasy-text-box">Kuka maalasi Mona Lisan?</div>
+                </div>
+            </div>
+            <div class="style-label">4. Epic Fantasy</div>
+        </div>
+
+        <!-- 5. COMIC -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-comic category-urheilu">
+                <div class="comic-bg"></div>
+                <div class="comic-content">
+                    <div class="comic-header">URHEILU!</div>
+                    <div class="comic-bubble">Kuka on F1 Mestari?!</div>
+                </div>
+            </div>
+            <div class="style-label">5. Comic Pop</div>
+        </div>
+
+        <!-- 6. ETHEREAL -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-ethereal category-avaruus">
+                <div class="ethereal-inner">
+                    <div class="ethereal-category">AVARUUS // COSMOS</div>
+                    <div class="ethereal-circle">🪐</div>
+                    <div class="ethereal-question">Nimeä suurin planeetta.</div>
+                </div>
+            </div>
+            <div class="style-label">6. Ethereal Holo</div>
+        </div>
+
+        <!-- 7. STEAMPUNK (NEW) -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-steampunk category-historia">
+                <div class="gear"></div>
+                <div class="steampunk-plate">
+                    <div class="steampunk-inner">
+                        <h3 style="margin:5px 0 15px 0; color:#ffd700; text-shadow:1px 1px 0 #000;">HISTORIA</h3>
+                        <div style="font-size:3rem; margin-bottom:10px; color:#cd7f32;">⚙️</div>
+                        <div style="color:#ffccbc; text-align:center;">Teollisen vallankumouksen alkuvuosi?</div>
+                    </div>
+                </div>
+            </div>
+            <div class="style-label">7. Steampunk</div>
+        </div>
+
+        <!-- 8. BLUEPRINT (NEW) -->
+        <div class="showcase-item">
+            <div class="card-wrapper tcg-blueprint category-tiede">
+                <div class="blueprint-content">
+                    <div class="blueprint-title">Fig. 1: Tiede</div>
+                    <div class="blueprint-sketch">📐</div>
+                    <div style="text-align:center; font-size:1.1rem;">Laske kappaleen massa.</div>
+                    <div class="blueprint-measure">scale: 1:100</div>
+                </div>
+            </div>
+        </div>
+
+    <!-- MINI CARDS SECTION -->
+    <header style="margin-top: 80px;">
+        <h1>MINI CARDS (Pakanhallinta)</h1>
+        <p>Kompaktit versiot korttien valitsemiseen ja listaukseen.</p>
+    </header>
+
+    <div class="master-grid" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
+        
+        <!-- MINI STYLE 1: SLIM ROW (List View) -->
+        <div class="showcase-item">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                
+                <!-- Item 1 -->
+                <div class="mini-row category-maantieto selected">
+                    <div class="mini-icon">🌍</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">MAANTIETO</div>
+                        <div class="mini-q">Mikä on Suomen pääkaupunki?</div>
+                    </div>
+                    <div class="mini-meta">Lvl 1</div>
+                    <div class="mini-check">✔</div>
+                </div>
+
+                 <!-- Item 2 -->
+                 <div class="mini-row category-tiede">
+                    <div class="mini-icon">⚛️</div>
+                    <div class="mini-content">
+                        <div class="mini-cat">TIEDE</div>
+                        <div class="mini-q">Mikä on veden kiehumispiste tyhjiössä?</div>
+                    </div>
+                    <div class="mini-meta">Lvl 3</div>
+                    <div class="mini-add">+</div>
+                </div>
+
+            </div>
+            <div class="style-label">A. Slim Row (List)</div>
+        </div>
+
+        <!-- MINI STYLE 2: COMPACT TILE (Grid View) -->
+        <div class="showcase-item">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%;">
+                
+                <div class="mini-tile category-urheilu selected">
+                    <div class="mini-tile-icon">🏆</div>
+                    <div class="mini-tile-cat">URHEILU</div>
+                    <div class="mini-tile-check">✔</div>
+                </div>
+
+                <div class="mini-tile category-historia">
+                    <div class="mini-tile-icon">📜</div>
+                    <div class="mini-tile-cat">HISTORIA</div>
+                </div>
+
+                <div class="mini-tile category-avaruus">
+                    <div class="mini-tile-icon">👽</div>
+                    <div class="mini-tile-cat">ALIENS</div>
+                </div>
+
+            </div>
+            <div class="style-label">B. Compact Tile (Icon Focus)</div>
+        </div>
+
+        <!-- MINI STYLE 3: MICRO CARD (Scaled Down) -->
+        <div class="showcase-item">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                
+                <div class="mini-card category-kulttuuri selected">
+                    <div class="mini-card-header"></div>
+                    <div class="mini-card-body">
+                        <div class="mini-card-icon">🎨</div>
+                        <div class="mini-card-text">Kuka maalasi Mona Lisan?</div>
+                    </div>
+                </div>
+
+                <div class="mini-card category-viihde">
+                    <div class="mini-card-header"></div>
+                    <div class="mini-card-body">
+                        <div class="mini-card-icon">🎬</div>
+                        <div class="mini-card-text">Paras elokuva 2024?</div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="style-label">C. Micro Card (Detailed)</div>
+        </div>
+
+    </div>
+
+    <!-- STYLES FOR MINI CARDS -->
+    <style>
+        /* A. SLIM ROW */
+        .mini-row {
+            display: flex;
+            align-items: center;
+            background: #2d3436;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--category-color);
+            color: #dfe6e9;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .mini-row:hover { background: #353b48; transform: translateX(5px); }
+        .mini-row.selected { background: #2d3436; border: 1px solid var(--category-color); border-left: 4px solid var(--category-color); box-shadow: 0 0 10px rgba(var(--rgb-color), 0.3); }
+        .mini-icon { font-size: 1.5rem; margin-right: 15px; width: 30px; text-align: center; }
+        .mini-content { flex-grow: 1; display: flex; flex-direction: column; }
+        .mini-cat { font-size: 0.65rem; color: var(--category-color); font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        .mini-q { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .mini-meta { font-size: 0.75rem; color: #636e72; margin-right: 15px; font-family: monospace; }
+        .mini-check { color: #00b894; font-weight: bold; }
+        .mini-add { color: #636e72; font-weight: bold; }
+
+        /* B. COMPACT TILE */
+        .mini-tile {
+            aspect-ratio: 1/1;
+            background: #2d3436;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .mini-tile:hover { transform: translateY(-3px); background: #353b48; }
+        .mini-tile.selected { border-color: var(--category-color); background: rgba(var(--rgb-color), 0.1); box-shadow: 0 0 15px rgba(var(--rgb-color), 0.4); }
+        .mini-tile-icon { font-size: 2rem; margin-bottom: 5px; }
+        .mini-tile-cat { font-size: 0.6rem; color: var(--category-color); font-weight: bold; text-transform: uppercase; }
+        .mini-tile-check { position: absolute; top: 5px; right: 5px; background: var(--category-color); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+
+        /* C. MICRO CARD */
+        .mini-card {
+            width: 100px;
+            height: 140px;
+            background: #dfe6e9;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .mini-card:hover { transform: scale(1.05); }
+        .mini-card.selected { border-color: var(--category-color); box-shadow: 0 0 10px var(--category-color); }
+        .mini-card-header { height: 6px; background: var(--category-color); width: 100%; }
+        .mini-card-body { padding: 8px; display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; }
+        .mini-card-icon { font-size: 1.8rem; margin: 10px 0; }
+        .mini-card-text { font-size: 0.6rem; color: #2d3436; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+    </style>
+
+</body>
+</html>

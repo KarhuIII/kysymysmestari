@@ -1,0 +1,50 @@
+{
+  "user_player2": [
+    {
+      "gameId": "PKWXMZ",
+      "timestamp": 1769420907747,
+      "opponent": "KV_2eim9peqg12_AAAAf",
+      "result": "win",
+      "score": {
+        "you": 0,
+        "opponent": 0
+      },
+      "playedCards": []
+    },
+    {
+      "gameId": "PKWXMZ",
+      "timestamp": 1769420907747,
+      "opponent": "UclmQB84Rfvzv8pjAAAh",
+      "result": "loss",
+      "score": {
+        "you": 0,
+        "opponent": 0
+      },
+      "playedCards": []
+    }
+  ],
+  "user_player1": [
+    {
+      "gameId": "GQKN5Y",
+      "timestamp": 1769430924546,
+      "opponent": "rZJhILSbC-EeJARCAADP",
+      "result": "win",
+      "score": {
+        "you": 0,
+        "opponent": 0
+      },
+      "playedCards": []
+    },
+    {
+      "gameId": "GQKN5Y",
+      "timestamp": 1769430924547,
+      "opponent": "WgkIcSjBjdQn-nQKAADN",
+      "result": "loss",
+      "score": {
+        "you": 0,
+        "opponent": 0
+      },
+      "playedCards": []
+    }
+  ]
+}

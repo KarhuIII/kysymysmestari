@@ -1,0 +1,1430 @@
+[
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Kuka löysi radioaktiivisuuden?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Henri Becquerel",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Marie Curie",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Ernest Rutherford",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Wilhelm Röntgen",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "73d30ceb-4a71-47b7-b7eb-5c0413e94239"
+  },
+  {
+    "language": "fi",
+    "category": "kulttuuri",
+    "category_label": "Kulttuuri",
+    "text": "Kuka kirjoitti teoksen 'Yksinäisyys satavuotiaassa'?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Gabriel García Márquez",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Mario Vargas Llosa",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Isabel Allende",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Jorge Luis Borges",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "4fb4d287-ba3c-4d4a-ae73-515828a74387"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on tarkka atomimassa hiilen isotoopilla C-13?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "13,003355 u",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "12,998 u",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "13,000 u",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12,995 u",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "0b76e829-bb96-4f63-b47c-d789815b9afe"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Kuinka monta satelliittia Marsilla tunnetaan vuonna 2025?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "2",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "3",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "4",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "6b23ce46-850d-47f6-8e50-de5e79cd11df"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä oli tarkka päivämäärä, jolloin ensimmäinen ihmisen tekemä proteiinisekvenssi julkaistiin?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "15. joulukuuta 1951",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "12. joulukuuta 1950",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "20. joulukuuta 1952",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1. tammikuuta 1951",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "64e60e63-349b-4cb9-9c33-71788c95067c"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä on maailman syvimmän tunnetun kaivoksen nimi ja syvyys metreinä?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Mponeng, 4 000 m",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Kola Superdeep, 12 262 m",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Savuka, 3 000 m",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "TauTona, 3 976 m",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "24e7bc8e-8c59-4cbe-bd11-3470ea4ba591"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Mikä on tarkka populaatio Galápagossaarten merileijonista vuonna 2025?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "15 000",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "10 000",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "20 000",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12 500",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "3c37eec6-97ed-482d-b2c5-f19743f04d9a"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä oli lämpötila Kelvin-asteina ensimmäisessä kvanttitietokoneen kokeessa vuonna 2019?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "15 mK",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "20 mK",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "10 mK",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "18 mK",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "d1274052-1aae-4313-89d5-51052c92a9ef"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä oli ensimmäisen tunnetun supernovan tarkka havaintovuosi?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "1054",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1006",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "1181",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1572",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "d73f6798-6485-4d1f-a5d0-220f1bbd6818"
+  },
+  {
+    "language": "fi",
+    "category": "historia",
+    "category_label": "Historia",
+    "text": "Mikä oli väestömäärä Roomassa vuonna 117 jKr.?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "1 600 000",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1 200 000",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "2 000 000",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1 200 000",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "57659c1d-f423-4087-a79c-d19849a4e95b"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on tarkka pituus ensimmäisen tunnetun DNA-molekyylin sekvenssissä, joka julkaistiin 1953?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "5 000",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "3 000",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "7 000",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "10 000",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "4b6edf86-8f33-4ee5-9d0d-120e86938517"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta yksityiskohtaista väriä ihmissilmä kykenee erottelemaan normaalissa valaistuksessa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "10 miljoonaa",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1 miljoona",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "100 miljoonaa",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12 miljoonaa",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "5cea8bcf-7e08-4413-b6e1-74a9648fb1d6"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä oli tarkka päivä, jolloin aurinkokunnan planeetta Pluto luokiteltiin uudelleen kääpiöplaneetaksi?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "24. elokuuta 2006",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "14. elokuuta 2006",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "24. syyskuuta 2006",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1. tammikuuta 2006",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "7080e3ae-bb80-4a58-b90c-f182254c88c2"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Mikä on tarkka paino Maapallon kokonaisilmakehälle kilogrammoina?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "5,15 x 10^18",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1 x 10^18",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "5,0 x 10^17",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "6 x 10^18",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "9f467690-c43a-4c92-bf4e-18d9dfae9370"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta yksilöä perhoslajin Monarch (Danaus plexippus) arvioitiin olevan muuttomatkalla 2020-luvulla?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "200 miljoonaa",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "100 miljoonaa",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "220 miljoonaa",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "150 miljoonaa",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "59bb365f-4ca5-4993-86bd-a09b1daf8a27"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä oli tarkka pituus ensimmäisen sukellusveneelle, joka saavutti merenpohjan Marianan haudassa, vuonna 1960?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "7 m",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "10 m",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "5 m",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12 m",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "5a6ec45d-3d6c-455c-8ef0-619b1eb68a24"
+  },
+  {
+    "language": "fi",
+    "category": "historia",
+    "category_label": "Historia",
+    "text": "Mikä on tarkka aika, jolloin Apollo 11 laskeutui Kuun pinnalle?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "20. heinäkuuta 1969 klo 20:17",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "19. heinäkuuta 1969 klo 13:45",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "21. heinäkuuta 1969 klo 22:27",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "20. heinäkuuta 1969 klo 11:08",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "6b794d82-70d1-45f9-9af5-03ca27128ce3"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Kuinka monta tunnettuja elementtejä oli jaksollisessa järjestelmässä vuonna 2025?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "118",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "116",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "120",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "115",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "e97ae219-d262-435d-be66-32de35350eaf"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mikä oli tarkka korkeus metriä, johon Eiffel-torni rakennettiin vuonna 1889?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "324 m",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "302 m",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "330 m",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "312 m",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "2fb7e01e-2c6f-4479-9b2a-5e97d3ca07b2"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Mihin syvyyteen Kola Superdeep Borehole kaivettiin?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "12 262 m",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "10 021 m",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "11 554 m",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12 678 m",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "e9182d32-c496-4133-bfff-66042ecebc43"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä on tarkka halkaisija kilometreinä Jupiterin planeetalla?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "139 820 km",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "142 360 km",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "137 530 km",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "140 750 km",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "53e95272-d3d0-4523-807e-d4fb2a9a13d0"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta lintulajia tunnettiin maailmassa vuonna 2025?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "10 700",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "10 400",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "11 000",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "10 300",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "0732f7df-f058-459c-9fc2-8fb11ba546e0"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä on tarkka etäisyys kilometreinä Maasta Kuuhun keskimäärin?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "384 400 km",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "386 100 km",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "380 300 km",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "395 900 km",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "0d640cf7-90b5-4879-b1dd-c98f565095f9"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Mikä on tarkka määrä sydämenlyöntejä minuutissa terveellä aikuisella levossa (keskiarvo)?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "72",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "67",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "62",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "74",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "bb7cf57e-1a7d-464a-a6e5-c0019d9b7452"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta yksilöä Arktisen jääkarhukannan arvioitiin olevan vuonna 2020?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "26 000",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "23 000",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "31 000",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "19 000",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "39a49222-7c0e-4a13-be81-51712796f1d1"
+  },
+  {
+    "language": "fi",
+    "category": "tiede",
+    "category_label": "Tiede",
+    "text": "Minä päivänä suoritettiin ensimmäinen PCR-koe (Polymerase Chain Reaction)?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "16. kesäkuuta 1983",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "1. tammikuuta 1983",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "20. kesäkuuta 1983",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "15. heinäkuuta 1983",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "0134375f-4a6f-49cd-ae16-6ef9d9103232"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Kuinka monta tunnettua mustaa aukkoa oli havaittu Linnunradassa vuonna 2025?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "60-70",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "30-40",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "0-10",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "90-100",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "c25924d8-82c5-4443-85e3-612355453ba4"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta makean veden kalalajia maailmassa on?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "16 000",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "15 000",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "20 000",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "12 000",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "874cd1ac-e26f-412e-9c95-ee8d69f50518"
+  },
+  {
+    "language": "fi",
+    "category": "maantieto",
+    "category_label": "Maantieto",
+    "text": "Kuinka pitkä Euroopan pisin joki, Volga, on?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "3 531 km",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "3 464 km",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "3 623 km",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "3 590 km",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "df84dd11-0858-4361-80f9-ad9b943e2edd"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä oli tarkka paino grammoina ensimmäisellä ihmisen tekemällä satelliitilla Sputnik 1?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "83600 g",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "80405 g",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "85030 g",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "91200 g",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "a95eb885-34cb-4ddf-9afe-d55a95cf57a2"
+  },
+  {
+    "language": "fi",
+    "category": "biologia",
+    "category_label": "Biologia",
+    "text": "Kuinka monta sydäntä mustekalalla on ja mikä niiden tehtävä?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "3, 2 pumppaa verta kiduksiin ja 1 koko kehoon",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "2, molemmat pumppaavat verta koko kehoon",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "3, 12 pumppaa verta kiduksiin ja 2 koko kehoon",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "1, pumppaa verta kehoon",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "566481e3-e1e6-4ff1-895d-bb270ba8a45d"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä joukkue voitti ensimmäisen NBA-mestaruuden vuonna 1947?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Philadelphia Warriors",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Boston Celtics",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Chicago Stags",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "New York Knicks",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "b03c93f4-20dd-49c6-8f2d-51c5ff49afc9"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä maa on voittanut eniten olympiakultaa miesten koripallossa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "USA",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Neuvostoliitto",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Argentina",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Serbia",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "d9c362fe-4979-442f-8770-701be6bc8df6"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuka on voittanut eniten Formula 1 maailmanmestaruuksia historiassa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Michael Schumacher",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Lewis Hamilton",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Juan Manuel Fangio",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Sebastian Vettel",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "25d8eadf-2b0d-40d9-b8b6-5cb6759c0369"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä joukkue voitti Stanley Cupin vuonna 2023?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Vegas Golden Knights",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Florida Panthers",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Colorado Avalanche",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Tampa Bay Lightning",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "16abcadd-60d5-4fa7-bd8c-463738996756"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä maa on voittanut eniten jalkapallon Copa América -mestaruuksia?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Uruguay",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Brasilia",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Argentiina",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Chile",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "bc194f1a-3443-4f9b-94b7-9e54dba9ffc4"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuinka monta virallista urheilulajia on mukana kesäolympialaisissa 2024?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "32",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "28",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "30",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "35",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "adfb8a51-dcb2-4b0a-a820-070fff023553"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä joukkue voitti miesten jalkapallon olympiakultaa Riossa 2016?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Brasilia",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Saksa",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Argentiina",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Nigeria",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "a31463e1-caa5-4bc1-8cea-e6b173a9c489"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuka voitti miesten 50 km kävelyn olympiakultaa 2016?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Matej Tóth",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Jared Tallent",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Robert Heffernan",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Wang Zhen",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "fdcab516-3131-4638-92cd-a5a1ef11dcf6"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Mikä maa on voittanut eniten naisten jalkapallon MM-kisoja?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Yhdysvallat",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Saksa",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Norja",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Japani",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "2ad5fd57-351e-4fb3-a613-3aa99dc21450"
+  },
+  {
+    "language": "fi",
+    "category": "avaruus",
+    "category_label": "Avaruus",
+    "text": "Mikä oli ensimmäinen planeetta, jolla Voyager 2 vieraili?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Jupiter",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Saturnus",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Uranus",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Neptunus",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "0bbe41d6-37f3-4061-ac4f-28de039a97de"
+  },
+  {
+    "language": "fi",
+    "category": "urheilu",
+    "category_label": "Urheilu",
+    "text": "Kuka on kaikkien aikojen paras maalintekijä jalkapallon MM-kisoissa?",
+    "difficulty": 5,
+    "media": null,
+    "active": true,
+    "answers": [
+      {
+        "idx": 0,
+        "text": "Miroslav Klose",
+        "is_correct": true
+      },
+      {
+        "idx": 1,
+        "text": "Ronaldo",
+        "is_correct": false
+      },
+      {
+        "idx": 2,
+        "text": "Gerd Müller",
+        "is_correct": false
+      },
+      {
+        "idx": 3,
+        "text": "Pelé",
+        "is_correct": false
+      }
+    ],
+    "kysymysmestari": false,
+    "tarkistettu": false,
+    "id": "d920867e-d135-4949-bf38-d709f58b97bf"
+  }
+]

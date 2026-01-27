@@ -1,0 +1,202 @@
+[
+    {
+        "id": "q1",
+        "question": "Mikä on Suomen pääkaupunki?",
+        "options": [
+            "Turku",
+            "Helsinki",
+            "Tampere"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q2",
+        "question": "Kuinka monta planeettaa on aurinkokunnassamme?",
+        "options": [
+            "7",
+            "8",
+            "9"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q3",
+        "question": "Mikä on Suomen suurin järvi?",
+        "options": [
+            "Saimaa",
+            "Päijänne",
+            "Inari"
+        ],
+        "correctIndex": 0
+    },
+    {
+        "id": "q4",
+        "question": "Kuka maalasi Mona Lisan?",
+        "options": [
+            "Michelangelo",
+            "Leonardo da Vinci",
+            "Raphael"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q5",
+        "question": "Mikä on maailman suurin valtameri?",
+        "options": [
+            "Atlantti",
+            "Intian valtameri",
+            "Tyynimeri"
+        ],
+        "correctIndex": 2
+    },
+    {
+        "id": "q6",
+        "question": "Minä vuonna Suomi itsenäistyi?",
+        "options": [
+            "1917",
+            "1918",
+            "1919"
+        ],
+        "correctIndex": 0
+    },
+    {
+        "id": "q7",
+        "question": "Kuinka monta jalkaa hämähäkillä on?",
+        "options": [
+            "6",
+            "8",
+            "10"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q8",
+        "question": "Mikä on maailman korkein vuori?",
+        "options": [
+            "K2",
+            "Mount Everest",
+            "Kilimanjaro"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q9",
+        "question": "Mikä on veden kiehumispiste Celsius-asteina?",
+        "options": [
+            "90°C",
+            "100°C",
+            "110°C"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q10",
+        "question": "Kuinka monta pelaajaa on jalkapallojoukkueessa kentällä?",
+        "options": [
+            "10",
+            "11",
+            "12"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q11",
+        "question": "Mikä planeetta tunnetaan punaisena planeettana?",
+        "options": [
+            "Venus",
+            "Mars",
+            "Jupiter"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q12",
+        "question": "Kuka kirjoitti Harry Potter -kirjat?",
+        "options": [
+            "J.K. Rowling",
+            "J.R.R. Tolkien",
+            "C.S. Lewis"
+        ],
+        "correctIndex": 0
+    },
+    {
+        "id": "q13",
+        "question": "Mikä on Ranskan pääkaupunki?",
+        "options": [
+            "Lyon",
+            "Marseille",
+            "Pariisi"
+        ],
+        "correctIndex": 2
+    },
+    {
+        "id": "q14",
+        "question": "Kuinka monta tuntia on vuorokaudessa?",
+        "options": [
+            "23",
+            "24",
+            "25"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q15",
+        "question": "Mikä eläin on tunnettu pitkästä kaulastaan?",
+        "options": [
+            "Kirahvi",
+            "Norsu",
+            "Kameli"
+        ],
+        "correctIndex": 0
+    },
+    {
+        "id": "q16",
+        "question": "Mikä on maailman suurin manner?",
+        "options": [
+            "Afrikka",
+            "Aasia",
+            "Amerikka"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q17",
+        "question": "Kuinka monta väriä on sateenkaaressa?",
+        "options": [
+            "5",
+            "6",
+            "7"
+        ],
+        "correctIndex": 2
+    },
+    {
+        "id": "q18",
+        "question": "Mikä on nopein maaeläin?",
+        "options": [
+            "Gepardi",
+            "Leijona",
+            "Antilooppi"
+        ],
+        "correctIndex": 0
+    },
+    {
+        "id": "q19",
+        "question": "Mikä on Japanin pääkaupunki?",
+        "options": [
+            "Osaka",
+            "Tokio",
+            "Kioto"
+        ],
+        "correctIndex": 1
+    },
+    {
+        "id": "q20",
+        "question": "Kuinka monta astetta on suorassa kulmassa?",
+        "options": [
+            "45°",
+            "90°",
+            "180°"
+        ],
+        "correctIndex": 1
+    }
+]

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kysymysmestari Admin</title>
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container {
+            max-width: 900px;
+            /* Wider for admin */
+        }
+
+        .question-list {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .question-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+
+        .question-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .question-content div {
+            margin-bottom: 5px;
+        }
+
+        .question-meta {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tags {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Admin Paneeli</h1>
+
+        <div class="nav-bar">
+            <button class="nav-btn active" id="tab-questions" onclick="showTab('questions')">Kysymykset</button>
+            <button class="nav-btn" id="tab-stats" onclick="showTab('stats')">Tilastot</button>
+        </div>
+
+        <!-- Questions Tab -->
+        <div id="view-questions" class="screen">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="search-questions" placeholder="Etsi kysymystä...">
+                <button class="btn btn-primary" onclick="openAddModal()">Lisää uusi</button>
+            </div>
+            <div class="question-list" id="questions-container">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="view-stats" class="screen hidden">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-users">0</div>
+                    <div class="stat-label">Pelaajia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-games">0</div>
+                    <div class="stat-label">Pelejä pelattu</div>
+                </div>
+            </div>
+            <h3>Pelaajat</h3>
+            <div class="history-list" id="players-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit/Add Modal -->
+    <div id="question-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Lisää kysymys</h2>
+            <input type="hidden" id="edit-id">
+
+            <div class="form-group">
+                <label>Kysymys</label>
+                <input type="text" id="edit-question">
+            </div>
+
+            <div class="form-group">
+                <label>Vaihtoehto 1</label>
+                <input type="text" id="edit-opt-0">
+            </div>
+            <div class="form-group">
+                <label>Vaihtoehto 2</label>
+                <input type="text" id="edit-opt-1">
+            </div>
+            <div class="form-group">
+                <label>Vaihtoehto 3</label>
+                <input type="text" id="edit-opt-2">
+            </div>
+
+            <div class="form-group">
+                <label>Vaihtoehto 4</label>
+                <input type="text" id="edit-opt-3">
+            </div>
+
+            <div class="form-group">
+                <label>Oikea vastaus (1-4)</label>
+                <select id="edit-correct" style="width: 100%; padding: 10px;">
+                    <option value="0">Vaihtoehto 1</option>
+                    <option value="1">Vaihtoehto 2</option>
+                    <option value="2">Vaihtoehto 3</option>
+                    <option value="3">Vaihtoehto 4</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Vaikeustaso (1-5)</label>
+                <input type="number" id="edit-difficulty" min="1" max="5" value="1" style="padding: 10px; width: 100%;">
+            </div>
+
+            <div class="form-group">
+                <label>Korttityyppi</label>
+                <select id="edit-card-type" style="width: 100%; padding: 10px;">
+                    <option value="normal">Normaali (Ei erikoistehostetta)</option>
+                    <option value="extra">Extra (Vastustaja väärin -> Saat pisteen)</option>
+                    <option value="classic">Classic (Väärin -> Menetät pisteen)</option>
+                    <option value="holo">Holo (Väärin -> Game Over)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal()">Peruuta</button>
+                <button class="btn btn-primary" onclick="saveQuestion()">Tallenna</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>
