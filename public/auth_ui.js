@@ -3,7 +3,21 @@
 // ===========================
 
 // DOM Elements
+// DOM Elements
 const authScreen = document.getElementById('auth-screen');
+const gameTitle = document.getElementById('game-title');
+// Secret debug toggle: Triple tap title
+if (gameTitle) {
+    let taps = 0;
+    gameTitle.addEventListener('click', () => {
+        taps++;
+        if (taps === 3) {
+            if (window.toggleMobileDebug) window.toggleMobileDebug();
+            taps = 0;
+        }
+        setTimeout(() => taps = 0, 1000);
+    });
+}
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
 const authTabs = document.querySelectorAll('.auth-tab');

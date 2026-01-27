@@ -89,7 +89,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav id="main-nav" class="nav-bar">
+    <nav id="main-nav" class="nav-bar auth-required hidden">
       <button class="nav-btn active" data-target="lobby-screen">Peli</button>
       <button class="nav-btn" data-target="profile-screen">Profiili</button>
       <button class="nav-btn" data-target="deck-manage-screen">Pakka</button>
@@ -436,13 +436,50 @@
       .close-modal:hover, .close-modal:focus { color: white; text-decoration: none; cursor: pointer; }
   </style>
 
+  <!-- Global Mobile Debug Overlay -->
+  <div id="mobile-debug-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:200px; background:rgba(0,0,0,0.8); color:#0f0; font-family:monospace; font-size:12px; z-index:9999; overflow-y:scroll; pointer-events:none; padding:10px; border-bottom:1px solid #0f0;">
+    <div>DEBUG LOG (v1.1)</div>
+  </div>
+
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script src="/socket.io/socket.io.js"></script>
-  <script src="auth.js"></script>
-  <script src="auth_ui.js"></script>
-  <script src="client.js"></script>
+  <script src="auth.js?v=2"></script>
+  <script src="auth_ui.js?v=2"></script>
+  <script src="client.js?v=2"></script>
+  
+  <script>
+    // Global debug logger
+    (function() {
+        const debugOverlay = document.getElementById('mobile-debug-overlay');
+        // Retrieve debug mode from local storage
+        const isDebug = localStorage.getItem('mobile_debug_enabled') === 'true';
+        
+        if (isDebug && debugOverlay) {
+            debugOverlay.style.display = 'block';
+        }
+
+        window.mobileLog = function(msg, type = 'info') {
+            if (!debugOverlay) return;
+            const line = document.createElement('div');
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if (type === 'error') line.style.color = 'red';
+            if (type === 'success') line.style.color = '#00ff00';
+            debugOverlay.prepend(line);
+            console.log(`[MOBILE] ${msg}`);
+        };
+        
+        // Expose toggle
+        window.toggleMobileDebug = function() {
+            const current = localStorage.getItem('mobile_debug_enabled') === 'true';
+            localStorage.setItem('mobile_debug_enabled', !current);
+            window.location.reload();
+        };
+
+        window.mobileLog('Page loaded. Version: 2');
+    })();
+  </script>
 </body>
 
 </html>

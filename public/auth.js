@@ -73,6 +73,8 @@ async function signIn(email, password) {
 
         currentUser = data.user;
         currentSession = data.session;
+        
+        if (window.mobileLog) window.mobileLog('SignIn success: ' + (currentUser ? currentUser.email : 'No User'), 'success');
 
         return { data };
     } catch (err) {
@@ -372,7 +374,13 @@ async function showAuthenticatedUI() {
     document.getElementById('main-nav')?.style.setProperty('display', 'flex');
     
     // Fetch and display profile from Supabase
-    const { data: profile } = await getProfile();
+    if (window.mobileLog) window.mobileLog('Fetching profile...');
+    const { data: profile, error } = await getProfile();
+    
+    if (error) {
+        if (window.mobileLog) window.mobileLog('Profile fetch ERROR: ' + JSON.stringify(error), 'error');
+    }
+
     if (profile) {
         const displayName = profile.display_name || profile.username || 'Pelaaja';
         const userDisplayNameEl = document.getElementById('user-display-name');
