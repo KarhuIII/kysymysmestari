@@ -304,7 +304,8 @@ select {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start; /* Content starts from top */
-    width: 75vh;
+    width: 100%;
+    max-width: 75vh;
     perspective: 1000px;
     min-height: 0; /* Allow shrinking if needed */
     padding-top: 20px; 
@@ -1133,9 +1134,9 @@ body.game-active .turn-indicator-pill {
 
     .mini-row.special-card-game {
         width: 100% !important; 
-        min-width: 100px;
-        height: 60px !important; 
-        padding: 5px 10px !important;
+        min-width: 15vw;
+        height: 8vh !important; 
+        padding: 0.5vh 1vh !important;
     }
     
     .mini-row.special-card-game .mini-q {
@@ -1155,21 +1156,23 @@ body.game-active .turn-indicator-pill {
         overflow-y: hidden !important; /* Force no scroll if they fit */
     }
 
-    /* Smaller cards for mobile screens */
+    /* Smaller cards for mobile screens - Scalable */
     .card-wrapper.face-down-full, 
     .tcg-ethereal {
-        width: 180px !important; /* even smaller */
-        height: 252px !important;
+        width: auto !important;
+        height: 35vh !important;
+        max-width: 80vw;
+        aspect-ratio: 2.5/3.5;
     }
 
     .ethereal-circle {
-        width: 60px !important;
-        height: 60px !important;
-        font-size: 1.8rem !important;
+        width: 8vh !important;
+        height: 8vh !important;
+        font-size: 4vh !important;
     }
 
     .ethereal-question {
-        font-size: 0.9rem !important;
+        font-size: 1.8vh !important;
     }
 }
 
