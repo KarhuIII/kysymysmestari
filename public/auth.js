@@ -39,6 +39,7 @@ async function signUp(email, password, username) {
             email,
             password,
             options: {
+                emailRedirectTo: window.location.origin,
                 data: {
                     username: username
                 }
