@@ -13,7 +13,8 @@
 body {
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent global scroll */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-y: auto;   /* Allow vertical scroll by default */
 }
 
 :root {
@@ -303,7 +304,7 @@ select {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start; /* Content starts from top */
-    width: 100%;
+    width: 75vh;
     perspective: 1000px;
     min-height: 0; /* Allow shrinking if needed */
     padding-top: 20px; 
@@ -532,57 +533,204 @@ select {
    COMPACT GAME MODE (Activated via JS class on body/container)
    ========================================================================= */
 
+/* =========================================================================
+   COMPACT GAME MODE (Activated via JS class on body/container)
+   ========================================================================= */
+
+/* =========================================================================
+   COMPACT GAME MODE (Activated via JS class on body/container)
+   ========================================================================= */
+
+/* =========================================================================
+   COMPACT GAME MODE (Activated via JS class on body/container)
+   ========================================================================= */
+
+body.game-active {
+    overflow: hidden; /* Prevent body scroll, handle inside containers */
+    background: #000; /* Deep black background behind the "phone" container */
+    display: flex; /* alignment for the container */
+    align-items: center;
+    justify-content: center;
+}
+
 body.game-active #game-title,
 body.game-active #main-nav,
 body.game-active #connection-status,
 body.game-active label[for="dev-player-select"],
-body.game-active #dev-player-select {  
+body.game-active #dev-player-select,
+body.game-active #user-info-bar, 
+body.game-active .lobby-server-section { 
     display: none !important;
 }
 
 body.game-active .container {
-    padding: 10px; /* Reduced padding */
-    min-height: auto; /* Fit content */
-    height: 95vh; /* Maximize height usage */
-    max-width: 1200px;
+    padding: 0; 
+    width: 100%;
+    /* Mobile Aspect Ratio range */
+    max-width: 70vh; 
+    height: 96vh; /* Floating container */
+    margin: 0 auto;
     justify-content: flex-start;
+    
+    /* RESTORED CONTAINER LOOK */
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 24px; /* Rounded corners like a phone/app */
+    background: rgba(30, 30, 30, 0.95); 
+    box-shadow: 0 0 50px rgba(100, 100, 255, 0.1);
+    
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Clip content to rounded corners */
 }
 
-/* Fix Special Hand Area to prevent overlap */
+/* COMPACT HEADER STYLES */
+body.game-active .scores-bar {
+    flex: 0 0 auto; /* Fixed height based on content */
+    padding: 0.5vh 1.5vh;
+    margin-bottom: 0;
+    background: rgba(0,0,0,0.3);
+    border-radius: 0; /* Full width header inside container */
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    height: 6vh; 
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+body.game-active .player-avatar {
+    width: 4vh; height: 4vh;
+    font-size: 2vh;
+    border-width: 2px;
+}
+
+body.game-active .score-pill {
+    padding: 0.2vh 1vh;
+    font-size: 1.5vh;
+    margin-top: 0.2vh;
+}
+
+body.game-active .vs-badge {
+    font-size: 2vh;
+    margin: 0;
+}
+
+body.game-active .turn-indicator-pill {
+    padding: 0.3vh 0.8vh;
+    font-size: 1vh;
+    margin-top: 0.3vh;
+}
+
+/* Fix Special Hand Area for VH layout */
 .special-hand-area {
     position: absolute;
-    bottom: 10px;
-    left: 0;
-    width: 100%;
+    bottom: 1vh;
+    right: 1vh; 
+    width: auto; 
     display: flex;
-    justify-content: center; /* Center */
+    justify-content: flex-end; 
     background: transparent;
-    pointer-events: none; /* Container passes clicks */
-    margin: 0; /* Reset margins */
+    pointer-events: none; 
+    margin: 0;
+    z-index: 20;
+    padding: 0;
 }
 
 .special-cards {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    pointer-events: auto; /* Cards catch clicks */
+    flex-wrap: nowrap; 
+    gap: 0.5vh;
+    justify-content: flex-end;
+    pointer-events: auto; 
+    flex-direction: column; 
+    align-items: flex-end;
+    padding-bottom: 0;
 }
 
-/* Ensure Question Area leaves room */
+/* CENTER AREA (Active Card) - Flexes to fill space */
 .active-card-area {
-    overflow-y: auto; /* Scroll if too tall */
-    justify-content: flex-start;
-    padding-top: 20px;
+    flex: 1 1 auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    width: 100%;
+    overflow: hidden; 
+    padding: 0;
+    position: relative;
+    max-height: 40vh; /* Reduced slightly to ensure proper flex distrib */
 }
 
-/* Make sure special cards (slim rows) look good in this context */
-.special-card-game {
-    width: auto !important; /* Allow flex width */
-    min-width: 150px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid #fdcb6e;
+/* CARD SIZING - RESPONSIVE TO HEIGHT */
+.card-wrapper.tcg-ethereal {
+    width: auto;
+    height: 32vh; /* REDUCED HEIGHT as requested */
+    aspect-ratio: 0.714; 
+    margin: 0;
+    font-size: 1.33vh; 
 }
+
+.card-wrapper.tcg-ethereal .ethereal-circle {
+    width: 6vh; height: 6vh; font-size: 3vh;
+}
+.card-wrapper.tcg-ethereal .ethereal-question {
+    font-size: 1.5vh;
+    padding: 0 1vh;
+    line-height: 1.3;
+}
+.card-wrapper.tcg-ethereal .ethereal-footer span {
+    font-size: 1.2vh;
+}
+
+/* WAITING MESSAGE & SPECIAL ITEMS */
+.waiting-message {
+    transform: scale(1.0); /* Reset scale */
+}
+
+/* HAND AREA (Bottom) - Fixed percentage */
+.hand-area {
+    flex: 0 0 50vh; /* Reduced from 30vh */
+    height: 90%;
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 0.5vh;
+    overflow-y: auto;
+    border-radius: 0;
+    margin: 0;
+    display: block; /* Ensure block */
+}
+
+.deck-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5vh;
+    padding-bottom: 2vh;
+}
+
+/* Mini Cards in Hand - Scale slightly */
+.mini-row {
+    height: auto;
+    min-height: 5vh;
+    padding: 0.8vh 1.5vh;
+}
+.mini-row .mini-icon { font-size: 2.5vh; }
+.mini-row .mini-q { font-size: 1.4vh; }
+.mini-row .mini-cat { font-size: 1vh; }
+.mini-row .mini-meta { font-size: 1vh; }
+
+/* Special cards buttons */
+.special-card-game {
+    width: auto !important; 
+    min-width: 10vw;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #fdcb6e;
+    margin-bottom: 0.5vh;
+    height: auto;
+    padding: 1vh;
+}
+.special-card-game .mini-q { font-size: 1.5vh; }
 
 /* Animations - keep existing at end of file */
 @keyframes slideInDown {
@@ -692,8 +840,8 @@ body.game-active .container {
     animation: floatCard 3s ease-in-out infinite;
     
     /* Ensure matching shape */
-    width: 260px;
-    height: 364px; /* Fixed height for consistency */
+    width: auto;
+    height: 32vh; /* Fixed height for consistency */
     aspect-ratio: 2.5/3.5;
     border-radius: 24px; /* Match Ethereal Theme */
     transform: scale(1.0); /* Force scale 1.0 */

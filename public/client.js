@@ -616,11 +616,7 @@ function showQuestion(question) {
     // 1. Create Ethereal Card element
     const cardEl = document.createElement('div');
     cardEl.className = `card-wrapper tcg-ethereal category-${cat}`;
-    cardEl.style.transform = 'scale(1.0)'; 
-    cardEl.style.width = '260px';
-    cardEl.style.height = '364px';
-    cardEl.style.margin = '0 0 20px 0'; // Removed top margin
-    cardEl.style.cursor = 'default';
+    // Inline styles removed to allow CSS control for responsiveness
     
     cardEl.innerHTML = `
         <div class="ethereal-inner">
