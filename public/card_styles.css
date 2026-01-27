@@ -298,7 +298,7 @@
     background-size: 200% 200%;
     animation: etherealGlow 3s ease infinite;
     z-index: -1;
-    opacity: 0.8;
+    opacity: 0.4; /* Reduced from 0.8 */
     filter: blur(5px);
 }
 @keyframes etherealGlow {
@@ -328,8 +328,9 @@
     justify-content: center;
     font-size: 2.5rem;
     background: radial-gradient(circle, var(--category-color) 0%, transparent 60%);
-    box-shadow: 0 0 30px var(--category-color);
+    box-shadow: 0 0 15px var(--category-color); /* Reduced from 30px */
 }
+
 .tcg-ethereal .ethereal-category {
     font-size: 0.7rem;
     letter-spacing: 3px;
@@ -339,7 +340,7 @@
     margin-bottom: 10px;
 }
 .tcg-ethereal .ethereal-question {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 300;
     text-align: center;
     line-height: 1.5;
@@ -362,9 +363,10 @@
 .tcg-ethereal.special-skip {
     --category-color: #ffeaa7; /* Yellowish */
 }
+
 .tcg-ethereal.special-skip .ethereal-circle {
     font-size: 3rem;
-    box-shadow: 0 0 40px #ffeaa7;
+    box-shadow: 0 0 20px #ffeaa7; /* Reduced from 40px */
 }
 
 .tcg-ethereal.special-joker {

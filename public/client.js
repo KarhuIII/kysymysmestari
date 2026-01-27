@@ -960,10 +960,12 @@ function renderHistory(history) {
 let currentProfile = null; // Store for sorting
 let sortMode = 'difficulty'; // 'name', 'difficulty', 'category'
 let filterMode = 'all';
+let viewMode = 'grid'; // Default to grid
 
 const sortNameBtn = document.getElementById('sort-name-btn');
 const sortDiffBtn = document.getElementById('sort-diff-btn');
 const sortCatBtn = document.getElementById('sort-cat-btn');
+const viewToggleBtn = document.getElementById('view-toggle-btn');
 const filterCatSelect = document.getElementById('filter-cat-select');
 
 // Helper to update active button state
@@ -982,11 +984,32 @@ function updateSortButtons() {
         activeBtn.style.background = '#00b894';
         activeBtn.style.color = 'white';
     }
+
+    // Update view toggle button text/icon
+    if (viewToggleBtn) {
+        if (viewMode === 'grid') {
+             viewToggleBtn.innerHTML = '📜 Lista';
+             viewToggleBtn.style.background = '#00b894';
+             viewToggleBtn.style.color = 'white';
+        } else {
+             viewToggleBtn.innerHTML = '🖼️ Kortit';
+             viewToggleBtn.style.background = ''; // reset
+             viewToggleBtn.style.color = '';
+        }
+    }
 }
 
 if (sortNameBtn) sortNameBtn.addEventListener('click', () => { sortMode = 'name'; updateSortButtons(); renderDeckManager(currentProfile); });
 if (sortDiffBtn) sortDiffBtn.addEventListener('click', () => { sortMode = 'difficulty'; updateSortButtons(); renderDeckManager(currentProfile); });
 if (sortCatBtn) sortCatBtn.addEventListener('click', () => { sortMode = 'category'; updateSortButtons(); renderDeckManager(currentProfile); });
+
+if (viewToggleBtn) {
+    viewToggleBtn.addEventListener('click', () => {
+        viewMode = (viewMode === 'list') ? 'grid' : 'list';
+        updateSortButtons();
+        renderDeckManager(currentProfile);
+    });
+}
 
 if (filterCatSelect) {
     filterCatSelect.addEventListener('change', (e) => {
@@ -1005,6 +1028,13 @@ function renderDeckManager(profile) {
 
     const activeSet = new Set(profile.activeCards);
     document.getElementById('active-deck-count').textContent = activeSet.size;
+    
+    // Toggle Grid Class
+    if (viewMode === 'grid') {
+        grid.classList.add('grid-mode');
+    } else {
+        grid.classList.remove('grid-mode');
+    }
 
     if (!profile.ownedCardsDetails) return;
 
@@ -1053,41 +1083,63 @@ function renderDeckManager(profile) {
     };
 
     displayCards.forEach(card => {
-        const div = document.createElement('div');
+        let div = document.createElement('div');
         const isActive = activeSet.has(card.id);
         const cat = (card.category || 'yleistieto').toLowerCase();
         const icon = categoryIcons[cat] || '❓';
         
-        // Use Slim Row style
-        div.className = `mini-row category-${cat} ${isActive ? 'selected' : ''}`;
-        div.dataset.id = card.id;
+        if (viewMode === 'list') {
+            // === LIST VIEW (Mini Row) ===
+            div.className = `mini-row category-${cat} ${isActive ? 'selected' : ''}`;
+            div.dataset.id = card.id;
 
-        div.innerHTML = `
-            <div class="mini-icon" title="Avaa kortti">${icon}</div>
-            <div class="mini-content">
-                <div class="mini-cat">${card.category || 'Yleistieto'}</div>
-                <div class="mini-q">${card.question}</div>
-            </div>
-            <div class="mini-meta">Lvl ${card.difficulty || 1}</div>
-            <div class="mini-check" style="opacity: ${isActive ? 1 : 0}">✔</div>
-        `;
-
-        // CLick on ROW toggles selection
-        div.addEventListener('click', (e) => {
-            // If clicking icon, don't select, show modal
-            if (e.target.closest('.mini-icon')) {
-                e.stopPropagation();
-                showFullCardModal(card);
-                return;
-            }
-
-            // Normal selection logic
-            div.classList.toggle('selected');
-            const check = div.querySelector('.mini-check');
-            if (check) check.style.opacity = div.classList.contains('selected') ? '1' : '0';
+            div.innerHTML = `
+                <div class="mini-icon" title="Avaa kortti">${icon}</div>
+                <div class="mini-content">
+                    <div class="mini-cat">${card.category || 'Yleistieto'}</div>
+                    <div class="mini-q">${card.question}</div>
+                </div>
+                <div class="mini-meta">Lvl ${card.difficulty || 1}</div>
+                <div class="mini-check" style="opacity: ${isActive ? 1 : 0}">✔</div>
+            `;
             
-            updateActiveCount();
-        });
+            // Icon click opens modal
+            div.addEventListener('click', (e) => {
+                if (e.target.closest('.mini-icon')) {
+                    e.stopPropagation();
+                    showFullCardModal(card);
+                    return;
+                }
+                toggleCardSelection(div, isActive, card);
+            });
+
+        } else {
+            // === GRID VIEW (Card Wrapper) ===
+            // Create Ethereal Card style
+            div.className = `card-wrapper tcg-ethereal category-${cat}`;
+            if (isActive) {
+                div.classList.add('selected');
+                div.style.border = '2px solid #00b894'; // Helper highlight
+                div.style.boxShadow = '0 0 15px #00b894';
+            }
+            div.dataset.id = card.id;
+            
+            div.innerHTML = `
+                <div class="ethereal-inner" style="pointer-events:none;">
+                    <div class="ethereal-category">${card.category || 'Yleistieto'}</div>
+                    <div class="ethereal-circle">${icon}</div>
+                    <div class="ethereal-question">${card.question}</div>
+                     <div class="ethereal-footer">
+                        <span style="font-size: 0.6rem; opacity: 0.7;">#${card.id.substring(0,4)}/1</span>
+                         <div class="rarity-dot basic"></div>
+                    </div>
+                </div>
+            `;
+
+            div.addEventListener('click', () => {
+                 toggleCardSelection(div, isActive, card);
+            });
+        }
 
         grid.appendChild(div);
     });
@@ -1095,7 +1147,34 @@ function renderDeckManager(profile) {
     renderSpecialCollection(profile);
 }
 
-// --- FULL CARD MODAL LOGIC ---
+function toggleCardSelection(element, wasActive, card) {
+     // Toggle logic needs to know current active count too, but basic toggle is:
+     // Ideally we update the backing Set or let CSS handle 'selected' class and then saveDeck scrapes it.
+     // In current impl, 'saveDeck' scrapes classes. So just toggle class.
+     
+     if (element.classList.contains('selected')) {
+         element.classList.remove('selected');
+         if (viewMode === 'list') {
+             const check = element.querySelector('.mini-check');
+             if(check) check.style.opacity = '0';
+         } else {
+             element.style.border = '';
+             element.style.boxShadow = '';
+         }
+     } else {
+         element.classList.add('selected');
+          if (viewMode === 'list') {
+             const check = element.querySelector('.mini-check');
+             if(check) check.style.opacity = '1';
+         } else {
+             element.style.border = '2px solid #00b894';
+             element.style.boxShadow = '0 0 15px #00b894';
+         }
+     }
+     updateActiveCount();
+}
+
+
 function showFullCardModal(card) {
     const modal = document.getElementById('card-modal');
     const container = document.getElementById('full-card-container');
@@ -1143,6 +1222,30 @@ function renderSpecialCollection(profile) {
     const grid = document.getElementById('special-collection-grid');
     if (!grid) return;
     grid.innerHTML = '';
+    
+    // Toggle Grid Class based on viewMode
+    if (viewMode === 'grid') {
+         grid.classList.add('grid-mode'); // Should be default grid really, but let's be explicit if we want list mode for specials too?
+         // Actually, special grid was ALREADY grid.
+         // If viewMode IS 'list', maybe we want list mode for specials too?
+         grid.style.display = 'grid'; // Force grid for now as per previous request?
+         // User requested toggle for ALL. 
+    } else {
+        // If List mode, maybe revert to column?
+        // But user asked for Special cards to be side-by-side (grid) previously.
+        // Let's interpret "List Mode" for Specials as "Mini Row" and "Card Mode" as "Big Card".
+        // BUT if I change display to block/flex, I lose the grid layout.
+        
+        // Let's support both.
+        if (viewMode === 'list') {
+            grid.style.display = 'flex';
+            grid.style.flexDirection = 'column';
+        } else {
+             grid.style.display = 'grid';
+             grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+        }
+    }
+
 
     const owned = profile.ownedSpecialCards || [];
     // Create a copy of active cards to track which ones are already showing as selected
@@ -1151,64 +1254,90 @@ function renderSpecialCollection(profile) {
 
     owned.forEach(cardType => {
         const div = document.createElement('div');
-        div.className = 'card-toggle special-card'; // Reuse card-toggle style
         div.dataset.type = cardType;
 
         // Determine if this specific card instance should be selected
         const activeIndex = activePool.indexOf(cardType);
+        let isSelected = false;
         if (activeIndex > -1) {
-            div.classList.add('selected');
+            isSelected = true;
             activePool.splice(activeIndex, 1); // Consume one instance
         }
-
-        // Ethereal Visuals
-        let label = cardType;
-        let icon = '';
-        let specialClass = '';
-
-        switch (cardType) {
-            case 'SKIP': label = 'Skip'; icon = '⏭️'; specialClass = 'special-skip'; break;
-            case 'JOKER': label = 'Jokeri'; icon = '🃏'; specialClass = 'special-joker'; break;
-            case 'SWAP_SELF': label = 'Vaihto'; icon = '🔄'; specialClass = 'special-swap'; break;
-            case 'MIRROR': label = 'Peili'; icon = '🪞'; specialClass = 'special-mirror'; break;
-            case 'SWAP_OPPONENT': label = 'Häiriö'; icon = '🔀'; specialClass = 'special-disrupt'; break;
-        }
-
-        div.className = `card-wrapper tcg-ethereal ${specialClass}`;
         
-        // Ethereal HTML structure
-        div.innerHTML = `
-            <div class="ethereal-inner">
-                <div class="ethereal-category">SPECIAL</div>
-                <div class="ethereal-circle" style="width:60px; height:60px; font-size:2rem;">${icon}</div>
-                <div class="ethereal-question" style="font-weight:bold; font-size:1.3rem;">${label}</div>
-                <div class="ethereal-footer">
-                    <span>EFFECT</span>
-                    <span>1 USE</span>
-                </div>
-            </div>
-        `;
+        const specialMeta = {
+            'SKIP': { icon: '⏭️', name: 'OHITA', desc: 'Ohita kysymys' },
+            'JOKER': { icon: '🃏', name: 'JOKERI', desc: 'Satunnainen etu' },
+            'SWAP_SELF': { icon: '🔄', name: 'VAIHTO', desc: 'Vaihda kysymys' },
+            'MIRROR': { icon: '🪞', name: 'PEILI', desc: 'Heijasta vaikutus' },
+            'SWAP_OPPONENT': { icon: '🔀', name: 'HÄIRIÖ', desc: 'Sekoita vastustaja' }
+        };
+        const meta = specialMeta[cardType] || { icon: '⭐', name: cardType, desc: 'Erikoiskortti' };
+        // Determine SPECIAL CLASS for coloring
+        let specialClass = '';
+        if (cardType === 'SKIP') specialClass = 'special-skip';
+        if (cardType === 'JOKER') specialClass = 'special-joker';
+        if (cardType === 'SWAP_SELF') specialClass = 'special-swap';
 
-        if (activeIndex > -1) {
-            div.classList.add('selected');
-             div.style.border = '2px solid white';
-             div.style.boxShadow = '0 0 15px white';
+        
+        if (viewMode === 'list') {
+             // === LIST MODE (Mini Row) ===
+            div.className = `mini-row category-viihde special-card ${isSelected ? 'selected' : ''}`;
+             // Special styling overrides for mini-row?
+             div.style.borderLeftColor = '#fdcb6e'; // Gold for special
+             
+             div.innerHTML = `
+                <div class="mini-icon">${meta.icon}</div>
+                <div class="mini-content">
+                    <div class="mini-cat" style="color:#fdcb6e;">${meta.name}</div>
+                    <div class="mini-q">${meta.desc}</div>
+                </div>
+                <div class="mini-check" style="opacity: ${isSelected ? 1 : 0}">✔</div>
+            `;
+            
+        } else {
+             // === GRID MODE (Card Wrapper) ===
+            div.className = `card-wrapper tcg-ethereal special-card ${specialClass} ${isSelected ? 'selected' : ''}`;
+            
+            div.innerHTML = `
+                <div class="ethereal-inner">
+                    <div class="ethereal-category">SPECIAL</div>
+                    <div class="ethereal-circle">${meta.icon}</div>
+                    <div class="ethereal-question">${meta.name}</div>
+                    <div class="ethereal-footer">
+                        <span>EFFECT</span>
+                         <div class="rarity-dot special"></div>
+                    </div>
+                </div>
+            `;
+            
+            if (isSelected) {
+                 div.style.border = '2px solid white';
+                 div.style.boxShadow = '0 0 15px white';
+            }
         }
 
         div.addEventListener('click', () => {
-            // Toggle Logic visual simulation
+             // Toggle Logic
             if (div.classList.contains('selected')) {
                 div.classList.remove('selected');
-                div.style.border = '';
-                div.style.boxShadow = '';
+                 if (viewMode === 'list') {
+                     const check = div.querySelector('.mini-check');
+                     if(check) check.style.opacity = '0';
+                 } else {
+                    div.style.border = '';
+                    div.style.boxShadow = '';
+                 }
             } else {
-                const currentSelected = document.querySelectorAll('.card-wrapper.tcg-ethereal.selected .ethereal-inner .ethereal-category:contains("SPECIAL")').length; 
-                // Note: The selector above is simplified, in reality we rely on class names
-                 const currentSpecials = document.querySelectorAll('#special-collection-grid .selected').length;
+                const currentSpecials = document.querySelectorAll('.special-card.selected').length;
                 if (currentSpecials < 3) {
                     div.classList.add('selected');
-                    div.style.border = '2px solid white';
-                    div.style.boxShadow = '0 0 15px white';
+                     if (viewMode === 'list') {
+                        const check = div.querySelector('.mini-check');
+                        if(check) check.style.opacity = '1';
+                    } else {
+                        div.style.border = '2px solid white';
+                        div.style.boxShadow = '0 0 15px white';
+                    }
                 } else {
                     alert('Voit valita enintään 3 erikoiskorttia!');
                 }

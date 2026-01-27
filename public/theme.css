@@ -211,6 +211,7 @@ select {
 }
 
 /* Deck Management */
+/* Deck Management */
 .collection-grid {
     display: flex;
     flex-direction: column;
@@ -220,6 +221,129 @@ select {
     padding: 10px;
     background: rgba(0,0,0,0.2);
     border-radius: 8px;
+}
+.collection-grid.grid-mode {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+.collection-grid.grid-mode .card-wrapper {
+    width: 100%;
+    margin: 0;
+}
+
+/* Special Cards Grid Layout */
+#special-collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); /* Adjusted for 0.8 scale */
+    gap: 15px;
+    padding: 15px;
+}
+/* Adjust special cards in grid to be smaller/fit */
+#special-collection-grid .card-wrapper.tcg-ethereal {
+    width: 260px; /* Force original width */
+    height: 364px; /* Force original height */
+    transform: scale(0.8); /* Larger scale for readability */
+    transform-origin: top left; /* Anchor */
+    margin-bottom: -73px; /* 364 * 0.2 approx */
+    margin-right: -52px; /* 260 * 0.2 */
+}
+
+/* Override existing collection grid items to look good on dark */
+/* Note: Slim Row (.mini-row) is already dark themed, so it fits perfectly! */
+.collection-grid.grid-mode .card-wrapper {
+    /* Scale down regular cards too */
+    width: 260px;
+    height: 364px;
+    transform: scale(0.8);
+    transform-origin: top left;
+    margin-bottom: -73px; 
+    margin-right: -52px; 
+    /* removed margin-left 10px to align better */
+} 
+/* Grid mode cell needs to accommodate the scaled item */
+.collection-grid.grid-mode {
+    display: grid; /* Ensure display is set */
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px; 
+    overflow-x: hidden;
+}
+
+/* RARITY DOT INDICATOR (Decoration) */
+.rarity-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-left: auto; /* Push to right */
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+.rarity-dot.basic {
+    background-color: #bdc3c7; /* Basic card = Gray */
+    border: 2px solid #7f8c8d;
+}
+
+.rarity-dot.special {
+    background-color: #fdcb6e; /* Special = Gold/Yellow */
+    border: 2px solid #d35400;
+    box-shadow: 0 0 8px #fdcb6e;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+        width: 95%;
+        border-radius: 8px; /* Slightly less rounded on small screens */
+    }
+
+    /* Server list */
+    .server-list-slim {
+        width: 100%;
+    }
+    .mini-row {
+        padding: 5px 10px;
+    }
+    .mini-q {
+        font-size: 0.9rem;
+    }
+
+    /* Game Screen */
+    .active-card-area {
+        max-width: 100%; /* Use full width */
+        padding-bottom: 90px;
+    }
+    
+    .special-hand-area {
+        position: fixed; /* Stick to bottom right properly */
+        bottom: 20px;
+        right: 10px;
+        z-index: 100;
+        /* Vertical stacking on very small screens */
+        flex-direction: column; 
+    }
+    
+    .special-cards {
+         flex-direction: column;
+         gap: 5px;
+         align-items: flex-end;
+    }
+
+    .special-card-game {
+        min-width: unset;
+        width: auto !important;
+        padding: 8px;
+    }
+    .special-card-game .mini-content {
+        display: none; /* Hide text on small mobile, show only icon? Or keep mini */
+    }
+    .special-card-game .mini-icon {
+        margin: 0;
+    }
+    
+    /* Ensure hand area doesn't cover game too much */
+    .hand-area {
+        max-height: 40vh;
+    }
 }
 
 /* Override existing collection grid items to look good on dark */
