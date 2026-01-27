@@ -116,17 +116,38 @@ export async function getOrCreateSupabaseProfile(userId: string, username?: stri
     return newProfile as Profile;
 }
 
-// Get player data
+// Get player data (with self-healing)
 export async function getPlayerData(userId: string): Promise<PlayerData | null> {
     const { data, error } = await supabaseAdmin
         .from('player_data')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
     if (error) {
         console.error('Failed to get player data:', error.message);
         return null;
+    }
+
+    if (!data) {
+        console.log(`Missing player_data for ${userId}, creating...`);
+        const { data: newData, error: createError } = await supabaseAdmin
+            .from('player_data')
+            .insert({
+                user_id: userId,
+                owned_cards: [],
+                active_cards: [],
+                owned_special_cards: [],
+                active_special_cards: []
+            })
+            .select()
+            .single();
+
+        if (createError) {
+            console.error('Failed to create missing player_data:', createError.message);
+            return null;
+        }
+        return newData as PlayerData;
     }
 
     return data as PlayerData;
@@ -147,17 +168,40 @@ export async function updatePlayerData(userId: string, updates: Partial<PlayerDa
     return true;
 }
 
-// Get player stats
+// Get player stats (with self-healing)
 export async function getPlayerStats(userId: string): Promise<Stats | null> {
     const { data, error } = await supabaseAdmin
         .from('stats')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
     if (error) {
         console.error('Failed to get stats:', error.message);
         return null;
+    }
+
+    if (!data) {
+        console.log(`Missing stats for ${userId}, creating...`);
+        const { data: newData, error: createError } = await supabaseAdmin
+            .from('stats')
+            .insert({
+                user_id: userId,
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                games_played: 0,
+                win_streak: 0,
+                best_streak: 0
+            })
+            .select()
+            .single();
+            
+        if (createError) {
+            console.error('Failed to create missing stats:', createError.message);
+            return null;
+        }
+        return newData as Stats;
     }
 
     return data as Stats;
