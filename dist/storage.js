@@ -202,53 +202,63 @@ function getProfile(username) {
 }
 // Update deck (hybrid)
 async function updateActiveDeck(username, activeCards, activeSpecialCards, supabaseUserId) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
-        const playerData = await (0, supabase_1.getPlayerData)(supabaseUserId);
+    if (effectiveSupabaseId) {
+        const playerData = await (0, supabase_1.getPlayerData)(effectiveSupabaseId);
         if (!playerData)
-            return false;
+            return { success: false, error: 'User data not found (Supabase)' };
         // Verify ownership
-        const ownsAll = activeCards.every(id => playerData.owned_cards.includes(id));
-        if (!ownsAll)
-            return false;
-        // Strict deck size check: Exactly 10
-        if (activeCards.length !== 10)
-            return false;
+        const missingCards = activeCards.filter(id => !playerData.owned_cards.includes(id));
+        if (missingCards.length > 0) {
+            console.log('Missing cards:', missingCards);
+            return { success: false, error: `You do not own these cards: ${missingCards.join(', ')}` };
+        }
+        // Limit deck size: Max 10 (validation happens at game start)
+        if (activeCards.length > 10) {
+            return { success: false, error: `Deck too large: ${activeCards.length} cards (Max 10)` };
+        }
         const updates = { active_cards: activeCards };
         if (activeSpecialCards) {
             updates.active_special_cards = activeSpecialCards;
         }
-        return await (0, supabase_1.updatePlayerData)(supabaseUserId, updates);
+        const result = await (0, supabase_1.updatePlayerData)(effectiveSupabaseId, updates);
+        if (!result)
+            return { success: false, error: 'Database update failed' };
+        return { success: true };
     }
     // Guest user
     const profile = guestPlayersCache[username];
     if (!profile)
-        return false;
+        return { success: false, error: 'User profile not found (Guest)' };
     // Verify ownership
-    const ownsAll = activeCards.every(id => profile.ownedCards.includes(id));
-    if (!ownsAll)
-        return false;
-    // Strict deck size check: Exactly 10
-    if (activeCards.length !== 10)
-        return false;
+    const missingCards = activeCards.filter(id => !profile.ownedCards.includes(id));
+    if (missingCards.length > 0) {
+        return { success: false, error: `You do not own these cards: ${missingCards.join(', ')}` };
+    }
+    // Limit deck size: Max 10 (validation happens at game start)
+    if (activeCards.length > 10) {
+        return { success: false, error: `Deck too large: ${activeCards.length} cards (Max 10)` };
+    }
     profile.activeCards = activeCards;
     if (activeSpecialCards) {
         profile.activeSpecialCards = activeSpecialCards;
     }
     saveGuestPlayers();
-    return true;
+    return { success: true };
 }
 // Add earned cards to collection (hybrid)
 async function addCardsToCollection(username, newCardIds, supabaseUserId) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
-        const playerData = await (0, supabase_1.getPlayerData)(supabaseUserId);
+    if (effectiveSupabaseId) {
+        const playerData = await (0, supabase_1.getPlayerData)(effectiveSupabaseId);
         if (!playerData)
             return;
         const uniqueNew = newCardIds.filter(id => !playerData.owned_cards.includes(id));
         if (uniqueNew.length === 0)
             return;
-        await (0, supabase_1.updatePlayerData)(supabaseUserId, {
+        await (0, supabase_1.updatePlayerData)(effectiveSupabaseId, {
             owned_cards: [...playerData.owned_cards, ...uniqueNew]
         });
         return;
@@ -263,9 +273,10 @@ async function addCardsToCollection(username, newCardIds, supabaseUserId) {
 }
 // Update stats (hybrid)
 async function updateStats(username, result, supabaseUserId) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
-        await (0, supabase_1.updatePlayerStats)(supabaseUserId, result);
+    if (effectiveSupabaseId) {
+        await (0, supabase_1.updatePlayerStats)(effectiveSupabaseId, result);
         return;
     }
     // Guest user
@@ -285,10 +296,11 @@ async function updateStats(username, result, supabaseUserId) {
 exports.updatePlayerStats = updateStats;
 // Save game history (hybrid)
 async function logGameHistory(username, entry, supabaseUserId) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
+    if (effectiveSupabaseId) {
         await supabase_1.supabaseAdmin.from('game_history').insert({
-            user_id: supabaseUserId,
+            user_id: effectiveSupabaseId,
             opponent_id: null, // Could be enhanced later
             result: entry.result,
             my_score: entry.score.you,
@@ -306,12 +318,13 @@ async function logGameHistory(username, entry, supabaseUserId) {
 }
 // Get player history (hybrid)
 async function getPlayerHistory(username, supabaseUserId) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
+    if (effectiveSupabaseId) {
         const { data, error } = await supabase_1.supabaseAdmin
             .from('game_history')
             .select('*')
-            .eq('user_id', supabaseUserId)
+            .eq('user_id', effectiveSupabaseId)
             .order('played_at', { ascending: false })
             .limit(20);
         if (error || !data)

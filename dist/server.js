@@ -148,61 +148,107 @@ io.on('connection', async (socket) => {
         console.log(`Game created: ${gameId} by ${socket.id}`);
         await broadcastWaitingGames(io);
     });
-    // Join game
+    // Join game (Request Phase)
     socket.on('join_game', async (data) => {
-        // First check compatibility before doing anything
-        const gameToCheck = (0, gameManager_1.getGameBySocketId)(socket.id)?.game;
-        // Wait, getGameBySocketId checks if WE are in a game. We need to check the target game logic.
-        // But joinGame handles logic.
-        // We need to check our deck size vs game.targetScore.
-        // We need to fetch the game first to know the targetScore.
         const { getGame } = require('./gameManager');
         const targetGame = getGame(data.gameId);
         if (!targetGame) {
             socket.emit('error', { message: 'Peliä ei löydy' });
             return;
         }
+        // Validate Deck Size
         const profile = await (0, storage_1.getOrCreateProfile)(getUserId(socket.id));
         if (profile.activeCards.length < targetGame.targetScore) {
             socket.emit('error', { message: `Sinulla pitää olla vähintään ${targetGame.targetScore} korttia pakassa liittyäksesi tähän peliä (Nykyinen: ${profile.activeCards.length}).` });
             return;
         }
-        const result = (0, gameManager_1.joinGame)(data.gameId, socket.id);
-        if (result.success) {
-            console.log(`Setting deck for playerB (Game ${data.gameId}):`, profile.activeCards.length, 'cards');
-            (0, gameManager_1.setPlayerDeck)(data.gameId, 'playerB', profile.activeCards);
-            const specials = profile.activeSpecialCards.length > 0 ? profile.activeSpecialCards : ['SKIP', 'JOKER', 'SWAP_SELF'];
-            (0, gameManager_1.setPlayerSpecialHand)(data.gameId, 'playerB', specials);
-            socket.join(data.gameId);
-            const response = {
-                success: true,
-                playerId: result.playerId
-            };
-            socket.emit('game_joined', response);
-            // Send game state to both players individually
-            const gameData = (0, gameManager_1.getGameBySocketId)(socket.id);
-            if (gameData) {
-                const { game } = gameData;
-                // Send to player A (the one who created the game)
+        // Check if game is waiting
+        if (targetGame.status !== 'waiting') {
+            socket.emit('error', { message: 'Peli on jo alkanut tai päättynyt.' });
+            return;
+        }
+        if (targetGame.playerB !== null) {
+            socket.emit('error', { message: 'Peli on täynnä.' });
+            return;
+        }
+        // Check pending requests
+        if (targetGame.pendingJoinRequest) {
+            socket.emit('error', { message: 'Pelissä on jo liittymispyyntö käsiteltävänä.' });
+            return;
+        }
+        // Create Pending Request
+        const requesterName = profile.displayName || profile.username || 'Pelaaja';
+        targetGame.pendingJoinRequest = {
+            socketId: socket.id,
+            username: requesterName
+        };
+        console.log(`Join request to game ${targetGame.id} from ${requesterName} (${socket.id})`);
+        // Notify Host
+        if (targetGame.playerA) {
+            const hostSocket = io.sockets.sockets.get(targetGame.playerA.id);
+            if (hostSocket) {
+                hostSocket.emit('join_request', {
+                    requesterName: requesterName,
+                    gameId: targetGame.id
+                });
+            }
+        }
+        // Notify Requester
+        socket.emit('join_status', { status: 'waiting_for_approval' });
+    });
+    // Resolve Join Request (Host Phase)
+    socket.on('resolve_join_request', async (data) => {
+        const gameData = (0, gameManager_1.getGameBySocketId)(socket.id);
+        if (!gameData || gameData.playerRole !== 'playerA')
+            return;
+        const { game } = gameData;
+        if (!game.pendingJoinRequest)
+            return;
+        const requesterId = game.pendingJoinRequest.socketId;
+        const requesterSocket = io.sockets.sockets.get(requesterId);
+        if (data.decision === 'accept') {
+            game.pendingJoinRequest = null; // Clear request first
+            if (!requesterSocket) {
+                socket.emit('error', { message: 'Pelaaja on poistunut pelistä.' });
+                return;
+            }
+            // Proceed with Join Logic
+            const result = (0, gameManager_1.joinGame)(game.id, requesterId);
+            if (result.success) {
+                const profile = await (0, storage_1.getOrCreateProfile)(getUserId(requesterId));
+                console.log(`Setting deck for playerB (Game ${game.id}):`, profile.activeCards.length, 'cards');
+                (0, gameManager_1.setPlayerDeck)(game.id, 'playerB', profile.activeCards);
+                const specials = profile.activeSpecialCards.length > 0 ? profile.activeSpecialCards : ['SKIP', 'JOKER', 'SWAP_SELF'];
+                (0, gameManager_1.setPlayerSpecialHand)(game.id, 'playerB', specials);
+                requesterSocket.join(game.id);
+                const response = {
+                    success: true,
+                    playerId: result.playerId
+                };
+                requesterSocket.emit('game_joined', response);
+                // Send game state to both
                 if (game.playerA) {
                     const stateA = (0, gameLogic_1.getPlayerGameState)(game, 'playerA');
-                    io.sockets.sockets.get(game.playerA.id)?.emit('game_state', stateA);
+                    io.to(game.playerA.id).emit('game_state', stateA);
                 }
-                // Send to player B (the one who just joined)
                 if (game.playerB) {
                     const stateB = (0, gameLogic_1.getPlayerGameState)(game, 'playerB');
-                    socket.emit('game_state', stateB);
+                    requesterSocket.emit('game_state', stateB);
                 }
+                console.log(`Player joined game (Approved): ${game.id}`);
+                await broadcastWaitingGames(io);
             }
-            console.log(`Player joined game: ${data.gameId}`);
-            await broadcastWaitingGames(io);
+            else {
+                requesterSocket.emit('error', { message: result.error || 'Liittyminen epäonnistui' });
+            }
         }
         else {
-            const response = {
-                success: false,
-                error: result.error
-            };
-            socket.emit('game_joined', response);
+            // Reject
+            game.pendingJoinRequest = null;
+            if (requesterSocket) {
+                requesterSocket.emit('error', { message: 'Pelin pitäjä hylkäsi liittymispyynnön.' });
+                requesterSocket.emit('join_status', { status: 'rejected' });
+            }
         }
     });
     // Play card
@@ -472,12 +518,13 @@ io.on('connection', async (socket) => {
         });
     });
     socket.on('update_deck', async (data) => {
-        const success = await (0, storage_1.updateActiveDeck)(getUserId(socket.id), data.activeCards, data.activeSpecialCards);
-        if (success) {
+        const result = await (0, storage_1.updateActiveDeck)(getUserId(socket.id), data.activeCards, data.activeSpecialCards);
+        if (result.success) {
             socket.emit('deck_updated', { success: true, activeCards: data.activeCards });
         }
         else {
-            socket.emit('error', { message: 'Invalid deck update' });
+            console.error('Deck update failed:', result.error);
+            socket.emit('error', { message: `Deck save failed: ${result.error || 'Unknown error'}` });
         }
     });
     socket.on('get_history', async () => {

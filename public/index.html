@@ -240,42 +240,71 @@
     <div id="deck-manage-screen" class="screen hidden">
       <h2>Pakan Hallinta</h2>
       <p class="info-text">Valitse kortit, joita haluat käyttää pelissä.</p>
-      <div class="deck-stats">
-        <span>Valittu: <span id="active-deck-count">0</span></span>
-        <button id="save-deck-btn" class="btn btn-primary small">Tallenna pakka</button>
-      </div>
-      <div class="deck-controls" style="margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-        <div class="sort-controls">
-            <span>Järjestä:</span>
-            <button id="sort-name-btn" class="btn btn-secondary small">A-Ö</button>
-            <button id="sort-diff-btn" class="btn btn-secondary small">Vaikeus</button>
-            <button id="sort-cat-btn" class="btn btn-secondary small">Kategoria</button>
-            <span style="margin-left: 10px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 10px;">Näkymä:</span>
-            <button id="view-toggle-btn" class="btn btn-secondary small" title="Vaihda näkymää">🖼️ Kortit</button>
-        </div>
-        <div class="filter-controls" style="margin-left: auto;">
-             <span>Näytä:</span>
-             <select id="filter-cat-select" style="padding: 5px; border-radius: 4px;">
-                 <option value="all">Kaikki</option>
-                 <option value="maantieto">Maantieto</option>
-                 <option value="kulttuuri">Kulttuuri</option>
-                 <option value="tiede">Tiede</option>
-                 <option value="avaruus">Avaruus</option>
-                 <option value="historia">Historia</option>
-                 <option value="aliens">Aliens</option>
-                 <option value="urheilu">Urheilu</option>
-                 <option value="viihde">Viihde</option>
-                 <option value="yleistieto">Yleistieto</option>
-             </select>
-        </div>
-      </div>
-      <div id="collection-grid" class="collection-grid">
-        <!-- Cards will be rendered here -->
+      
+      <!-- New Unified Header -->
+      <div class="deck-management-header">
+          <!-- Tabs -->
+          <div class="deck-tabs">
+              <button id="tab-btn-questions" class="auth-tab active" data-target="tab-questions">Kysymykset</button>
+              <button id="tab-btn-special" class="auth-tab" data-target="tab-special">Erikoiskortit</button>
+          </div>
+          
+          <!-- Actions (Stats + Settings) -->
+          <div class="deck-actions">
+              <div class="deck-stats">
+                  <span>Valittu: <span id="active-deck-count">0</span>/10</span>
+              </div>
+              <button id="deck-settings-toggle" class="btn btn-secondary small" title="Suodatus & Järjestys">
+                  <span>⚙️</span>
+                  <span id="settings-arrow">▼</span>
+              </button>
+          </div>
       </div>
 
-      <h3>Erikoiskortit (Valitse max 3)</h3>
-      <div id="special-collection-grid" class="collection-grid">
-        <!-- Special cards rendered here -->
+      <!-- Tab Content: Questions -->
+      <div id="tab-questions" class="tab-content">
+          <!-- Menu expands here, below header -->
+          <div id="deck-controls-menu" class="deck-controls-menu hidden" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="sort-controls" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <span style="opacity:0.7; font-size:0.9em; min-width: 60px;">Järjestä:</span>
+                <button id="sort-name-btn" class="btn btn-secondary small">A-Ö</button>
+                <button id="sort-diff-btn" class="btn btn-secondary small">Vaikeus</button>
+                <button id="sort-cat-btn" class="btn btn-secondary small">Kategoria</button>
+            </div>
+            
+            <div class="view-controls" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <span style="opacity:0.7; font-size:0.9em; min-width: 60px;">Näkymä:</span>
+                <button id="view-toggle-btn" class="btn btn-secondary small" title="Vaihda näkymää" style="flex:1;">🖼️ Kortit</button>
+            </div>
+
+            <div class="filter-controls" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                 <span style="opacity:0.7; font-size:0.9em; min-width: 60px;">Kategoria:</span>
+                 <select id="filter-cat-select" style="padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); flex:1;">
+                     <option value="all">Kaikki</option>
+                     <option value="maantieto">Maantieto</option>
+                     <option value="kulttuuri">Kulttuuri</option>
+                     <option value="tiede">Tiede</option>
+                     <option value="avaruus">Avaruus</option>
+                     <option value="historia">Historia</option>
+                     <option value="aliens">Aliens</option>
+                     <option value="urheilu">Urheilu</option>
+                     <option value="viihde">Viihde</option>
+                     <option value="yleistieto">Yleistieto</option>
+                 </select>
+            </div>
+          </div>
+          <div id="collection-grid" class="collection-grid">
+            <!-- Cards will be rendered here -->
+          </div>
+      </div>
+
+      <!-- Tab Content: Special Cards -->
+      <div id="tab-special" class="tab-content hidden">
+          <h3>Erikoiskortit (Valitse max 3)</h3>
+          <!-- Reusing responsive grid class -->
+          <div id="special-collection-grid" class="collection-grid grid-mode">
+            <!-- Special cards rendered here -->
+          </div>
       </div>
     </div>
 

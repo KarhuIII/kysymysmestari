@@ -231,37 +231,50 @@ export async function updateActiveDeck(
     activeCards: string[], 
     activeSpecialCards?: string[],
     supabaseUserId?: string
-): Promise<boolean> {
+): Promise<{ success: boolean; error?: string }> {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
+
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
-        const playerData = await getPlayerData(supabaseUserId);
-        if (!playerData) return false;
+    if (effectiveSupabaseId) {
+        const playerData = await getPlayerData(effectiveSupabaseId);
+        if (!playerData) return { success: false, error: 'User data not found (Supabase)' };
 
         // Verify ownership
-        const ownsAll = activeCards.every(id => playerData.owned_cards.includes(id));
-        if (!ownsAll) return false;
+        const missingCards = activeCards.filter(id => !playerData.owned_cards.includes(id));
+        if (missingCards.length > 0) {
+            console.log('Missing cards:', missingCards);
+            return { success: false, error: `You do not own these cards: ${missingCards.join(', ')}` };
+        }
 
-        // Strict deck size check: Exactly 10
-        if (activeCards.length !== 10) return false;
+        // Limit deck size: Max 10 (validation happens at game start)
+        if (activeCards.length > 10) {
+             return { success: false, error: `Deck too large: ${activeCards.length} cards (Max 10)` };
+        }
 
         const updates: Partial<PlayerData> = { active_cards: activeCards };
         if (activeSpecialCards) {
             updates.active_special_cards = activeSpecialCards;
         }
 
-        return await updatePlayerData(supabaseUserId, updates);
+        const result = await updatePlayerData(effectiveSupabaseId, updates);
+        if (!result) return { success: false, error: 'Database update failed' };
+        return { success: true };
     }
 
     // Guest user
     const profile = guestPlayersCache[username];
-    if (!profile) return false;
+    if (!profile) return { success: false, error: 'User profile not found (Guest)' };
 
     // Verify ownership
-    const ownsAll = activeCards.every(id => profile.ownedCards.includes(id));
-    if (!ownsAll) return false;
+    const missingCards = activeCards.filter(id => !profile.ownedCards.includes(id));
+    if (missingCards.length > 0) {
+        return { success: false, error: `You do not own these cards: ${missingCards.join(', ')}` };
+    }
 
-    // Strict deck size check: Exactly 10
-    if (activeCards.length !== 10) return false;
+    // Limit deck size: Max 10 (validation happens at game start)
+    if (activeCards.length > 10) {
+        return { success: false, error: `Deck too large: ${activeCards.length} cards (Max 10)` };
+    }
 
     profile.activeCards = activeCards;
 
@@ -270,7 +283,7 @@ export async function updateActiveDeck(
     }
 
     saveGuestPlayers();
-    return true;
+    return { success: true };
 }
 
 // Add earned cards to collection (hybrid)
@@ -279,15 +292,17 @@ export async function addCardsToCollection(
     newCardIds: string[],
     supabaseUserId?: string
 ) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
+
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
-        const playerData = await getPlayerData(supabaseUserId);
+    if (effectiveSupabaseId) {
+        const playerData = await getPlayerData(effectiveSupabaseId);
         if (!playerData) return;
 
         const uniqueNew = newCardIds.filter(id => !playerData.owned_cards.includes(id));
         if (uniqueNew.length === 0) return;
 
-        await updatePlayerData(supabaseUserId, {
+        await updatePlayerData(effectiveSupabaseId, {
             owned_cards: [...playerData.owned_cards, ...uniqueNew]
         });
         return;
@@ -309,9 +324,10 @@ export async function updateStats(
     result: 'win' | 'loss' | 'draw',
     supabaseUserId?: string
 ) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
-        await updateSupabaseStats(supabaseUserId, result);
+    if (effectiveSupabaseId) {
+        await updateSupabaseStats(effectiveSupabaseId, result);
         return;
     }
 
@@ -336,10 +352,11 @@ export async function logGameHistory(
     entry: GameHistoryEntry,
     supabaseUserId?: string
 ) {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
+    if (effectiveSupabaseId) {
         await supabaseAdmin.from('game_history').insert({
-            user_id: supabaseUserId,
+            user_id: effectiveSupabaseId,
             opponent_id: null, // Could be enhanced later
             result: entry.result,
             my_score: entry.score.you,
@@ -362,12 +379,13 @@ export async function getPlayerHistory(
     username: string,
     supabaseUserId?: string
 ): Promise<GameHistoryEntry[]> {
+    const effectiveSupabaseId = supabaseUserId || (isSupabaseUUID(username) ? username : null);
     // Supabase user
-    if (supabaseUserId && !isGuestUser(supabaseUserId)) {
+    if (effectiveSupabaseId) {
         const { data, error } = await supabaseAdmin
             .from('game_history')
             .select('*')
-            .eq('user_id', supabaseUserId)
+            .eq('user_id', effectiveSupabaseId)
             .order('played_at', { ascending: false })
             .limit(20);
 

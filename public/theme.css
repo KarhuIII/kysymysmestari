@@ -10,13 +10,6 @@
     display: none; /* Chrome, Safari and Opera */
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-    overflow-y: auto;   /* Allow vertical scroll by default */
-}
-
 :root {
     /* Category Colors */
     --color-maantieto: #4834d4;
@@ -52,6 +45,20 @@ body {
     --card-border-width: 3px;
 }
 
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-y: auto;   /* Allow vertical scroll by default */
+    width: 100%;
+    position: relative;
+}
+
 /* =========================================================================
    GLOBAL STYLES (Overrides style.css)
    ========================================================================= */
@@ -83,6 +90,8 @@ h1, h2, h3 {
     box-shadow: var(--glass-shadow);
     padding: 2rem;
     width: 90%;
+    margin-top: 4vh; /* Added gap to top */
+    margin-bottom: 4vh; /* Balanced bottom gap */
     max-width: 1000px; /* Wider for better game view */
     min-height: 600px;
     display: flex;
@@ -210,6 +219,22 @@ select {
     color: #dfe6e9;
 }
 
+/* Deck Tabs */
+.deck-tabs .auth-tab {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    flex: 0 1 auto; /* Don't stretch infinitely */
+    min-width: 100px;
+}
+.deck-tabs .auth-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(108, 92, 231, 0.3);
+}
+
 /* Deck Management */
 /* Deck Management */
 .collection-grid {
@@ -224,7 +249,7 @@ select {
 }
 .collection-grid.grid-mode {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); /* Increased from 180px */
     gap: 15px;
 }
 .collection-grid.grid-mode .card-wrapper {
@@ -232,22 +257,8 @@ select {
     margin: 0;
 }
 
-/* Special Cards Grid Layout */
-#special-collection-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); /* Adjusted for 0.8 scale */
-    gap: 15px;
-    padding: 15px;
-}
-/* Adjust special cards in grid to be smaller/fit */
-#special-collection-grid .card-wrapper.tcg-ethereal {
-    width: 260px; /* Force original width */
-    height: 364px; /* Force original height */
-    transform: scale(0.8); /* Larger scale for readability */
-    transform-origin: top left; /* Anchor */
-    margin-bottom: -73px; /* 364 * 0.2 approx */
-    margin-right: -52px; /* 260 * 0.2 */
-}
+/* Special Cards Grid Layout - Now uses .collection-grid.grid-mode shared class */
+/* Previous overrides removed to ensure identical sizing */
 
 /* Override existing collection grid items to look good on dark */
 /* Note: Slim Row (.mini-row) is already dark themed, so it fits perfectly! */
@@ -293,12 +304,57 @@ select {
     .container {
         padding: 1rem;
         width: 95%;
+        max-width: 100vw; /* Safety net */
         border-radius: 8px; /* Slightly less rounded on small screens */
+        overflow-x: hidden; /* Ensure container itself doesn't overflow */
+    }
+
+    /* Fix Auth Tabs pushing width */
+    .auth-tab {
+        padding: 10px; /* Reduced from 12px 20px */
+        font-size: 0.9rem;
+    }
+
+    h1 {
+        font-size: 1.5rem; /* Cap title size */
+        word-wrap: break-word; /* Prevent long words breaking layout */
     }
 
     /* Server list */
     .server-list-slim {
         width: 100%;
+    }
+
+    /* Force 2-column grid on mobile with smaller cards */
+    @media (max-width: 480px) {
+        .collection-grid.grid-mode {
+            grid-template-columns: 1fr 1fr; /* 2 equal columns */
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* The grid cell wrapper */
+        .collection-grid.grid-mode .card-grid-cell {
+            width: 100%;
+            height: 240px; /* Space reserved for scaled card */
+            position: relative; /* Anchor for absolute card */
+            /* Debug: border: 1px solid red; */
+        }
+
+        /* The actual card scaled down */
+        .collection-grid.grid-mode .card-grid-cell .card-wrapper {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            /* Center visual card */
+            transform: translateX(-50%) scale(0.65);
+            transform-origin: top center;
+            /* Reset any margins */
+            margin: 0 !important;
+            /* Width/Height are forced by base styles (260x364) */
+            width: 260px !important;
+            height: 364px !important;
+        }
     }
     .mini-row {
         padding: 5px 10px;
@@ -1053,6 +1109,49 @@ body.game-active .turn-indicator-pill {
     gap: 8px;
 }
 
+/* Toast container */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    background: rgba(45, 52, 54, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px;
+    border-left: 4px solid #0984e3;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast.success { border-left-color: #00b894; }
+.toast.error { border-left-color: #d63031; }
+.toast.warning { border-left-color: #fdcb6e; }
+
+.toast.closing {
+    animation: slideOutRight 0.5s forwards;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
+
 .server-item {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1619,5 +1718,52 @@ body.game-active .turn-indicator-pill {
     
     .oauth-buttons {
         flex-direction: column;
+    }
+}
+
+/* === Deck Management Header === */
+.deck-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-wrap: wrap; /* Allow wrapping on very small screens */
+    gap: 10px;
+}
+
+.deck-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.deck-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.deck-stats {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    background: rgba(255,255,255,0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Adjust settings button in header */
+#deck-settings-toggle {
+    width: auto !important; /* Override full width */
+    padding: 6px 10px;
+}
+
+@media (max-width: 480px) {
+    .deck-management-header {
+        flex-direction: column; /* Stack on mobile if needed, or keep row */
+        align-items: stretch;
+    }
+    .deck-actions {
+        justify-content: space-between;
     }
 }

@@ -258,10 +258,8 @@ function setupSocketListeners() {
     });
 
     socket.on('deck_updated', (data) => {
-        console.log('💾 Deck updated:', data);
-        if (data.success) {
-            showNotification('Pakka tallennettu!', 'success');
-        }
+        console.log('📦 Deck updated:', data);
+        // showNotification('Pakka tallennettu!', 'success'); // Suppressed per user request
     });
 
     socket.on('waiting_games_list', (games) => {
@@ -293,11 +291,21 @@ if (approvalRejectBtn) {
 }
 
 createGameBtn.addEventListener('click', () => {
+    const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
+    if (count !== 10) {
+        alert(`Sinun täytyy valita tasan 10 kysymyskorttia ennen pelin aloitusta! (Valittu: ${count})`);
+        return;
+    }
     console.log('Creating game...');
     socket.emit('create_game', { targetScore: 5 });
 });
 
 joinGameBtn.addEventListener('click', () => {
+    const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
+    if (count !== 10) {
+        alert(`Sinun täytyy valita tasan 10 kysymyskorttia ennen peliin liittymistä! (Valittu: ${count})`);
+        return;
+    }
     const code = roomCodeInput.value.trim().toUpperCase();
     if (code.length === 6) {
         console.log('Joining game:', code);
@@ -361,6 +369,12 @@ function toggleGameMode(active) {
 // Navigation Handling
 navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
+        // Check if we are leaving Deck Manager
+        const currentActive = document.querySelector('.nav-btn.active');
+        if (currentActive && currentActive.dataset.target === 'deck-manage-screen' && btn !== currentActive) {
+             showNotification('Pakka tallennettu', 'success');
+        }
+
         // Update active button
         navButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -379,6 +393,26 @@ navButtons.forEach(btn => {
         }
     });
 });
+
+// Profile & Deck Handlers
+const deckTabBtns = document.querySelectorAll('.deck-tabs .auth-tab');
+if (deckTabBtns.length > 0) {
+    deckTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+             // Deactivate all
+             deckTabBtns.forEach(b => b.classList.remove('active'));
+             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+             
+             // Activate clicked
+             btn.classList.add('active');
+             const target = document.getElementById(btn.dataset.target);
+             if (target) target.classList.remove('hidden');
+
+             // Show confirmation toast on tab switch as requested
+             showNotification('Pakka tallennettu', 'success');
+        });
+    });
+}
 
 const saveDeckBtn = document.getElementById('save-deck-btn');
 if (saveDeckBtn) {
@@ -766,7 +800,7 @@ function showNotification(message, type = 'info') {
         toast.addEventListener('animationend', () => {
             toast.remove();
         });
-    }, 4000);
+    }, 1000);
 }
 
 function showOpponentAnswer(data) {
@@ -1018,6 +1052,22 @@ if (filterCatSelect) {
     });
 }
 
+
+
+const settingsToggleBtn = document.getElementById('deck-settings-toggle');
+if (settingsToggleBtn) {
+    settingsToggleBtn.addEventListener('click', () => {
+        const menu = document.getElementById('deck-controls-menu');
+        const arrow = document.getElementById('settings-arrow');
+        if (menu) {
+            menu.classList.toggle('hidden');
+            if (arrow) {
+                arrow.textContent = menu.classList.contains('hidden') ? '▼' : '▲';
+            }
+        }
+    });
+}
+
 function renderDeckManager(profile) {
     // Initial setup
     currentProfile = profile;
@@ -1112,9 +1162,14 @@ function renderDeckManager(profile) {
                 }
                 toggleCardSelection(div, isActive, card);
             });
+            grid.appendChild(div);
 
         } else {
             // === GRID VIEW (Card Wrapper) ===
+            // Wrap in cell for better layout control
+            const cell = document.createElement('div');
+            cell.className = 'card-grid-cell';
+
             // Create Ethereal Card style
             div.className = `card-wrapper tcg-ethereal category-${cat}`;
             if (isActive) {
@@ -1139,20 +1194,18 @@ function renderDeckManager(profile) {
             div.addEventListener('click', () => {
                  toggleCardSelection(div, isActive, card);
             });
+            
+            cell.appendChild(div);
+            grid.appendChild(cell);
         }
-
-        grid.appendChild(div);
     });
 
     renderSpecialCollection(profile);
 }
 
 function toggleCardSelection(element, wasActive, card) {
-     // Toggle logic needs to know current active count too, but basic toggle is:
-     // Ideally we update the backing Set or let CSS handle 'selected' class and then saveDeck scrapes it.
-     // In current impl, 'saveDeck' scrapes classes. So just toggle class.
-     
      if (element.classList.contains('selected')) {
+         // Deselecting
          element.classList.remove('selected');
          if (viewMode === 'list') {
              const check = element.querySelector('.mini-check');
@@ -1162,6 +1215,13 @@ function toggleCardSelection(element, wasActive, card) {
              element.style.boxShadow = '';
          }
      } else {
+         // Selecting - Check Limit
+         const currentSelected = document.querySelectorAll('#collection-grid .selected').length;
+         if (currentSelected >= 10) {
+             alert('Voit valita enintään 10 kysymyskorttia!');
+             return;
+         }
+
          element.classList.add('selected');
           if (viewMode === 'list') {
              const check = element.querySelector('.mini-check');
@@ -1172,8 +1232,29 @@ function toggleCardSelection(element, wasActive, card) {
          }
      }
      updateActiveCount();
+     saveDeck(); // Auto-save
 }
 
+
+function updateActiveCount() {
+    const selected = document.querySelectorAll('#collection-grid .selected').length;
+    const countEl = document.getElementById('active-deck-count');
+    if (countEl) countEl.textContent = selected;
+}
+
+function saveDeck() {
+    const selectedEls = document.querySelectorAll('#collection-grid .selected');
+    const activeCards = Array.from(selectedEls).map(el => el.dataset.id);
+
+    // Get specials
+    const activeSpecialCards = [];
+    document.querySelectorAll('.special-card.selected').forEach(el => {
+        activeSpecialCards.push(el.dataset.type);
+    });
+
+    // Auto-save always emits, validation happens at game start
+    socket.emit('update_deck', { activeCards, activeSpecialCards });
+}
 
 function showFullCardModal(card) {
     const modal = document.getElementById('card-modal');
@@ -1293,9 +1374,13 @@ function renderSpecialCollection(profile) {
                 </div>
                 <div class="mini-check" style="opacity: ${isSelected ? 1 : 0}">✔</div>
             `;
+            grid.appendChild(div);
             
         } else {
              // === GRID MODE (Card Wrapper) ===
+             const cell = document.createElement('div');
+             cell.className = 'card-grid-cell';
+
             div.className = `card-wrapper tcg-ethereal special-card ${specialClass} ${isSelected ? 'selected' : ''}`;
             
             div.innerHTML = `
@@ -1314,64 +1399,43 @@ function renderSpecialCollection(profile) {
                  div.style.border = '2px solid white';
                  div.style.boxShadow = '0 0 15px white';
             }
-        }
 
-        div.addEventListener('click', () => {
-             // Toggle Logic
-            if (div.classList.contains('selected')) {
-                div.classList.remove('selected');
-                 if (viewMode === 'list') {
-                     const check = div.querySelector('.mini-check');
-                     if(check) check.style.opacity = '0';
-                 } else {
-                    div.style.border = '';
-                    div.style.boxShadow = '';
-                 }
-            } else {
-                const currentSpecials = document.querySelectorAll('.special-card.selected').length;
-                if (currentSpecials < 3) {
-                    div.classList.add('selected');
-                     if (viewMode === 'list') {
+            div.addEventListener('click', () => {
+                if (div.classList.contains('selected')) {
+                    div.classList.remove('selected');
+                    if (viewMode === 'list') {
                         const check = div.querySelector('.mini-check');
-                        if(check) check.style.opacity = '1';
+                        if(check) check.style.opacity = '0';
                     } else {
-                        div.style.border = '2px solid white';
-                        div.style.boxShadow = '0 0 15px white';
+                        div.style.border = '';
+                        div.style.boxShadow = '';
                     }
                 } else {
-                    alert('Voit valita enintään 3 erikoiskorttia!');
+                    const currentSpecials = document.querySelectorAll('.special-card.selected').length;
+                    if (currentSpecials < 3) {
+                        div.classList.add('selected');
+                        if (viewMode === 'list') {
+                            const check = div.querySelector('.mini-check');
+                            if(check) check.style.opacity = '1';
+                        } else {
+                            div.style.border = '2px solid white';
+                            div.style.boxShadow = '0 0 15px white';
+                        }
+                    } else {
+                        alert('Voit valita enintään 3 erikoiskorttia!');
+                        return; // Don't save if blocked
+                    }
                 }
-            }
-        });
+                saveDeck(); // Auto-save
+            });
 
-        grid.appendChild(div);
+            cell.appendChild(div);
+            grid.appendChild(cell);
+        }
     });
 }
 
-function updateActiveCount() {
-    const selected = document.querySelectorAll('.mini-row.selected').length;
-    const countEl = document.getElementById('active-deck-count');
-    if (countEl) countEl.textContent = selected;
-}
 
-function saveDeck() {
-    const selectedEls = document.querySelectorAll('.mini-row.selected'); // Question cards (now mini-row)
-    const activeCards = Array.from(selectedEls).map(el => el.dataset.id);
-
-    // Strict validation: Must be 10 cards
-    if (activeCards.length !== 10) {
-        alert(`Sinun täytyy valita tasan 10 kysymyskorttia! (Nykyinen: ${activeCards.length})`);
-        return;
-    }
-
-    // Get specials
-    const activeSpecialCards = [];
-    document.querySelectorAll('.special-card.selected').forEach(el => {
-        activeSpecialCards.push(el.dataset.type);
-    });
-
-    socket.emit('update_deck', { activeCards, activeSpecialCards });
-}
 
 // --- SPECIAL CARDS IN GAME ---
 function renderSpecialHand() {

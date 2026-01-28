@@ -641,11 +641,12 @@ io.on('connection', async (socket: Socket) => {
     });
 
     socket.on('update_deck', async (data: { activeCards: string[], activeSpecialCards?: any[] }) => {
-        const success = await updateActiveDeck(getUserId(socket.id), data.activeCards, data.activeSpecialCards);
-        if (success) {
+        const result = await updateActiveDeck(getUserId(socket.id), data.activeCards, data.activeSpecialCards);
+        if (result.success) {
             socket.emit('deck_updated', { success: true, activeCards: data.activeCards });
         } else {
-            socket.emit('error', { message: 'Invalid deck update' });
+            console.error('Deck update failed:', result.error);
+            socket.emit('error', { message: `Deck save failed: ${result.error || 'Unknown error'}` });
         }
     });
 
