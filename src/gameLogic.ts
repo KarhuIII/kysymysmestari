@@ -78,6 +78,63 @@ export function answerQuestion(
         return null;
     }
 
+    const question = getQuestion(game.activeQuestion.questionId);
+    if (!question) return null;
+
+    // Single Player Logic Override
+    if (game.mode === 'single') {
+        const player = game.playerA!;
+        
+        // Always playerA answering in single player
+        // Check if correct
+        const correct = answerIndex === question.correctIndex;
+        const correctAnswer = question.options[question.correctIndex];
+        
+        if (correct) {
+            player.score += 1;
+        }
+        
+        // Add to history
+         game.answeredQuestions.push({
+            questionId: game.activeQuestion.questionId,
+            askedBy: 'playerA', // System asked, but we track as playerA so stats work? Or create 'system'? 
+            // Types say askedBy is 'playerA' | 'playerB'. Let's use 'playerB' as System proxy for history if needed, 
+            // but for single player assume playerA answered.
+            answeredBy: 'playerA',
+            correct
+        });
+
+        // Clear active
+        game.activeQuestion = null;
+        
+        let gameOver = false;
+        
+        // Check if more questions in system deck
+        if (game.systemDeck && game.systemDeck.length > 0) {
+             const nextQId = game.systemDeck.shift()!;
+             game.activeQuestion = {
+                from: 'SYSTEM',
+                to: player.id,
+                questionId: nextQId
+            };
+        } else {
+            // No more questions -> Game Over
+            gameOver = true;
+            game.status = 'finished';
+            game.winner = 'playerA'; // Single player always "wins" or finishes
+        }
+        
+        return {
+            correct,
+            correctAnswer,
+            pointsAwarded: correct,
+            newScore: player.score,
+            gameOver,
+            winner: gameOver ? 'playerA' : null
+        };
+    }
+
+    // MULTIPLAYER LOGIC
     const player = game[playerRole];
     const opponent = playerRole === 'playerA' ? game.playerB : game.playerA;
     const opponentRole = playerRole === 'playerA' ? 'playerB' : 'playerA';
@@ -88,9 +145,6 @@ export function answerQuestion(
     if (game.activeQuestion.to !== player.id) {
         return null;
     }
-
-    const question = getQuestion(game.activeQuestion.questionId);
-    if (!question) return null;
 
     const correct = answerIndex === question.correctIndex;
     const correctAnswer = question.options[question.correctIndex];
@@ -197,7 +251,28 @@ export function getPlayerGameState(game: Game, playerRole: 'playerA' | 'playerB'
         return q ? { id: q.id, question: q.question, category: q.category, cardType: q.cardType } : { id: questionId, question: 'Kysymys' };
     });
 
-    // console.log(`GameState for ${playerRole}: Deck size ${deckWithQuestions.length}`);
+
+
+    // Construct players array for Lobby UI (Unified with Multi)
+    const players = [];
+    if (game.playerA) {
+        players.push({
+            id: 'playerA',
+            name: game.playerA.name || 'Pelaaja 1',
+            score: game.playerA.score,
+            isHost: true,
+            isAsker: game.currentTurn === 'playerA'
+        });
+    }
+    if (game.playerB) {
+        players.push({
+            id: 'playerB',
+            name: game.playerB.name || 'Pelaaja 2',
+            score: game.playerB.score,
+            isHost: false, // 1v1 doesn't track host explicitly but playerA is effectively host
+            isAsker: game.currentTurn === 'playerB'
+        });
+    }
 
     return {
 
@@ -213,7 +288,11 @@ export function getPlayerGameState(game: Game, playerRole: 'playerA' | 'playerB'
         status: game.status,
         winner: game.winner,
         roundNumber: game.answeredQuestions.length + 1,
-        isWaitingForAnswer: (game.activeQuestion && game.activeQuestion.from === player.id) ? true : false
+        isWaitingForAnswer: (game.activeQuestion && game.activeQuestion.from === player.id) ? true : false,
+        mode: game.mode || 'single', // 'multi' is default for created games, 'single' for singleheader. 
+        // Note: 1v1 is 'multi' in Mode ENUM potentially but 'classic' logic used here.
+        // Let's pass the players array
+        players: players
     };
 }
 
@@ -227,8 +306,16 @@ export function getAvailableQuestionsForWinner(game: Game, winnerRole: 'playerA'
         .filter(qa => qa.answeredBy === winnerRole && qa.correct)
         .map(qa => qa.questionId);
 
+    console.log(`[getAvailableQuestionsForWinner] Correctly answered: ${correctlyAnswered.length}`, correctlyAnswered);
+    console.log(`[getAvailableQuestionsForWinner] Winner deck: ${winner.deck.length}`, winner.deck);
+
     // Filter out questions already in winner's deck
-    const available = correctlyAnswered.filter(qId => !winner.deck.includes(qId));
+    // In Single Player, deck is always empty (system provides questions), so all correct are available
+    const available = game.mode === 'single' 
+        ? correctlyAnswered 
+        : correctlyAnswered.filter(qId => !winner.deck.includes(qId));
+
+    console.log(`[getAvailableQuestionsForWinner] Available: ${available.length}`, available);
 
     // Remove duplicates
     return [...new Set(available)];
@@ -237,15 +324,25 @@ export function getAvailableQuestionsForWinner(game: Game, winnerRole: 'playerA'
 // Add selected questions to winner's deck
 export function addSelectedQuestions(game: Game, winnerRole: 'playerA' | 'playerB', questionIds: string[]): boolean {
     const winner = game[winnerRole];
-    if (!winner) return false;
+    if (!winner) {
+        console.log('[addSelectedQuestions] No winner found');
+        return false;
+    }
 
     // Validate: max 3 questions
-    if (questionIds.length > 3) return false;
+    if (questionIds.length > 3) {
+        console.log('[addSelectedQuestions] Too many questions selected');
+        return false;
+    }
 
     // Validate: all questions must be available
     const available = getAvailableQuestionsForWinner(game, winnerRole);
+    console.log('[addSelectedQuestions] Checking questionIds:', questionIds, 'against available:', available);
     const allValid = questionIds.every(qId => available.includes(qId));
-    if (!allValid) return false;
+    if (!allValid) {
+        console.log('[addSelectedQuestions] Not all questions are valid');
+        return false;
+    }
 
     // Add questions to deck
     winner.deck.push(...questionIds);

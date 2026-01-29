@@ -4,6 +4,7 @@ export type SpecialCardType = 'SWAP_OPPONENT' | 'SWAP_SELF' | 'JOKER' | 'MIRROR'
 
 export interface Player {
     id: string;
+    name?: string; // Added for Lobby UI
     score: number;
     deck: string[]; // Array of question IDs
     specialHand: SpecialCardType[]; // Array of special cards
@@ -46,6 +47,7 @@ export interface Game {
     currentTurn: 'playerA' | 'playerB';
     activeQuestion: ActiveQuestion | null;
     status: 'waiting' | 'active' | 'finished';
+    visibility: 'public' | 'private';
     winner: string | null;
     answeredQuestions: QuestionAnswer[]; // Track Q&A history for winner selection
     pendingJoinRequest?: {
@@ -53,6 +55,8 @@ export interface Game {
         username: string;
     } | null;
     targetScore: number;
+    mode?: 'multi' | 'single';
+    systemDeck?: string[]; // Queue of questions for single player mode
 }
 
 // Client-safe question (without correct answer)
@@ -99,6 +103,8 @@ export interface GameStateUpdate {
     winner: string | null;
     roundNumber: number;
     isWaitingForAnswer: boolean;
+    mode?: 'multi' | 'single';
+    players?: { id: string; name: string; score: number; isHost: boolean }[]; // Added for Lobby UI compatibility
 }
 
 export interface QuestionPresentedEvent {
@@ -136,4 +142,105 @@ export interface GameHistoryEntry {
     result: 'win' | 'loss' | 'draw';
     score: { you: number; opponent: number };
     playedCards: string[]; // IDs of cards played by this user
+}
+
+// ==================== MULTI-PLAYER MODE ====================
+
+export type MultiGameMode = 'round' | 'choice'; // round = all answer, choice = pick target
+
+export interface MultiPlayer {
+    id: string;        // socket.id
+    playerId: string;  // persistent player identifier (e.g., "player_abc123")
+    name: string;      // display name
+    score: number;
+    deck: string[];
+    specialHand: SpecialCardType[];
+}
+
+export interface MultiActiveQuestion {
+    from: string;      // asker playerId
+    to: string[];      // who should answer (all others in 'round', single in 'choice')
+    questionId: string;
+    answers: Map<string, number | null>; // playerId -> answerIndex (null = not yet answered)
+}
+
+export interface MultiQuestionAnswer {
+    questionId: string;
+    askedBy: string;    // playerId
+    answeredBy: string; // playerId
+    correct: boolean;
+}
+
+export interface MultiGame {
+    id: string;
+    gameMode: MultiGameMode;
+    players: Map<string, MultiPlayer>;  // playerId -> MultiPlayer
+    playerOrder: string[];              // ordered list for turn rotation
+    currentAskerIndex: number;          // index in playerOrder for whose turn to ask
+    hostId: string;                     // playerId of game creator
+    maxPlayers: number;                 // 2-10+
+    activeQuestion: MultiActiveQuestion | null;
+    status: 'waiting' | 'active' | 'finished';
+    visibility: 'public' | 'private';
+    winner: string | null;              // playerId of winner
+    answeredQuestions: MultiQuestionAnswer[];
+    targetScore: number;
+    pendingJoinRequests: Map<string, { socketId: string; username: string }>; // Multiple pending requests
+}
+
+// Multi-player WebSocket Events
+export interface CreateMultiGameRequest {
+    mode: MultiGameMode;
+    maxPlayers?: number;
+    targetScore?: number;
+    visibility?: 'public' | 'private';
+}
+
+export interface CreateMultiGameResponse {
+    gameId: string;
+    playerId: string;
+}
+
+export interface MultiGameStateUpdate {
+    gameId: string;
+    gameMode: MultiGameMode;
+    myPlayerId: string;
+    myScore: number;
+    myDeckSize: number;
+    players: { id: string; name: string; score: number; isAsker: boolean; isHost: boolean }[];
+    currentAskerId: string;
+    isMyTurn: boolean;          // true if I'm the asker
+    isAnswering: boolean;       // true if I should answer
+    status: 'waiting' | 'active' | 'finished';
+    winner: string | null;
+    playerCount: number;
+    maxPlayers: number;
+}
+
+export interface MultiQuestionPresentedEvent {
+    question: ClientQuestion;
+    askerId: string;
+    askerName: string;
+    targetIds: string[];  // who should answer
+}
+
+export interface MultiAnswerResultEvent {
+    playerId: string;
+    playerName: string;
+    correct: boolean;
+    pointsAwarded: boolean;
+    newScore: number;
+}
+
+export interface MultiRoundResultEvent {
+    results: MultiAnswerResultEvent[];
+    correctAnswer: string;
+    nextAskerId: string;
+    nextAskerName: string;
+}
+
+export interface MultiGameOverEvent {
+    rankings: { playerId: string; name: string; score: number; rank: number }[];
+    winnerId: string;
+    winnerName: string;
 }

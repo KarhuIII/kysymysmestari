@@ -10,7 +10,9 @@
 
 <body>
   <div class="container">
-    <h1 id="game-title">🎯 Kysymysmestari</h1>
+    <div id="logo-container" class="logo-container">
+      <h1 id="game-title">Kysymysmestari</h1>
+    </div>
 
     <!-- Auth Screen (shown when not logged in) -->
     <div id="auth-screen" class="screen">
@@ -93,6 +95,7 @@
       <button class="nav-btn active" data-target="lobby-screen">Peli</button>
       <button class="nav-btn" data-target="profile-screen">Profiili</button>
       <button class="nav-btn" data-target="deck-manage-screen">Pakka</button>
+      <button class="nav-btn" data-target="showroom-screen">Showroom</button>
     </nav>
 
 
@@ -101,44 +104,102 @@
       <span id="status-text">Yhdistetään...</span>
     </div>
 
-    <!-- Lobby Screen -->
-    <div id="lobby-screen" class="screen">
-      <div id="lobby-main-grid" class="lobby-grid">
-        <!-- Create Section -->
-        <div class="lobby-col create-section">
-          <h2>Luo peli</h2>
-          <div class="create-card">
-            <p class="section-desc">Aloita uusi peli ja kutsu ystäväsi.</p>
-            <button id="create-game-btn" class="btn btn-primary btn-block">Luo uusi peli</button>
-          </div>
-          
-          <div id="room-code-display" class="room-code hidden">
-            <p>Huonekoodi:</p>
-            <h3 id="room-code"></h3>
-            <div class="waiting-spinner"></div>
-            <p class="waiting">Odotetaan vastustajaa...</p>
-          </div>
-        </div>
-
-        <!-- Join Section -->
-        <div class="lobby-col join-section">
-          <h2>Liity peliin</h2>
-          
-          <div class="join-card">
-            <h4 class="sub-title">Syötä koodi</h4>
-            <div class="input-group">
-              <input type="text" id="room-code-input" placeholder="HUONE" maxlength="6">
-              <button id="join-game-btn" class="btn btn-secondary">Liity</button>
+      <!-- Lobby Screen -->
+      <div id="lobby-screen" class="screen">
+        <div id="lobby-main-grid" class="lobby-grid">
+            <!-- 1. Single Player -->
+            <div class="create-card">
+              <h4 class="sub-title">Yksinpeli</h4>
+              <p class="section-desc">Testaa taitosi 10 kysymyksen haasteessa.</p>
+              <button id="single-player-btn" class="btn btn-primary btn-block" style="background: linear-gradient(135deg, #00b894, #00cec9); border:none; box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);">👤 Aloita Yksinpeli</button>
             </div>
-          </div>
 
-          <div class="join-card server-list-cta">
-            <h4 class="sub-title">Selaa pelejä</h4>
-            <p class="section-desc">Löydä avoimia pelejä ja haasta muita pelaajia.</p>
-            <button id="open-server-modal-btn" class="btn btn-primary btn-block">Selaa avoimia pelejä</button>
-          </div>
+            <!-- 2. Multiplayer -->
+            <div class="create-card">
+              <h4 class="sub-title">Moninpeli & Kaverit</h4>
+              <p class="section-desc">Pelaa kaveria vastaan tai isommalla porukalla.</p>
+              <button id="open-create-menu-btn" class="btn btn-secondary btn-block" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); border:none;">👥 Moninpeli</button>
+              
+              <div id="room-code-display" class="room-code hidden" style="margin-top: 15px;">
+                <p>Huonekoodi:</p>
+                <h3 id="room-code"></h3>
+                <div class="waiting-spinner"></div>
+                <p class="waiting">Odotetaan vastustajaa...</p>
+              </div>
+            </div>
+
+            <!-- 3. Join Game -->
+            <div class="join-card">
+              <h4 class="sub-title">Syötä koodi</h4>
+              <p class="section-desc">Liity peliin ystäväsi jakamalla koodilla.</p>
+              <div class="input-group">
+                <input type="text" id="room-code-input" placeholder="HUONE" maxlength="6">
+                <button id="join-game-btn" class="btn btn-secondary">Liity</button>
+              </div>
+            </div>
+
+            <!-- 4. Browse Games -->
+            <div class="join-card server-list-cta">
+              <h4 class="sub-title">Selaa pelejä</h4>
+              <p class="section-desc">Löydä avoimia pelejä ja haasta muita pelaajia.</p>
+              <button id="open-server-modal-btn" class="btn btn-primary btn-block">Selaa avoimia pelejä</button>
+            </div>
         </div>
-      </div>
+
+        <!-- Modals and Hidden Screens moved out of grid flow -->
+        
+        <!-- Create Game Modal -->
+        <div id="create-game-modal" class="modal hidden">
+            <div class="modal-content glass-panel" style="background: var(--surface-card, #1e272e); width: 90%; max-width: 500px; padding: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+                <span class="close-modal" id="close-create-modal">&times;</span>
+                <h3 style="margin-bottom: 1.5rem; text-align:center;">Luo Peli</h3>
+                
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-secondary);">Pelimuoto</label>
+                    <div class="mode-selector" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button class="mode-btn active" data-mode="1v1" style="flex:1;">1 vs 1</button>
+                        <button class="mode-btn" data-mode="round" style="flex:1;">Kierros (Multi)</button>
+                        <button class="mode-btn" data-mode="choice" style="flex:1;">Valinta (Multi)</button>
+                    </div>
+                    <p id="mode-description" style="font-size:0.8rem; margin-top:0.5rem; opacity:0.7; min-height: 2.5em;">
+                        Klassinen kaksinpeli. Toinen vastaa vuorollaan.
+                    </p>
+                </div>
+
+                <div id="player-count-group" class="form-group hidden" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-secondary);">Pelaajamäärä (Max)</label>
+                    <div class="player-count-selector" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button class="count-btn active" data-count="3">3</button>
+                        <button class="count-btn" data-count="4">4</button>
+                        <button class="count-btn" data-count="5">5</button>
+                        <button class="count-btn" data-count="6">6</button>
+                        <button class="count-btn" data-count="7">7</button>
+                        <button class="count-btn" data-count="8">8</button>
+                        <button class="count-btn" data-count="9">9</button>
+                        <button class="count-btn" data-count="10">10</button>
+                    </div>
+                    <input type="hidden" id="create-max-players" value="3">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-secondary);">Näkyvyys</label>
+                    <div class="visibility-selector" style="display:flex; gap:1rem;">
+                        <label style="display:flex; align-items:center; cursor:pointer;">
+                            <input type="radio" name="visibility" value="public" checked>
+                            <span style="margin-left:0.5rem;">Julkinen (Listataan aulassa)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; cursor:pointer;">
+                            <input type="radio" name="visibility" value="private">
+                            <span style="margin-left:0.5rem;">Yksityinen (Vain koodilla)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="confirm-create-game-btn" class="btn btn-primary btn-block" style="padding: 1rem; font-size:1.1rem;">Aloita Peli</button>
+            </div>
+        </div>
+
+
       
       <!-- Integrated Server List Section -->
       <div id="lobby-server-list-section" class="lobby-server-section hidden">
@@ -157,6 +218,41 @@
         <div class="debug-header">Debug Log</div>
         <div id="debug-log" class="debug-log"></div>
       </div>
+    </div>
+
+
+    <!-- NEW: Game Lobby Screen (Waiting Room) -->
+    <div id="game-lobby-screen" class="screen hidden">
+        <div class="lobby-header">
+            <h2>Odotusaula</h2>
+            <div class="room-info">
+                <span>Huonekoodi:</span>
+                <span id="lobby-room-code" class="code-badge">CODE</span>
+            </div>
+        </div>
+
+        <div class="lobby-content" style="display: flex; gap: 2rem; margin-top: 2rem;">
+            <!-- Left: Players -->
+            <div class="lobby-panel players-panel" style="flex: 1;">
+                <h3>Pelaajat (<span id="lobby-player-count">1</span>/<span id="lobby-max-players">5</span>)</h3>
+                <div id="lobby-player-list" class="player-list">
+                    <!-- Players injected here -->
+                </div>
+            </div>
+
+            <!-- Right: My Info / Deck - REMOVED per user request -->
+        </div>
+
+        <div class="lobby-footer" style="margin-top: 2rem;">
+            <button id="leave-lobby-btn" class="btn btn-secondary">Poistu</button>
+            <div class="host-controls hidden" id="host-controls" style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end; flex-wrap: wrap;">
+                <p class="status-msg" id="lobby-status-msg" style="margin: 0;">Odotetaan muita pelaajia...</p>
+                <button id="start-game-btn" class="btn btn-primary" disabled>Aloita Peli</button>
+            </div>
+            <div class="guest-controls" id="guest-controls">
+                <p class="status-msg">Odotetaan pelinjohtajan aloitusta...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Profile Screen -->
@@ -238,9 +334,6 @@
 
     <!-- Deck Management Screen -->
     <div id="deck-manage-screen" class="screen hidden">
-      <h2>Pakan Hallinta</h2>
-      <p class="info-text">Valitse kortit, joita haluat käyttää pelissä.</p>
-      
       <!-- New Unified Header -->
       <div class="deck-management-header">
           <!-- Tabs -->
@@ -306,6 +399,75 @@
             <!-- Special cards rendered here -->
           </div>
       </div>
+    </div>
+
+    <!-- Showroom Screen -->
+    <div id="showroom-screen" class="screen hidden">
+        <h2>🎨 Logojen Showroom</h2>
+        <p class="section-desc" style="text-align:center;">Valitse suosikkisi tulevaksi pelin logoksi!</p>
+        
+        <div class="showroom-grid">
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-1">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Neon Glow</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-2">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Retro Pixel</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-3">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Gradient Flow</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-4">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">3D Pop</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-5">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Elegant Serif</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-6" data-text="Kysymysmestari">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Glitch Cyber</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-7">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Bubble Gum</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-8">KYSYMYSMESTARI</h1>
+                </div>
+                <div class="showroom-label">Sci-Fi Tech</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-9">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Minimal Thin</div>
+            </div>
+            <div class="showroom-item">
+                <div class="css-logo-container">
+                    <h1 class="logo-style-10">Kysymysmestari</h1>
+                </div>
+                <div class="showroom-label">Arcade Outline</div>
+            </div>
+        </div>
     </div>
 
     <!-- Game Screen -->
@@ -379,7 +541,7 @@
     </div>
 
     <!-- Game Over Screen -->
-    <div id="game-over-screen" class="screen hidden">
+    <div id="game-over-screen" class="screen hidden theme-ethereal">
       <h2 id="game-over-title"></h2>
       <div class="final-scores">
         <p>Sinä: <span id="final-my-score"></span></p>
@@ -405,7 +567,10 @@
         <p id="selection-result"></p>
       </div>
 
-      <button id="new-game-btn" class="btn btn-primary">Uusi peli</button>
+      <div class="game-over-buttons">
+        <button id="new-game-btn" class="btn btn-primary">Uusi peli</button>
+        <button id="exit-game-btn" class="btn btn-secondary">Poistu</button>
+      </div>
     </div>
     
     <!-- Join Approval Modal (Host) -->
@@ -441,6 +606,100 @@
     </div>
 
     <!-- Server List Modal removed, now integrated in Lobby -->
+
+    <!-- Multi-Player Lobby Screen -->
+    <div id="multi-lobby-screen" class="screen hidden">
+      <div class="multi-lobby-container" style="max-width:600px; margin:0 auto; padding:1rem;">
+        <h2 style="text-align:center;">🎮 Moninpeli-Aula</h2>
+        
+        <div class="multi-lobby-info glass-panel" style="padding:1rem; margin-bottom:1rem; text-align:center;">
+          <p>Huonekoodi: <strong id="multi-room-code" style="font-size:1.5rem; color:var(--accent-primary);">---</strong></p>
+          <p id="multi-mode-info" style="opacity:0.8;">Kierros-moodi</p>
+          <p id="multi-player-count" style="margin-top:0.5rem;">Pelaajia: 1/10</p>
+        </div>
+
+        <h3>Pelaajat</h3>
+        <div id="multi-players-list" class="multi-players-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+          <!-- Players rendered here -->
+        </div>
+
+        <div id="multi-host-controls" class="hidden" style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;">
+          <button id="start-multi-game-btn" class="btn btn-primary" style="flex:1; min-width:150px;">▶️ Aloita peli</button>
+          <button id="cancel-multi-game-btn" class="btn btn-secondary" style="flex:1; min-width:150px;">❌ Peruuta</button>
+        </div>
+        
+        <div id="multi-player-waiting" class="hidden" style="text-align:center; padding:1rem;">
+          <div class="waiting-spinner"></div>
+          <p>Odotetaan pelin alkua...</p>
+          <button id="leave-multi-lobby-btn" class="btn btn-secondary" style="margin-top:1rem;">Poistu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Player Game Screen -->
+    <div id="multi-game-screen" class="screen hidden theme-ethereal">
+      
+      <button id="leave-multi-game-btn" class="close-modal" style="top:15px; right:15px; width:40px; height:40px; font-size:1.5rem; background:rgba(255, 71, 87, 0.2); border:1px solid rgba(255, 71, 87, 0.5);" title="Poistu pelistä">✕</button>
+
+      <!-- Multi-Player Scoreboard -->
+      <div class="multi-scoreboard" style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.5rem; padding:1rem; background:rgba(0,0,0,0.3); border-radius:10px; margin-bottom:1rem;">
+        <div id="multi-scoreboard-players" style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center;">
+          <!-- Player scores rendered here -->
+        </div>
+      </div>
+
+      <!-- Turn Indicator -->
+      <div id="multi-turn-indicator" class="turn-indicator-pill" style="text-align:center; margin-bottom:1rem; padding:1rem; background:rgba(108, 92, 231, 0.3); border-radius:10px;">
+        <span id="multi-turn-text">Odottaa...</span>
+      </div>
+
+      <!-- Active Question Area -->
+      <div class="active-card-area">
+        <div id="multi-waiting-message" class="waiting-message hidden">
+          <p>Odotetaan kysyjää...</p>
+        </div>
+
+        <div id="multi-question-area" class="question-area hidden">
+          <p id="multi-asker-name" style="text-align:center; opacity:0.8; margin-bottom:0.5rem;">Pelaaja kysyy:</p>
+          <h3 id="multi-question-text" style="color:white; text-align:center; font-size:1.5rem; margin-bottom:20px;"></h3>
+          <div id="multi-answer-options" class="answer-options"></div>
+        </div>
+
+        <div id="multi-round-result" class="hidden" style="padding:1rem; background:rgba(0,0,0,0.5); border-radius:10px; text-align:center;">
+          <h3>Kierroksen tulokset</h3>
+          <div id="multi-round-results-list" style="margin:1rem 0;"></div>
+          <p>Oikea vastaus: <strong id="multi-correct-answer"></strong></p>
+          <p id="multi-next-asker" style="margin-top:1rem; font-size:1.1rem;"></p>
+          <button id="multi-continue-btn" class="btn btn-primary" style="margin-top:1rem;">Jatka</button>
+        </div>
+      </div>
+
+      <!-- Player Hand -->
+      <div id="multi-deck-area" class="hand-area hidden">
+        <div id="multi-deck-cards" style="width:100%; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;"></div>
+      </div>
+
+      <!-- Target Selection for Choice Mode -->
+      <div id="multi-target-select" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100;">
+        <h3 style="color:white; margin-bottom:1rem;">Valitse kenelle kysyt</h3>
+        <div id="multi-target-players" style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center;"></div>
+        <button id="cancel-target-select-btn" class="btn btn-secondary" style="margin-top:1rem;">Peruuta</button>
+      </div>
+    </div>
+
+    <!-- Multi-Player Game Over Screen -->
+    <div id="multi-game-over-screen" class="screen hidden theme-ethereal">
+      <h2 id="multi-game-over-title" style="text-align:center;">🏆 Peli päättyi!</h2>
+      
+      <div id="multi-rankings" style="max-width:400px; margin:1rem auto; padding:1rem; background:rgba(0,0,0,0.3); border-radius:10px;">
+        <!-- Rankings rendered here -->
+      </div>
+
+      <div class="game-over-buttons" style="display:flex; gap:1rem; justify-content:center; margin-top:2rem;">
+        <button id="multi-new-game-btn" class="btn btn-primary">Uusi peli</button>
+        <button id="multi-exit-btn" class="btn btn-secondary">Poistu</button>
+      </div>
+    </div>
   </div>
 
   <style>
@@ -478,7 +737,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="auth.js?v=2"></script>
   <script src="auth_ui.js?v=2"></script>
-  <script src="client.js?v=2"></script>
+  <script src="client.js?v=3"></script>
   
   <script>
     // Global debug logger

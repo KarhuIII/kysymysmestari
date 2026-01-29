@@ -4,6 +4,7 @@ import { Server, Socket } from 'socket.io';
 import path from 'path';
 import {
     createGame,
+    createSinglePlayerGame,
     joinGame,
     getGameBySocketId,
     getQuestion,
@@ -25,6 +26,28 @@ import {
     addSelectedQuestions
 } from './gameLogic';
 import {
+    createMultiGame,
+    joinMultiGame,
+    leaveMultiGame,
+    getMultiGame,
+    getMultiGameBySocketId,
+    getWaitingMultiGames,
+    removeMultiGame,
+    setMultiPlayerDeck,
+    setMultiPlayerSpecialHand,
+    getCurrentAskerId,
+    startMultiGame,
+    getQuestion as getMultiQuestion
+} from './multiGameManager';
+import {
+    playCardMulti,
+    answerQuestionMulti,
+    resolveRound,
+    getMultiPlayerGameState,
+    toClientQuestion,
+    getMultiPlayerDeck
+} from './multiGameLogic';
+import {
     loadData,
     getOrCreateProfile,
     getProfile,
@@ -39,11 +62,12 @@ import {
     CreateGameResponse,
     JoinGameRequest,
     JoinGameResponse,
-
     PlayCardRequest,
     AnswerQuestionRequest,
     ClientQuestion,
-    UseSpecialCardRequest
+    UseSpecialCardRequest,
+    CreateMultiGameRequest,
+    MultiGameMode
 } from './types';
 
 
@@ -130,6 +154,41 @@ const broadcastWaitingGames = async (io: Server) => {
     io.emit('waiting_games_list', waitingGames);
 };
 
+// Helper to broadcast waiting multi-games
+const broadcastWaitingMultiGames = async () => {
+    const games = getWaitingMultiGames();
+    const waitingGames = await Promise.all(games.map(async g => {
+        const host = g.players.get(g.hostId);
+        return {
+            id: g.id,
+            hostName: host?.name || 'Host',
+            mode: g.gameMode,
+            playerCount: g.players.size,
+            maxPlayers: g.maxPlayers,
+            targetScore: g.targetScore
+        };
+    }));
+    console.log(`🌐 [Multi] Broadcasting ${waitingGames.length} waiting multi-games`);
+    io.emit('waiting_multi_games_list', waitingGames);
+};
+
+// Helper to send waiting multi-games to a specific socket
+const broadcastWaitingMultiGamesTo = async (socket: Socket) => {
+    const games = getWaitingMultiGames();
+    const waitingGames = await Promise.all(games.map(async g => {
+        const host = g.players.get(g.hostId);
+        return {
+            id: g.id,
+            hostName: host?.name || 'Host',
+            mode: g.gameMode,
+            playerCount: g.players.size,
+            maxPlayers: g.maxPlayers,
+            targetScore: g.targetScore
+        };
+    }));
+    socket.emit('waiting_multi_games_list', waitingGames);
+};
+
 // Socket.IO connection handling
 io.on('connection', async (socket: Socket) => {
     // Handle authentication (persistent ID)
@@ -174,15 +233,15 @@ io.on('connection', async (socket: Socket) => {
     });
 
     // Create game
-    socket.on('create_game', async (data: { targetScore?: number }) => {
+    socket.on('create_game', async (data: { targetScore?: number; visibility?: 'public' | 'private' }) => {
         const targetScore = data?.targetScore || 5;
+        const visibility = data?.visibility || 'public';
         // Validate score
         const validScore = Math.max(3, Math.min(100, targetScore));
 
-
-
         // Get profile and set deck
         const profile = await getOrCreateProfile(getUserId(socket.id));
+        const playerName = profile.displayName || profile.username || 'Pelaaja';
 
         // Validation: Check if player has enough cards for the target score
         if (profile.activeCards.length < validScore) {
@@ -190,7 +249,7 @@ io.on('connection', async (socket: Socket) => {
             return;
         }
 
-        const { gameId, playerId } = createGame(socket.id, validScore);
+        const { gameId, playerId } = createGame(socket.id, playerName, validScore, visibility);
 
         // Inject player's deck into the game
         console.log(`Setting deck for playerA (Game ${gameId}):`, profile.activeCards.length, 'cards');
@@ -204,9 +263,106 @@ io.on('connection', async (socket: Socket) => {
 
         const response: CreateGameResponse = { gameId, playerId };
         socket.emit('game_created', response);
+        
+        // Send initial state for Lobby UI
+        const { getGame } = require('./gameManager');
+        const game = getGame(gameId);
+        if (game) {
+            const state = getPlayerGameState(game, 'playerA');
+            socket.emit('game_state', state);
+        }
 
         console.log(`Game created: ${gameId} by ${socket.id}`);
         await broadcastWaitingGames(io);
+    });
+
+    // Create Single Player Game
+    socket.on('start_single_player', async () => {
+        // Clean up any existing game for this socket first
+        const existingGame = getGameBySocketId(socket.id);
+        if (existingGame) {
+            console.log(`Cleaning up existing game ${existingGame.game.id} before starting new SP game`);
+            socket.leave(existingGame.game.id);
+            removeGame(existingGame.game.id);
+        }
+        
+        const profile = await getOrCreateProfile(getUserId(socket.id));
+        const playerName = profile.displayName || profile.username || 'Pelaaja';
+        const { gameId, playerId } = createSinglePlayerGame(socket.id, playerName);
+        
+        socket.join(gameId);
+        
+        // Notify client
+        const response: CreateGameResponse = { gameId, playerId };
+        socket.emit('game_created', response);
+        
+        // Send initial state for Lobby
+        const { getGame } = require('./gameManager');
+        const game = getGame(gameId);
+        if (game) {
+             const state = getPlayerGameState(game, 'playerA');
+             socket.emit('game_state', state);
+        }
+        console.log(`Single Player Game created: ${gameId} by ${socket.id}`);
+    });
+
+    // Start 1v1 or Single Player Game (Manual Start)
+    socket.on('start_game', () => {
+        const gameData = getGameBySocketId(socket.id);
+        if (!gameData) {
+            socket.emit('error', { message: 'Peliä ei löydy' });
+            return;
+        }
+
+        const { game, playerRole } = gameData;
+
+        // Only host/playerA can start
+        if (playerRole !== 'playerA') {
+            socket.emit('error', { message: 'Vain peli isäntä voi aloittaa pelin' });
+            return;
+        }
+
+        // 1v1 check: need 2 players
+        if (game.mode !== 'single' && !game.playerB) {
+            socket.emit('error', { message: 'Peli tarvitsee toisen pelaajan ennen aloitusta' });
+            return;
+        }
+
+        // Activate game
+        game.status = 'active';
+
+        // Serve first question for Single Player
+        if (game.mode === 'single' && game.systemDeck && game.systemDeck.length > 0) {
+            const firstQId = game.systemDeck.shift()!;
+            game.activeQuestion = {
+                from: 'SYSTEM',
+                to: socket.id,
+                questionId: firstQId
+            };
+        }
+
+        // Notify all players in game
+        const updateState = (role: 'playerA' | 'playerB') => {
+            const player = game[role];
+            if (player) {
+                const s = getPlayerGameState(game, role);
+                io.to(player.id).emit('game_state', s);
+                
+                // If single player question was set, send it
+                if (game.mode === 'single' && game.activeQuestion) {
+                    const q = getQuestion(game.activeQuestion.questionId);
+                    if (q) {
+                        const clientQ = toClientQuestion(q);
+                        io.to(player.id).emit('question_presented', { question: clientQ });
+                    }
+                }
+            }
+        };
+
+        updateState('playerA');
+        updateState('playerB');
+
+        console.log(`Game ${game.id} manually started by host`);
     });
 
     // Join game (Request Phase)
@@ -279,6 +435,7 @@ io.on('connection', async (socket: Socket) => {
         const requesterSocket = io.sockets.sockets.get(requesterId);
 
         if (data.decision === 'accept') {
+             const requesterName = game.pendingJoinRequest?.username || 'Pelaaja';
              game.pendingJoinRequest = null; // Clear request first
 
              if (!requesterSocket) {
@@ -287,7 +444,8 @@ io.on('connection', async (socket: Socket) => {
              }
 
              // Proceed with Join Logic
-             const result = joinGame(game.id, requesterId);
+             // We use the captured requesterName
+             const result = joinGame(game.id, requesterId, requesterName);
 
              if (result.success) {
                 const profile = await getOrCreateProfile(getUserId(requesterId));
@@ -458,88 +616,114 @@ io.on('connection', async (socket: Socket) => {
 
         // Check if game is over
         if (result.gameOver) {
-            // Handle Draw
-            if (!result.winner) {
-                // Log History for Draw
-                if (game.playerA && game.playerB) {
-                    await logGameHistory(game.playerA.id, {
-                        gameId: game.id, timestamp: Date.now(), opponent: game.playerB.id, result: 'draw',
-                        score: { you: game.playerA.score, opponent: game.playerB.score }, playedCards: []
-                    });
-                    await logGameHistory(game.playerB.id, {
-                        gameId: game.id, timestamp: Date.now(), opponent: game.playerA.id, result: 'draw',
-                        score: { you: game.playerB.score, opponent: game.playerA.score }, playedCards: []
-                    });
-                    await updatePlayerStats(getUserId(game.playerA.id), 'draw');
-                    await updatePlayerStats(getUserId(game.playerB.id), 'draw');
-                }
-
-                io.to(game.playerA!.id).emit('game_over', {
-                    winner: 'draw',
-                    finalScore: {
-                        you: game.playerA!.score,
-                        opponent: game.playerB!.score
-                    }
+            // SINGLE PLAYER GAME OVER
+            if (game.mode === 'single') {
+                const finalScore = game.playerA!.score;
+                // Log history for single player
+                await logGameHistory(getUserId(game.playerA!.id), {
+                    gameId: game.id, timestamp: Date.now(), opponent: 'SYSTEM', result: 'win',
+                    score: { you: finalScore, opponent: 0 }, playedCards: []
                 });
-                io.to(game.playerB!.id).emit('game_over', {
-                    winner: 'draw',
-                    finalScore: {
-                        you: game.playerB!.score,
-                        opponent: game.playerA!.score
-                    }
-                });
-                console.log(`Game ${game.id} ended in a DRAW`);
-            } else {
-                // Handle Winner
-                const winnerRole = result.winner;
-                const loserRole = winnerRole === 'playerA' ? 'playerB' : 'playerA';
-
-                // Update Stats & History
-                const winnerId = game[winnerRole]!.id;
-                const loserId = game[loserRole]!.id;
-
-                await updatePlayerStats(getUserId(winnerId), 'win');
-                if (game[loserRole]) await updatePlayerStats(getUserId(loserId), 'loss');
-
-                await logGameHistory(getUserId(winnerId), {
-                    gameId: game.id, timestamp: Date.now(), opponent: loserId, result: 'win',
-                    score: { you: game[winnerRole]!.score, opponent: game[loserRole]!.score }, playedCards: []
-                });
-                if (game[loserRole]) {
-                    await logGameHistory(getUserId(loserId), {
-                        gameId: game.id, timestamp: Date.now(), opponent: winnerId, result: 'loss',
-                        score: { you: game[loserRole]!.score, opponent: game[winnerRole]!.score }, playedCards: []
-                    });
-                }
-
+                await updatePlayerStats(getUserId(game.playerA!.id), 'win');
+                
                 // Get available questions for winner to select
-                const availableQuestionIds = getAvailableQuestionsForWinner(game, winnerRole);
+                const availableQuestionIds = getAvailableQuestionsForWinner(game, 'playerA');
                 const availableQuestions = availableQuestionIds.map((qId: string) => {
                     const q = getQuestion(qId);
                     return q ? { id: q.id, question: q.question, options: q.options } : null;
                 }).filter((q: any) => q !== null);
-
-                // Send game over to winner with available questions
-                io.to(game[winnerRole]!.id).emit('game_over', {
+                
+                socket.emit('game_over', {
                     winner: 'you',
-                    finalScore: {
-                        you: game[winnerRole]!.score,
-                        opponent: game[loserRole]!.score
-                    },
+                    finalScore: { you: finalScore, opponent: 0 },
                     availableQuestions
                 });
+                console.log(`Single Player Game ${game.id} ended. Score: ${finalScore}/10`);
+            } else {
+                // MULTIPLAYER GAME OVER
+                // Handle Draw
+                if (!result.winner) {
+                    // Log History for Draw
+                    if (game.playerA && game.playerB) {
+                        await logGameHistory(game.playerA.id, {
+                            gameId: game.id, timestamp: Date.now(), opponent: game.playerB.id, result: 'draw',
+                            score: { you: game.playerA.score, opponent: game.playerB.score }, playedCards: []
+                        });
+                        await logGameHistory(game.playerB.id, {
+                            gameId: game.id, timestamp: Date.now(), opponent: game.playerA.id, result: 'draw',
+                            score: { you: game.playerB.score, opponent: game.playerA.score }, playedCards: []
+                        });
+                        await updatePlayerStats(getUserId(game.playerA.id), 'draw');
+                        await updatePlayerStats(getUserId(game.playerB.id), 'draw');
+                    }
 
-                // Send game over to loser
-                if (game[loserRole]) {
-                    io.to(game[loserRole]!.id).emit('game_over', {
-                        winner: 'opponent',
+                    io.to(game.playerA!.id).emit('game_over', {
+                        winner: 'draw',
                         finalScore: {
-                            you: game[loserRole]!.score,
-                            opponent: game[winnerRole]!.score
+                            you: game.playerA!.score,
+                            opponent: game.playerB!.score
                         }
                     });
+                    io.to(game.playerB!.id).emit('game_over', {
+                        winner: 'draw',
+                        finalScore: {
+                            you: game.playerB!.score,
+                            opponent: game.playerA!.score
+                        }
+                    });
+                    console.log(`Game ${game.id} ended in a DRAW`);
+                } else {
+                    // Handle Winner
+                    const winnerRole = result.winner;
+                    const loserRole = winnerRole === 'playerA' ? 'playerB' : 'playerA';
+
+                    // Update Stats & History
+                    const winnerId = game[winnerRole]!.id;
+                    const loserId = game[loserRole]!.id;
+
+                    await updatePlayerStats(getUserId(winnerId), 'win');
+                    if (game[loserRole]) await updatePlayerStats(getUserId(loserId), 'loss');
+
+                    await logGameHistory(getUserId(winnerId), {
+                        gameId: game.id, timestamp: Date.now(), opponent: loserId, result: 'win',
+                        score: { you: game[winnerRole]!.score, opponent: game[loserRole]!.score }, playedCards: []
+                    });
+                    if (game[loserRole]) {
+                        await logGameHistory(getUserId(loserId), {
+                            gameId: game.id, timestamp: Date.now(), opponent: winnerId, result: 'loss',
+                            score: { you: game[loserRole]!.score, opponent: game[winnerRole]!.score }, playedCards: []
+                        });
+                    }
+
+                    // Get available questions for winner to select
+                    const availableQuestionIds = getAvailableQuestionsForWinner(game, winnerRole);
+                    const availableQuestions = availableQuestionIds.map((qId: string) => {
+                        const q = getQuestion(qId);
+                        return q ? { id: q.id, question: q.question, options: q.options } : null;
+                    }).filter((q: any) => q !== null);
+
+                    // Send game over to winner with available questions
+                    io.to(game[winnerRole]!.id).emit('game_over', {
+                        winner: 'you',
+                        finalScore: {
+                            you: game[winnerRole]!.score,
+                            opponent: game[loserRole]!.score
+                        },
+                        availableQuestions
+                    });
+
+                    // Send game over to loser
+                    if (game[loserRole]) {
+                        io.to(game[loserRole]!.id).emit('game_over', {
+                            winner: 'opponent',
+                            finalScore: {
+                                you: game[loserRole]!.score,
+                                opponent: game[winnerRole]!.score
+                            }
+                        });
+                    }
+                    console.log(`Game ${game.id} ended. Winner: ${winnerRole}`);
                 }
-                console.log(`Game ${game.id} ended. Winner: ${winnerRole}`);
             }
         } else {
             // Update game state for both players
@@ -549,6 +733,21 @@ io.on('connection', async (socket: Socket) => {
             io.to(game[playerRole]!.id).emit('game_state', statePlayer);
             if (opponent) {
                 io.to(opponent.id).emit('game_state', stateOpponent);
+            }
+
+            // Single Player: If next question is ready, send it
+            if (game.mode === 'single' && game.activeQuestion) {
+                const q = getQuestion(game.activeQuestion.questionId);
+                if (q) {
+                    const clientQ: ClientQuestion = { 
+                        id: q.id, 
+                        question: q.question, 
+                        options: q.options, 
+                        category: q.category, 
+                        cardType: q.cardType 
+                    };
+                    socket.emit('question_presented', { question: clientQ });
+                }
             }
         }
 
@@ -566,9 +765,17 @@ io.on('connection', async (socket: Socket) => {
         const { game, playerRole } = gameData;
 
         // Verify player is the winner
-        if (game.winner !== game[playerRole]?.id) {
-            socket.emit('error', { message: 'Only winner can select questions' });
-            return;
+        // In Single Player, winner is always 'playerA' (the player role, not socket ID)
+        if (game.mode === 'single') {
+            if (game.winner !== 'playerA' || playerRole !== 'playerA') {
+                socket.emit('error', { message: 'Only winner can select questions' });
+                return;
+            }
+        } else {
+            if (game.winner !== game[playerRole]?.id) {
+                socket.emit('error', { message: 'Only winner can select questions' });
+                return;
+            }
         }
 
         // Add selected questions
@@ -653,6 +860,259 @@ io.on('connection', async (socket: Socket) => {
     socket.on('get_history', async () => {
         const history = await getPlayerHistory(getUserId(socket.id));
         socket.emit('history_data', history);
+    });
+
+    // ==================== MULTI-PLAYER MODE ====================
+
+    // Create Multi-Player Game
+    socket.on('create_multi_game', async (data: CreateMultiGameRequest) => {
+        const profile = await getOrCreateProfile(getUserId(socket.id));
+        const playerName = profile.displayName || profile.username || 'Host';
+        
+        const { gameId, playerId } = createMultiGame(socket.id, playerName, {
+            mode: data.mode,
+            maxPlayers: data.maxPlayers || 10,
+            targetScore: data.targetScore || 5,
+            visibility: data.visibility || 'public'
+        });
+
+        // Set player's deck
+        if (profile.activeCards.length > 0) {
+            setMultiPlayerDeck(gameId, playerId, profile.activeCards);
+        }
+        const specials = profile.activeSpecialCards?.length > 0 
+            ? profile.activeSpecialCards 
+            : ['SKIP', 'JOKER', 'SWAP_SELF'];
+        setMultiPlayerSpecialHand(gameId, playerId, specials as any);
+
+        socket.join(gameId);
+        socket.emit('multi_game_created', { gameId, playerId });
+        
+        // Send initial state
+        const game = getMultiGame(gameId);
+        if (game) {
+            socket.emit('multi_game_state', getMultiPlayerGameState(game, playerId));
+        }
+
+        console.log(`[Multi] Game ${gameId} created by ${playerName} (mode: ${data.mode})`);
+        broadcastWaitingMultiGames();
+    });
+
+    // Get waiting multi games
+    socket.on('get_waiting_multi_games', () => {
+        broadcastWaitingMultiGamesTo(socket);
+    });
+
+    // Join Multi-Player Game
+    socket.on('join_multi_game', async (data: { gameId: string }) => {
+        const profile = await getOrCreateProfile(getUserId(socket.id));
+        const playerName = profile.displayName || profile.username || 'Player';
+
+        const result = joinMultiGame(data.gameId, socket.id, playerName);
+
+        if (!result.success) {
+            socket.emit('error', { message: result.error || 'Liittyminen epäonnistui' });
+            return;
+        }
+
+        const game = getMultiGame(data.gameId);
+        if (!game) return;
+
+        // Set player's deck
+        if (profile.activeCards.length > 0) {
+            setMultiPlayerDeck(data.gameId, result.playerId!, profile.activeCards);
+        }
+        const specials = profile.activeSpecialCards?.length > 0 
+            ? profile.activeSpecialCards 
+            : ['SKIP', 'JOKER', 'SWAP_SELF'];
+        setMultiPlayerSpecialHand(data.gameId, result.playerId!, specials as any);
+
+        socket.join(data.gameId);
+        socket.emit('multi_game_joined', { gameId: data.gameId, playerId: result.playerId });
+
+        // Send state to all players in game
+        for (const [pid, player] of game.players) {
+            const playerSocket = io.sockets.sockets.get(player.id);
+            if (playerSocket) {
+                playerSocket.emit('multi_game_state', getMultiPlayerGameState(game, pid));
+            }
+        }
+
+        console.log(`[Multi] ${playerName} joined game ${data.gameId}`);
+        broadcastWaitingMultiGames();
+    });
+
+    // Start Multi-Player Game (Host only)
+    socket.on('start_multi_game', () => {
+        const gameData = getMultiGameBySocketId(socket.id);
+        if (!gameData) {
+            socket.emit('error', { message: 'Peliä ei löydy' });
+            return;
+        }
+
+        const { game, playerId } = gameData;
+
+        // Only host can start
+        if (game.hostId !== playerId) {
+            socket.emit('error', { message: 'Vain pelin luoja voi aloittaa pelin' });
+            return;
+        }
+
+        if (game.players.size < 2) {
+            socket.emit('error', { message: 'Pelissä pitää olla vähintään 2 pelaajaa' });
+            return;
+        }
+
+        const success = startMultiGame(game.id);
+        if (!success) {
+            socket.emit('error', { message: 'Pelin aloitus epäonnistui' });
+            return;
+        }
+
+        // Send state to all players
+        for (const [pid, player] of game.players) {
+            const playerSocket = io.sockets.sockets.get(player.id);
+            if (playerSocket) {
+                playerSocket.emit('multi_game_started');
+                playerSocket.emit('multi_game_state', getMultiPlayerGameState(game, pid));
+                
+                // Send deck to each player
+                playerSocket.emit('multi_deck', getMultiPlayerDeck(game, pid));
+            }
+        }
+
+        console.log(`[Multi] Game ${game.id} started with ${game.players.size} players`);
+        broadcastWaitingMultiGames();
+    });
+
+    // Play card in Multi-Player
+    socket.on('play_card_multi', (data: { questionId: string; targetId?: string }) => {
+        const gameData = getMultiGameBySocketId(socket.id);
+        if (!gameData) {
+            socket.emit('error', { message: 'Peliä ei löydy' });
+            return;
+        }
+
+        const { game, playerId } = gameData;
+        const result = playCardMulti(game, playerId, data.questionId, data.targetId);
+
+        if (!result.success) {
+            socket.emit('error', { message: result.error || 'Kortin pelaaminen epäonnistui' });
+            return;
+        }
+
+        if (!result.question || !game.activeQuestion) return;
+
+        const clientQ = toClientQuestion(result.question);
+        const askerName = game.players.get(playerId)?.name || 'Kysyjä';
+
+        // Send question to answerers
+        for (const answerId of game.activeQuestion.to) {
+            const answerer = game.players.get(answerId);
+            if (answerer) {
+                const answererSocket = io.sockets.sockets.get(answerer.id);
+                if (answererSocket) {
+                    answererSocket.emit('multi_question_presented', {
+                        question: clientQ,
+                        askerId: playerId,
+                        askerName: askerName,
+                        targetIds: game.activeQuestion.to
+                    });
+                }
+            }
+        }
+
+        // Send updated state to all
+        for (const [pid, player] of game.players) {
+            const playerSocket = io.sockets.sockets.get(player.id);
+            if (playerSocket) {
+                playerSocket.emit('multi_game_state', getMultiPlayerGameState(game, pid));
+            }
+        }
+
+        console.log(`[Multi] Card played in game ${game.id} by ${askerName}`);
+    });
+
+    // Answer question in Multi-Player
+    socket.on('answer_multi', (data: { answerIndex: number }) => {
+        const gameData = getMultiGameBySocketId(socket.id);
+        if (!gameData) {
+            socket.emit('error', { message: 'Peliä ei löydy' });
+            return;
+        }
+
+        const { game, playerId } = gameData;
+        const result = answerQuestionMulti(game, playerId, data.answerIndex);
+
+        if (!result.success) {
+            socket.emit('error', { message: result.error || 'Vastaaminen epäonnistui' });
+            return;
+        }
+
+        // Notify the answerer immediately
+        socket.emit('multi_answer_received', { correct: result.correct });
+
+        // Check if all have answered
+        if (result.allAnswered) {
+            const roundResult = resolveRound(game);
+
+            // Send round result to all
+            for (const [pid, player] of game.players) {
+                const playerSocket = io.sockets.sockets.get(player.id);
+                if (playerSocket) {
+                    const nextAsker = game.players.get(getCurrentAskerId(game));
+                    playerSocket.emit('multi_round_result', {
+                        results: roundResult.results,
+                        correctAnswer: roundResult.correctAnswer,
+                        nextAskerId: getCurrentAskerId(game),
+                        nextAskerName: nextAsker?.name || 'Seuraava'
+                    });
+
+                    // If game over, send game over
+                    if (roundResult.gameOver) {
+                        const rankings = Array.from(game.players.values())
+                            .sort((a, b) => b.score - a.score)
+                            .map((p, i) => ({ playerId: p.playerId, name: p.name, score: p.score, rank: i + 1 }));
+                        
+                        const winner = game.players.get(roundResult.winner!);
+                        playerSocket.emit('multi_game_over', {
+                            rankings,
+                            winnerId: roundResult.winner,
+                            winnerName: winner?.name || 'Voittaja'
+                        });
+                    } else {
+                        // Send updated state
+                        playerSocket.emit('multi_game_state', getMultiPlayerGameState(game, pid));
+                    }
+                }
+            }
+
+            console.log(`[Multi] Round resolved in game ${game.id}. Game over: ${roundResult.gameOver}`);
+        }
+    });
+
+    // Leave Multi-Player Game
+    socket.on('leave_multi_game', () => {
+        const gameData = getMultiGameBySocketId(socket.id);
+        if (!gameData) return;
+
+        const { game, playerId } = gameData;
+        const playerName = game.players.get(playerId)?.name || 'Player';
+
+        leaveMultiGame(game.id, playerId);
+        socket.leave(game.id);
+
+        // Notify remaining players
+        for (const [pid, player] of game.players) {
+            const playerSocket = io.sockets.sockets.get(player.id);
+            if (playerSocket) {
+                playerSocket.emit('multi_player_left', { playerName });
+                playerSocket.emit('multi_game_state', getMultiPlayerGameState(game, pid));
+            }
+        }
+
+        console.log(`[Multi] ${playerName} left game ${game.id}`);
+        broadcastWaitingMultiGames();
     });
 
 });

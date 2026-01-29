@@ -1140,5 +1140,57 @@
       "gamesPlayed": 0
     },
     "created": 1769515179120
+  },
+  "Guest_a5xki82": {
+    "username": "Guest_a5xki82",
+    "ownedCards": [
+      "6b78751d-e910-4fc6-9c52-8307fdfa3721",
+      "30850488-c822-4f84-b857-d772f068c380",
+      "0400df90-e386-46e6-955f-d5c3552939b9",
+      "19775e8e-4b00-4c57-8261-9cf31b03d733",
+      "b4209f05-bdda-48ca-9cf3-351c44eee7f2",
+      "c72764d8-bc38-4961-9f0e-35b06c744cd7",
+      "6d19e6fa-b1d4-4688-9cc0-d711ef270f3b",
+      "1a01d39a-4c8a-4875-b801-fb2e05e28a6a",
+      "34652c83-a314-41cb-8c84-1838cb16933e",
+      "2684ca2c-ade8-4e1c-b898-ce88ba8234e1",
+      "f3706d05-eac6-420c-9f64-ac7de7d1dfbf",
+      "1c4da163-500b-4621-9767-cc0196868e37",
+      "a08ac2fe-be3b-4b60-bc77-60ad40db5977",
+      "cb474c92-ab0e-4b5e-b929-ba148768bfb4",
+      "3fe83021-1f56-4607-a3fc-e0ae6a63f7e3"
+    ],
+    "activeCards": [
+      "6b78751d-e910-4fc6-9c52-8307fdfa3721",
+      "30850488-c822-4f84-b857-d772f068c380",
+      "0400df90-e386-46e6-955f-d5c3552939b9",
+      "19775e8e-4b00-4c57-8261-9cf31b03d733",
+      "b4209f05-bdda-48ca-9cf3-351c44eee7f2",
+      "c72764d8-bc38-4961-9f0e-35b06c744cd7",
+      "6d19e6fa-b1d4-4688-9cc0-d711ef270f3b",
+      "1a01d39a-4c8a-4875-b801-fb2e05e28a6a",
+      "34652c83-a314-41cb-8c84-1838cb16933e",
+      "2684ca2c-ade8-4e1c-b898-ce88ba8234e1"
+    ],
+    "ownedSpecialCards": [
+      "JOKER",
+      "MIRROR",
+      "SWAP_OPPONENT",
+      "SWAP_SELF",
+      "SWAP_SELF",
+      "JOKER"
+    ],
+    "activeSpecialCards": [
+      "JOKER",
+      "MIRROR",
+      "SWAP_OPPONENT"
+    ],
+    "stats": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 0,
+      "gamesPlayed": 0
+    },
+    "created": 1769682356386
   }
 }

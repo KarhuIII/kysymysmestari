@@ -61,8 +61,60 @@ function generateWeightedDeck(): string[] {
     return deck.sort(() => Math.random() - 0.5);
 }
 
+// Generate deck for Single Player (10 questions, progressed difficulty)
+function generateSinglePlayerDeck(): string[] {
+    const byDifficulty = new Map<number, Question[]>();
+    questions.forEach(q => {
+        const diff = q.difficulty || 2;
+        if (!byDifficulty.has(diff)) {
+            byDifficulty.set(diff, []);
+        }
+        byDifficulty.get(diff)!.push(q);
+    });
+
+    const deck: string[] = [];
+
+    // Configuration: 3 Easy, 4 Medium, 3 Hard
+    const config = [
+        { count: 3, levels: [1, 2] },
+        { count: 4, levels: [3, 4] },
+        { count: 3, levels: [5, 6] }
+    ];
+
+    config.forEach(cfg => {
+        let availableForTier: Question[] = [];
+        cfg.levels.forEach(lvl => {
+            if (byDifficulty.has(lvl)) {
+                availableForTier.push(...byDifficulty.get(lvl)!);
+            }
+        });
+        
+        // Shuffle available
+        availableForTier = availableForTier.sort(() => Math.random() - 0.5);
+        
+        // Take count
+        const selected = availableForTier.slice(0, cfg.count).map(q => q.id);
+        deck.push(...selected);
+    });
+    
+    // If we didn't get 10 (because missing levels), fill with randoms
+    if (deck.length < 10) {
+        const needed = 10 - deck.length;
+        const allIds = questions.map(q => q.id);
+        const remaining = allIds.filter(id => !deck.includes(id)).sort(() => Math.random() - 0.5);
+        deck.push(...remaining.slice(0, needed));
+    }
+
+    return deck;
+}
+
 // Create new game
-export function createGame(socketId: string, targetScore: number = 5): { gameId: string; playerId: string } {
+export function createGame(
+    socketId: string, 
+    playerName: string, // Added playerName
+    targetScore: number = 5,
+    visibility: 'public' | 'private' = 'public'
+): { gameId: string; playerId: string } {
     const gameId = generateGameId();
     const playerId = 'playerA';
 
@@ -70,8 +122,8 @@ export function createGame(socketId: string, targetScore: number = 5): { gameId:
         id: gameId,
         playerA: {
             id: socketId,
+            name: playerName,
             score: 0,
-
             deck: [], // Will be set by setPlayerDeck
             specialHand: [] // Will be set by setPlayerDeck (or new func)
         },
@@ -79,9 +131,43 @@ export function createGame(socketId: string, targetScore: number = 5): { gameId:
         currentTurn: Math.random() < 0.5 ? 'playerA' : 'playerB', // Random starting turn
         activeQuestion: null,
         status: 'waiting',
+        visibility: visibility,
         winner: null,
         answeredQuestions: [], // Initialize empty history
-        targetScore: targetScore
+        targetScore: targetScore,
+        mode: 'multi'
+    };
+
+    games.set(gameId, game);
+    return { gameId, playerId };
+}
+
+// Create Single Player Game
+export function createSinglePlayerGame(socketId: string, playerName?: string): { gameId: string; playerId: string } {
+    const gameId = generateGameId();
+    const playerId = 'playerA';
+
+    const systemDeck = generateSinglePlayerDeck();
+
+    const game: Game = {
+        id: gameId,
+        playerA: {
+            id: socketId,
+            name: playerName || 'Pelaaja',
+            score: 0,
+            deck: [], 
+            specialHand: [] 
+        },
+        playerB: null,
+        currentTurn: 'playerA',
+        activeQuestion: null,
+        status: 'waiting', // Unified Lobby: Start as waiting
+        visibility: 'private', // Single player is always private
+        winner: null,
+        answeredQuestions: [],
+        targetScore: 10,
+        mode: 'single',
+        systemDeck: systemDeck
     };
 
     games.set(gameId, game);
@@ -89,29 +175,30 @@ export function createGame(socketId: string, targetScore: number = 5): { gameId:
 }
 
 // Join existing game
-export function joinGame(gameId: string, socketId: string): { success: boolean; playerId?: string; error?: string } {
+export function joinGame(gameId: string, socketId: string, playerName: string): { success: boolean; playerId?: string; error?: string } {
     const game = games.get(gameId);
 
     if (!game) {
-        return { success: false, error: 'Game not found' };
+        return { success: false, error: 'Peliä ei löydy' };
     }
 
     if (game.status !== 'waiting') {
-        return { success: false, error: 'Game already started' };
+        return { success: false, error: 'Peli on jo alkanut' };
     }
 
     if (game.playerB !== null) {
-        return { success: false, error: 'Game is full' };
+        return { success: false, error: 'Peli on täynnä' };
     }
 
     game.playerB = {
         id: socketId,
+        name: playerName,
         score: 0,
 
         deck: [], // Will be set by setPlayerDeck
         specialHand: []
     };
-    game.status = 'active';
+    game.status = 'waiting'; // Stay in waiting for manual start
 
     return { success: true, playerId: 'playerB' };
 }
@@ -123,7 +210,7 @@ export function getGame(gameId: string): Game | undefined {
 
 // Get all waiting games
 export function getWaitingGames(): Game[] {
-    const waiting = Array.from(games.values()).filter(g => g.status === 'waiting' && g.playerB === null);
+    const waiting = Array.from(games.values()).filter(g => g.status === 'waiting' && g.mode !== 'single' && g.visibility !== 'private');
     console.log(`[GameManager] getWaitingGames returning ${waiting.length} games. Total games in map: ${games.size}`);
     return waiting;
 }
@@ -317,4 +404,3 @@ export function deleteQuestion(id: string): boolean {
         return false;
     }
 }
-

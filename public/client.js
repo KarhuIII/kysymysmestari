@@ -156,6 +156,7 @@ function addDebugLog(msg) {
 
 // Track selected questions
 let selectedQuestionIds = [];
+let nextQuestion = null; // Queue next question for single player flow
 
 // Socket events - wrapped in function for reconnection support
 function setupSocketListeners() {
@@ -165,6 +166,9 @@ function setupSocketListeners() {
         console.log('✅ Connected to server');
         statusText.textContent = 'Yhdistetty';
         connectionStatus.classList.add('connected');
+        
+        // Fetch profile immediately to update deck counts
+        socket.emit('get_profile');
     });
 
     socket.on('disconnect', () => {
@@ -177,9 +181,15 @@ function setupSocketListeners() {
         console.log('🎮 Game created:', data);
         gameState.gameId = data.gameId;
         gameState.myPlayerId = data.playerId;
-        roomCode.textContent = data.gameId;
-        roomCodeDisplay.classList.remove('hidden');
-        createGameBtn.disabled = true;
+        
+        // Redirect to Lobby (Unified)
+        gameState.mode = 'single'; // or '1v1'/'classic', effectively single/1v1 mode
+        showLobbyScreen(data.gameId, true);
+        
+        // Old Logic (Hidden now):
+        // roomCode.textContent = data.gameId;
+        // roomCodeDisplay.classList.remove('hidden');
+        if (createGameBtn) createGameBtn.disabled = true;
     });
 
     socket.on('game_joined', (data) => {
@@ -187,6 +197,8 @@ function setupSocketListeners() {
         if (joinWaitingModal) joinWaitingModal.classList.add('hidden'); // Hide waiting modal
         if (data.success) {
             gameState.myPlayerId = data.playerId;
+            gameState.mode = 'single'; // 1v1
+            showLobbyScreen(gameState.gameId || data.gameId, false); // Host=false
         } else {
             alert('Virhe: ' + data.error);
         }
@@ -212,7 +224,16 @@ function setupSocketListeners() {
     socket.on('game_state', (data) => {
         console.log('📊 Game state received:', data);
         gameState = { ...gameState, ...data };
-        updateGameUI();
+        
+        // If waiting, update Lobby UI
+        if (data.status === 'waiting') {
+            updateLobbyUI(gameState);
+        } else {
+            // Active game
+            document.getElementById('game-lobby-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            updateGameUI();
+        }
     });
 
     socket.on('question_presented', (data) => {
@@ -266,7 +287,95 @@ function setupSocketListeners() {
         addDebugLog(`Vastaanotettiin ${games.length} peliä listaan.`);
         renderServerList(games);
     });
+
+    
+
+    // Handlers moved to end of file to prevent re-attachment issues
+
+
+
+    // ==================== MULTI-PLAYER LISTENERS ====================
+
+    socket.on('multi_game_created', (data) => {
+        console.log('🎮 Multi-Game created:', data);
+        gameState.gameId = data.gameId;
+        gameState.myPlayerId = data.playerId;
+        showLobbyScreen(data.gameId, true);
+    });
+
+    socket.on('multi_game_joined', (data) => {
+         console.log('🚪 Multi-Game joined:', data);
+        if (typeof joinWaitingModal !== 'undefined' && joinWaitingModal) joinWaitingModal.classList.add('hidden');
+        gameState.gameId = data.gameId;
+        gameState.myPlayerId = data.playerId;
+        showLobbyScreen(data.gameId, false);
+    });
+
+    socket.on('multi_game_state', (data) => {
+        console.log('📊 Multi-Game state:', data);
+        // data contains: players (array), mode, status, settings, etc.
+        if (data.status === 'active') {
+             startGameFromLobby(data);
+             updateMultiGameUI(data);
+        } else {
+             updateLobbyUI(data);
+        }
+    });
+
+    socket.on('multi_game_started', () => {
+         console.log('🚀 Multi-Game started!');
+         showScreen('multi-game-screen');
+         document.body.classList.add('game-active');
+    });
+
+    socket.on('multi_question_presented', (data) => {
+         console.log('❓ Multi Answer Time:', data);
+         showMultiQuestion(data);
+    });
+
+    socket.on('multi_answer_received', (data) => {
+          // Feedback for answering
+          if (data.correct) {
+               showNotification('Oikein!', 'success');
+          } else {
+               showNotification('Väärin!', 'error');
+          }
+           // UI should update to "waiting for others"
+          const qArea = document.getElementById('multi-question-text');
+          if(qArea) qArea.innerHTML = '<h3>Vastaus rekisteröity. Odotetaan muita...</h3>';
+          document.getElementById('multi-answer-options').innerHTML = '';
+    });
+
+    socket.on('multi_round_result', (data) => {
+        console.log('🏁 Round Result:', data);
+        showMultiRoundResult(data);
+    });
+
+    socket.on('multi_game_over', (data) => {
+         console.log('🏆 Multi Game Over:', data);
+         showMultiGameOver(data);
+    });
+    
+    socket.on('waiting_multi_games_list', (games) => {
+         // Merge or handle separately? 
+         // For now, let's just log or maybe implement a separate list if user wants?
+         // User "Server List" usually implies generic. 
+         // Let's modify renderServerList to accept these too or call a variant.
+         console.log('Multi games list:', games);
+         renderServerList(games); // Unified render
+    });
+
+    socket.on('multi_deck', (deck) => {
+         // Receive deck cards for gameplay
+         // Render hand using existing logic but into multi-deck-area
+         renderMultiHand(deck);
+    });
 }
+
+// Initial socket setup
+// setupSocketListeners(); // It is called at the end of file usually, or if we are inside function? 
+
+
 
 // Initial socket setup
 setupSocketListeners();
@@ -290,15 +399,117 @@ if (approvalRejectBtn) {
     });
 }
 
-createGameBtn.addEventListener('click', () => {
-    const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
-    if (count !== 10) {
-        alert(`Sinun täytyy valita tasan 10 kysymyskorttia ennen pelin aloitusta! (Valittu: ${count})`);
-        return;
+    // Create Game Modal Logic
+    const openCreateMenuBtn = document.getElementById('open-create-menu-btn');
+    const createGameModal = document.getElementById('create-game-modal');
+    const closeCreateModal = document.getElementById('close-create-modal');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    const countBtns = document.querySelectorAll('.count-btn'); // NEW
+    const playerCountGroup = document.getElementById('player-count-group');
+    const createMaxPlayersInput = document.getElementById('create-max-players'); // Hidden input
+    const modeDescription = document.getElementById('mode-description');
+    const confirmCreateGameBtn = document.getElementById('confirm-create-game-btn');
+
+    let selectedMode = '1v1'; // Default
+
+    const modeDescriptions = {
+        '1v1': 'Klassinen kaksinpeli. Toinen vastaa vuorollaan.',
+        'round': 'Kaikki vastaavat. Nopein oikein vastannut saa pisteet. (2-10 pelaajaa)',
+        'choice': 'Vuorossa oleva valitsee kuka vastaa. (3-10 pelaajaa)'
+    };
+
+    if (openCreateMenuBtn) {
+        openCreateMenuBtn.addEventListener('click', () => {
+             createGameModal.classList.remove('hidden');
+        });
     }
-    console.log('Creating game...');
-    socket.emit('create_game', { targetScore: 5 });
-});
+
+    if (closeCreateModal) {
+        closeCreateModal.addEventListener('click', () => {
+             createGameModal.classList.add('hidden');
+        });
+    }
+
+    modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Update UI
+            modeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            selectedMode = btn.dataset.mode;
+            
+            // Show/Hide player count based on mode
+            if (selectedMode === '1v1') {
+                playerCountGroup.classList.add('hidden');
+            } else {
+                playerCountGroup.classList.remove('hidden');
+            }
+
+            // Update description
+            if (modeDescription) {
+                modeDescription.textContent = modeDescriptions[selectedMode];
+            }
+        });
+    });
+
+    // Handle Player Count Buttons
+    countBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            countBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            createMaxPlayersInput.value = btn.dataset.count;
+        });
+    });
+
+    if (confirmCreateGameBtn) {
+        confirmCreateGameBtn.addEventListener('click', () => {
+            const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
+             
+            if (count !== 10) {
+                alert(`Sinun täytyy valita tasan 10 kysymyskorttia ennen pelin aloitusta! (Valittu: ${count})`);
+                return;
+            }
+
+            const visibility = document.querySelector('input[name="visibility"]:checked').value;
+            const maxPlayers = parseInt(createMaxPlayersInput.value);
+
+            console.log(`Starting game: Mode=${selectedMode}, Visibility=${visibility}, MaxPlayers=${maxPlayers}`);
+
+            if (selectedMode === '1v1') {
+                socket.emit('create_game', { targetScore: 5, visibility: visibility });
+            } else {
+                socket.emit('create_multi_game', { 
+                    mode: selectedMode, 
+                    maxPlayers: maxPlayers,
+                    targetScore: 5,
+                    visibility: visibility 
+                });
+            }
+            
+            createGameModal.classList.add('hidden');
+            // Show notification? 
+            // We wait for socket event to switch screen
+        });
+    }
+
+    /* 
+    createGameBtn.addEventListener('click', () => { ... old logic removed ... });
+    */
+
+const singlePlayerBtn = document.getElementById('single-player-btn');
+if (singlePlayerBtn) {
+    singlePlayerBtn.addEventListener('click', () => {
+        console.log('Starting single player game...');
+        // No deck check required for single player? 
+        // Logic says system provides deck. But player answers...
+        // Does player use their own cards to ANSWER? No, usually you answer given questions.
+        // But in this game, "Deck" is questions you ASK.
+        // In SP, System asks. So player needs no cards?
+        // Actually, player might still want to "collect" cards if they win?
+        // Let's allow starting without check.
+        socket.emit('start_single_player');
+    });
+}
 
 joinGameBtn.addEventListener('click', () => {
     const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
@@ -318,13 +529,16 @@ joinGameBtn.addEventListener('click', () => {
 continueBtn.addEventListener('click', () => {
     console.log('Continue clicked');
     answerResult.classList.add('hidden');
-    updateGameUI();
+    
+    if (nextQuestion) {
+        showQuestion(nextQuestion);
+        nextQuestion = null;
+    } else {
+        updateGameUI();
+    }
 });
 
-newGameBtn.addEventListener('click', () => {
-    console.log('New game clicked');
-    resetGame();
-});
+// New game button handler is defined later with SP-aware logic
 
 if (surrenderBtn) {
     surrenderBtn.addEventListener('click', () => {
@@ -471,12 +685,23 @@ function renderServerList(games) {
 
 // UI update functions
 function updateGameUI() {
+    // Safety check: ensure we actually have a game ID before showing game UI
+    if (!gameState.gameId) {
+        console.warn('⚠️ updateGameUI called but gameId is null. Ignoring.');
+        return;
+    }
+
     console.log('🔄 Updating UI with state:', gameState);
     toggleGameMode(true); // Enable compact mode
     // Hide lobby, show game
     lobbyScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
     gameOverScreen.classList.add('hidden');
+
+    // Make sure we hide result screen if it was left open (e.g. from previous game)
+    // unless we are actually viewing a result?
+    // answerResult.classList.add('hidden'); // Logic seems to handle this elsewhere
+
 
     // Show player role
     const roleDisplay = document.getElementById('player-role-display');
@@ -485,14 +710,36 @@ function updateGameUI() {
     }
 
     // Update scores
+    // Update scores
     myScoreEl.textContent = gameState.myScore;
-    opponentScoreEl.textContent = gameState.opponentScore;
-
-    // Update round counter
-    const roundCounter = document.getElementById('round-counter');
-    if (roundCounter && gameState.roundNumber) {
-        roundCounter.textContent = `Kierros: ${gameState.roundNumber}`;
+    
+    if (gameState.mode === 'single') {
+        // Single Player Adjustments
+        opponentScoreEl.parentElement.classList.add('hidden'); // Hide opponent score container
+        myScoreEl.parentElement.classList.add('hidden'); // Hide player score too (mystery mode)
+        const roleDisplay = document.getElementById('player-role-display');
+        if (roleDisplay) roleDisplay.textContent = 'Yksinpeli';
+        
+        // Hide VS badge container (parent of turn-indicator)
+        const turnIndicator = document.getElementById('turn-indicator');
+        if (turnIndicator && turnIndicator.parentElement) {
+             const vsBadge = turnIndicator.parentElement.querySelector('.vs-badge');
+             if (vsBadge) vsBadge.classList.add('hidden');
+        }
+    } else {
+        opponentScoreEl.parentElement.classList.remove('hidden');
+        opponentScoreEl.textContent = gameState.opponentScore;
+        
+        // Show VS badge
+        const turnIndicator = document.getElementById('turn-indicator');
+        if (turnIndicator && turnIndicator.parentElement) {
+             const vsBadge = turnIndicator.parentElement.querySelector('.vs-badge');
+             if (vsBadge) vsBadge.classList.remove('hidden');
+        }
     }
+
+    // Update round counter (if element exists or create one)
+    // ...
 
     // Don't update turn/deck display if a question is currently being shown
     if (!questionArea.classList.contains('hidden')) {
@@ -506,14 +753,20 @@ function updateGameUI() {
     }
 
     // Update turn indicator
-    if (gameState.currentTurn === 'me') {
-        turnIndicator.textContent = 'Sinun vuorosi';
-        turnIndicator.className = 'turn-indicator my-turn';
-        showDeck();
+    if (gameState.mode === 'single') {
+         turnIndicator.textContent = `Kysymys ${gameState.roundNumber}/10`;
+         turnIndicator.className = 'turn-indicator my-turn'; // Keep it active style
+         showDeck();
     } else {
-        turnIndicator.textContent = 'Vastustajan vuoro';
-        turnIndicator.className = 'turn-indicator opponent-turn';
-        showWaiting(false);
+        if (gameState.currentTurn === 'me') {
+            turnIndicator.textContent = 'Sinun vuorosi';
+            turnIndicator.className = 'turn-indicator my-turn';
+            showDeck();
+        } else {
+            turnIndicator.textContent = 'Vastustajan vuoro';
+            turnIndicator.className = 'turn-indicator opponent-turn';
+            showWaiting(false);
+        }
     }
     renderSpecialHand();
 }
@@ -541,7 +794,7 @@ function showDeck() {
     }
 
     // Default table state for asker: show face down card if not hovering
-    if (gameState.currentTurn === 'me') {
+    if (gameState.currentTurn === 'me' && gameState.mode !== 'single') {
         renderDefaultTableState();
     }
 
@@ -638,6 +891,20 @@ function showWaiting(isBig = false) {
 
 function showQuestion(question) {
     console.log('💡 Showing question to user:', question.question);
+
+    // Safety: If game screen is hidden or we have no game ID, don't show question
+    if (gameScreen.classList.contains('hidden') || !gameState.gameId) {
+         console.warn('⚠️ Attempted to show question but game screen is hidden or no game active.');
+         return;
+    }
+
+    
+    // If answer result is visible, queue this question instead of showing immediately (SP flow)
+    if (!answerResult.classList.contains('hidden')) {
+        console.log('⏳ Queuing next question until user clicks Continue');
+        nextQuestion = question;
+        return;
+    }
     
     // Everyone sees deck disabled by default during a question phase
     if (deckArea) {
@@ -683,7 +950,8 @@ function showQuestion(question) {
     `;
 
     // 2. Determine where to show options based on role
-    const isAnswerer = (gameState.currentTurn !== 'me');
+    // In Single Player, player is ALWAYS answerer
+    const isAnswerer = (gameState.currentTurn !== 'me' || gameState.mode === 'single');
     let targetContainer;
 
     if (isAnswerer) {
@@ -755,6 +1023,20 @@ function showQuestion(question) {
 
 function showAnswerResult(data) {
     console.log('📋 Showing answer result');
+    
+    // Single Player: Skip result screen, auto-continue
+    if (gameState.mode === 'single') {
+        questionArea.classList.add('hidden');
+        // Don't show answerResult screen, just wait for next question
+        // The next question will be queued via nextQuestion variable
+        if (nextQuestion) {
+            showQuestion(nextQuestion);
+            nextQuestion = null;
+        }
+        return;
+    }
+    
+    // Multiplayer: Show result
     questionArea.classList.add('hidden');
     answerResult.classList.remove('hidden');
 
@@ -818,8 +1100,20 @@ function showGameOver(data) {
     gameScreen.classList.add('hidden');
     gameOverScreen.classList.remove('hidden');
 
-    finalMyScore.textContent = data.finalScore.you;
-    finalOpponentScore.textContent = data.finalScore.opponent;
+    // Reconstruct score display to avoid detached DOM element issues on replay
+    const finalScoresDiv = document.querySelector('#game-over-screen .final-scores');
+    if (finalScoresDiv) {
+        if (gameState.mode === 'single') {
+            finalScoresDiv.innerHTML = `
+                <p>Oikein: <span id="final-my-score">${data.finalScore.you}</span>/10</p>
+            `;
+        } else {
+            finalScoresDiv.innerHTML = `
+                <p>Sinä: <span id="final-my-score">${data.finalScore.you}</span></p>
+                <p>Vastustaja: <span id="final-opponent-score">${data.finalScore.opponent}</span></p>
+            `;
+        }
+    }
 
     // Reset selection state
     selectedQuestionIds = [];
@@ -851,7 +1145,7 @@ function renderAvailableQuestions(questions) {
 
     questions.forEach(q => {
         const div = document.createElement('div');
-        div.className = 'selectable-question';
+        div.className = 'question-item';
         div.textContent = q.question;
         div.dataset.id = q.id;
 
@@ -943,10 +1237,67 @@ function resetGame() {
     availableQuestions.innerHTML = '';
 
     // Reset game screen elements
-    if (questionArea) questionArea.classList.add('hidden');
-    if (deckArea) deckArea.classList.add('hidden');
+    if (questionArea) {
+        questionArea.classList.add('hidden');
+        questionArea.innerHTML = '';
+    }
+    if (deckArea) {
+        deckArea.classList.add('hidden');
+        deckArea.innerHTML = '';
+        deckArea.classList.remove('options-active'); // Reset styling
+    }
     if (waitingMessage) waitingMessage.classList.add('hidden');
     if (answerResult) answerResult.classList.add('hidden');
+    
+    // Explicitly ensure body doesn't have game-active (redundant safety)
+    document.body.classList.remove('game-active');
+
+}
+
+// New Game Button Handler
+if (newGameBtn) {
+    newGameBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const wasSpMode = gameState.mode === 'single';
+        
+        // If was in Single Player mode, start a new SP game immediately without going to lobby
+        if (wasSpMode) {
+            // Reset game over UI
+            gameOverScreen.classList.add('hidden');
+            questionSelection.classList.add('hidden');
+            loserMessage.classList.add('hidden');
+            selectionConfirmed.classList.add('hidden');
+            selectedQuestionIds = [];
+            
+            // Reset game state
+            gameState = {
+                ...gameState,
+                myScore: 0,
+                opponentScore: 0,
+                myDeckSize: 0,
+                myDeck: [],
+                currentTurn: null,
+                status: null
+            };
+            
+            // Small delay to prevent click event from bleeding through to new question options
+            setTimeout(() => {
+                socket.emit('start_single_player');
+            }, 50);
+        } else {
+            resetGame();
+        }
+    });
+}
+
+// Exit Game Button Handler
+const exitGameBtn = document.getElementById('exit-game-btn');
+if (exitGameBtn) {
+    exitGameBtn.addEventListener('click', () => {
+        resetGame();
+    });
 }
 
 // --- Profile & Deck Rendering ---
@@ -1322,8 +1673,9 @@ function renderSpecialCollection(profile) {
             grid.style.display = 'flex';
             grid.style.flexDirection = 'column';
         } else {
-             grid.style.display = 'grid';
-             grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+             // Grid mode handled by CSS class .grid-mode
+             // Removing manual inline styles that conflict with theme.css
+             grid.removeAttribute('style');
         }
     }
 
@@ -1563,4 +1915,361 @@ function renderDefaultTableState() {
         </div>
         <div style="color: rgba(255,255,255,0.3); font-style: italic; margin-top:5px;">Valitse kortti pelataksesi</div>
     `;
+}
+
+// ==================== MULTI-PLAYER UI FUNCTIONS ====================
+
+function updateMultiLobbyUI(state) {
+    const list = document.getElementById('multi-players-list');
+    const count = document.getElementById('multi-player-count');
+    const modeInfo = document.getElementById('multi-mode-info');
+    
+    if (list) {
+        list.innerHTML = '';
+        state.players.forEach(p => {
+             const div = document.createElement('div');
+             div.className = 'player-item glass-panel';
+             div.style.padding = '10px';
+             div.style.display = 'flex';
+             div.style.justifyContent = 'space-between';
+             div.style.alignItems = 'center';
+             
+             div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.5rem;">👤</span>
+                    <span style="font-weight:bold;">${p.name} ${p.isHost ? '👑' : ''}</span>
+                </div>
+                <div class="score-badge">${p.score} pts</div>
+             `;
+             list.appendChild(div);
+        });
+    }
+
+    if (count) count.textContent = `Pelaajia: ${state.players.length}/${state.settings.maxPlayers}`;
+    if (modeInfo) modeInfo.textContent = `Pelimuoto: ${state.mode === 'round' ? 'Kierros (Kaikki vastaa)' : 'Valinta (Kysyjä valitsee)'}`;
+}
+
+function updateMultiGameUI(state) {
+    console.log('🔄 Updating Multi Game UI:', state);
+    toggleGameMode(true);
+    
+    // Switch screens
+    document.getElementById('game-lobby-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.add('hidden'); // Legacy screen? 
+    // Wait, do we use 'game-screen' for multi too? Or 'multi-game-screen'?
+    // In showScreen('multi-game-screen') call... 
+    // I don't have 'multi-game-screen' in HTML. I should use 'game-screen' but adapted.
+    // Let's assume we reuse 'game-screen'.
+    
+    const gameScreen = document.getElementById('game-screen');
+    gameScreen.classList.remove('hidden');
+    
+    // Update Scores
+    const myPlayer = state.players.find(p => p.id === gameState.myPlayerId);
+    if (myPlayer) {
+        document.getElementById('my-score').textContent = myPlayer.score;
+    }
+    
+    // Opponent Score? In multi we might have many.
+    // Maybe hide opponent score or show "Leaderboard"?
+    // For now, let's just show top opponent or something.
+    document.getElementById('opponent-score-container').classList.add('hidden'); // Hide simple VS score
+    
+    // Turn Indicator
+    const turnIndicator = document.getElementById('turn-indicator');
+    if (state.status === 'active') {
+         if (state.mode === 'round') {
+             turnIndicator.textContent = 'Kierros käynnissä';
+             turnIndicator.className = 'turn-indicator';
+         } else if (state.mode === 'choice') {
+             const asker = state.players.find(p => p.id === state.currentTurn);
+             if (state.currentTurn === gameState.myPlayerId) {
+                 turnIndicator.textContent = 'Sinun vuorosi valita!';
+                 turnIndicator.className = 'turn-indicator my-turn';
+             } else {
+                 turnIndicator.textContent = `${asker ? asker.name : 'Pelaaja'} valitsee...`;
+                 turnIndicator.className = 'turn-indicator opponent-turn';
+             }
+         }
+    }
+    
+    // Show Deck if my turn (or always if round mode?)
+    // In round mode, everyone answers? No, usually asker asks.
+    // "Round" mode description: "Kaikki vastaavat". So Asker asks, everyone else answers.
+    // So Asker needs deck.
+    
+    if (state.activeQuestion) {
+        // Question in progress
+        showMultiQuestion({
+            question: state.activeQuestion.card, // This might need adaptation
+            askerId: state.currentTurn, 
+            askerName: 'Kysyjä' // Todo: resolve name
+        });
+    } else {
+        // Waiting for asker
+        if (state.currentTurn === gameState.myPlayerId) {
+             showDeck();
+        } else {
+             showWaiting(false);
+        }
+    }
+}
+
+function renderMultiHand(deck) {
+    // Reuse existing logic, just update state
+    gameState.myDeck = deck;
+    gameState.myDeckSize = deck.length;
+    showDeck();
+}
+
+function showMultiQuestion(data) {
+    // Reuse showQuestion logic but adapt data
+    // data.question is the card object (or clientQuestion)
+    showQuestion(data.question);
+}
+
+function showMultiRoundResult(data) {
+    // Show toast or overlay?
+    if (data.correct) {
+        showNotification('Oikein! +1 Piste', 'success');
+    } else {
+        showNotification(`Väärin! Oikea: ${data.correctAnswer}`, 'error');
+    }
+}
+
+function showMultiGameOver(data) {
+    console.log('🏆 Multi Game Over');
+    document.getElementById('game-screen').classList.add('hidden');
+    const screen = document.getElementById('game-over-screen');
+    screen.classList.remove('hidden');
+    
+    document.getElementById('game-over-title').textContent = 'Peli Päättyi!';
+    
+    const resultsDiv = document.querySelector('#game-over-screen .final-scores');
+    resultsDiv.innerHTML = '<h3>Tulokset:</h3><ul style="list-style:none; padding:0;">';
+    
+    // Sort scores
+    const sorted = data.scores.sort((a,b) => b.score - a.score);
+    
+    sorted.forEach((s, i) => {
+        const isMe = s.playerId === gameState.myPlayerId;
+        const name = s.playerId === gameState.myPlayerId ? 'Sinä' : 'Pelaaja ' + s.playerId.substring(0,4);
+        const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ''));
+        
+        resultsDiv.innerHTML += `
+            <li style="padding:10px; background:rgba(255,255,255,0.1); margin:5px 0; border-radius:5px; ${isMe ? 'border:1px solid #6c5ce7;' : ''}">
+                <span style="font-size:1.2rem; margin-right:10px;">${medal}</span>
+                <span style="font-weight:bold;">${name}</span>
+                <span style="float:right;">${s.score} p</span>
+            </li>
+        `;
+    });
+    
+    resultsDiv.innerHTML += '</ul>';
+    
+    document.getElementById('question-selection').classList.add('hidden');
+    document.getElementById('loser-message').classList.add('hidden');
+}
+
+// ==================== LOBBY & NAVIGATION FUNCTIONS (FIXED) ====================
+
+    // Updated Handlers for Lobby
+    const startGameBtn = document.getElementById('start-game-btn');
+    const leaveLobbyBtn = document.getElementById('leave-lobby-btn');
+
+    if (startGameBtn) {
+        startGameBtn.addEventListener('click', () => {
+             console.log('👑 Host starting game...', gameState.mode);
+             
+             // Check mode to call correct socket event
+             if (gameState.gameMode === 'round' || gameState.gameMode === 'choice') {
+                 // Multiplayer (new logic)
+                 socket.emit('start_multi_game', { gameId: gameState.gameId });
+             } else {
+                 // 1v1 or Single Player (classic logic)
+                 socket.emit('start_game');
+             }
+        });
+    }
+
+    if (leaveLobbyBtn) {
+        leaveLobbyBtn.addEventListener('click', () => {
+             if(confirm('Haluatko varmasti poistua aulasta?')) {
+                 console.log('👋 Leaving lobby...');
+                 
+                 // Mode-aware leave
+                 if (gameState.mode === 'multi' || gameState.gameMode === 'round' || gameState.gameMode === 'choice') {
+                     socket.emit('leave_multi_game', { gameId: gameState.gameId });
+                 } else {
+                     socket.emit('leave_game', { gameId: gameState.gameId });
+                 }
+                 
+                 // Reset UI locally
+                 document.getElementById('game-lobby-screen').classList.add('hidden');
+                 document.getElementById('lobby-screen').classList.remove('hidden');
+                 document.body.classList.remove('game-active');
+             }
+        });
+    }
+
+function showLobbyScreen(gameId, isHost) {
+    console.log(`Showing Lobby: ${gameId}, Host: ${isHost}`);
+    
+    // Hide all screens
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    
+    // Show Lobby
+    const lobby = document.getElementById('game-lobby-screen');
+    if (lobby) lobby.classList.remove('hidden');
+    
+    // Update Info
+    const codeEl = document.getElementById('lobby-room-code');
+    if (codeEl) codeEl.textContent = gameId;
+    
+    // Controls
+    const hostControls = document.getElementById('host-controls');
+    const guestControls = document.getElementById('guest-controls');
+    // Note: ensure startBtn is re-queried or valid if declared globally
+    
+    if (isHost) {
+        if (hostControls) hostControls.classList.remove('hidden');
+        if (guestControls) guestControls.classList.add('hidden');
+        if (startGameBtn) startGameBtn.disabled = true; // Wait for players
+    } else {
+        if (hostControls) hostControls.classList.add('hidden');
+        if (guestControls) guestControls.classList.remove('hidden');
+    }
+    
+    // Reset/Clear lists
+    const pList = document.getElementById('lobby-player-list');
+    if (pList) pList.innerHTML = '<div class="waiting-spinner"></div>';
+    
+    // Try to request latest state if missing?
+    socket.emit('get_multi_game_state', { gameId: gameId });
+}
+
+function updateLobbyUI(state) {
+    console.log('🔄 updateLobbyUI:', state); // Added Debug log
+    // Check IDs from index.html: lobby-player-list, lobby-player-count
+    const list = document.getElementById('lobby-player-list');
+    const count = document.getElementById('lobby-player-count');
+    const max = document.getElementById('lobby-max-players');
+    
+    // Safety check for players array
+    const players = state.players || [];
+    console.log(`👥 Players in state: ${players.length}`, players); // Added Debug log
+    
+    if (list) {
+        list.innerHTML = '';
+        players.forEach(p => {
+             const div = document.createElement('div');
+             div.className = 'player-item glass-panel';
+             div.style.padding = '10px';
+             div.style.marginBottom = '5px';
+             div.style.display = 'flex';
+             div.style.justifyContent = 'space-between';
+             div.style.alignItems = 'center';
+             
+             // Check if me
+             const isMe = p.id === gameState.myPlayerId;
+             if (isMe) div.style.border = '1px solid #00b894';
+             
+             div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.5rem;">${p.isHost ? '👑' : '👤'}</span>
+                    <span style="font-weight:bold;">${p.name}</span>
+                </div>
+                <div class="score-badge">${p.score}</div>
+             `;
+             list.appendChild(div);
+        });
+    }
+
+    if (count) count.textContent = players.length;
+    // Fix: Check both settings.maxPlayers and root maxPlayers
+    const maxPlayers = (state.settings && state.settings.maxPlayers) ? state.settings.maxPlayers : (state.maxPlayers || '?');
+    if (max) max.textContent = maxPlayers;
+    
+    // Host Logic
+    const startBtn = document.getElementById('start-game-btn');
+    const msg = document.getElementById('lobby-status-msg');
+    
+    if (startBtn) {
+        if (players.length >= 2) {
+            startBtn.disabled = false;
+            if (msg) msg.textContent = 'Valmiina aloitukseen!';
+        } else {
+            startBtn.disabled = true;
+            if (msg) msg.textContent = 'Odotetaan lisää pelaajia...';
+        }
+    }
+    
+    // Verify Deck Rendering for "My Deck"
+     const deckPreview = document.getElementById('lobby-my-deck-preview');
+     if(deckPreview && state.players) {
+          const me = players.find(p => p.id === gameState.myPlayerId);
+          if (me && me.deckSize > 0) {
+                deckPreview.innerHTML = `<p style="text-align:center;">Valittuna ${me.deckSize} korttia</p>`;
+                // Ideally we show cards if available in data, but usually 'state' only has summaries.
+                // We rely on 'renderMultiHand' for full deck which comes separately.
+          } else {
+               deckPreview.innerHTML = '<p style="text-align:center; opacity:0.5;">Ei pakkaa valittu</p>';
+          }
+     }
+}
+
+function startGameFromLobby(state) {
+     console.log('Starting game from lobby...');
+     document.getElementById('game-lobby-screen').classList.add('hidden');
+     document.getElementById('game-screen').classList.remove('hidden');
+     document.body.classList.add('game-active');
+     
+     // Update game UI initially
+     updateMultiGameUI(state);
+}
+
+// Re-implement updateMultiLobbyUI to redirect to updateLobbyUI
+function updateMultiLobbyUI(state) {
+    updateLobbyUI(state);
+}
+
+function renderMultiHand(deck) {
+    // Check where to render
+    const lobbyPreview = document.getElementById('lobby-my-deck-preview');
+    const gameDeckArea = document.getElementById('deck-cards'); // Reuse single player deck area?
+    
+    // If we are in lobby (game-lobby-screen not hidden)
+    const lobby = document.getElementById('game-lobby-screen');
+    const inLobby = !lobby.classList.contains('hidden');
+    
+    const target = inLobby ? lobbyPreview : gameDeckArea;
+    
+    if (!target) return;
+    target.innerHTML = '';
+    
+    const cards = deck.hand || deck; // Handle both formats
+    
+    cards.forEach(card => {
+         const div = document.createElement('div');
+         
+         if (inLobby) {
+             // Mini preview style
+             div.className = 'mini-card';
+             div.style.background = '#2d3436';
+             div.style.padding = '5px';
+             div.style.margin = '2px';
+             div.style.fontSize = '0.7em';
+             div.textContent = card.question.substring(0, 20) + '...';
+         } else {
+             // Game style (reuse card-btn class)
+             div.className = 'card-btn category-' + (card.category||'yleistieto').toLowerCase();
+             div.textContent = card.question;
+             div.onclick = () => {
+                 if (confirm(`Kysy: "${card.question}"?`)) {
+                     socket.emit('play_card_multi', { questionId: card.id });
+                 }
+             };
+         }
+         target.appendChild(div);
+    });
 }
