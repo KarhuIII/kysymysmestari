@@ -182,13 +182,16 @@ function setupSocketListeners() {
         gameState.gameId = data.gameId;
         gameState.myPlayerId = data.playerId;
         
-        // Redirect to Lobby (Unified)
-        gameState.mode = 'single'; // or '1v1'/'classic', effectively single/1v1 mode
-        showLobbyScreen(data.gameId, true);
+        // Redirect logic: SP goes direct, Others go to Lobby
+        if (gameState.mode === 'single') {
+            console.log('🕹️ Single Player: Bypassing lobby');
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            const gameScreen = document.getElementById('game-screen');
+            if (gameScreen) gameScreen.classList.remove('hidden');
+        } else {
+            showLobbyScreen(data.gameId, true);
+        }
         
-        // Old Logic (Hidden now):
-        // roomCode.textContent = data.gameId;
-        // roomCodeDisplay.classList.remove('hidden');
         if (createGameBtn) createGameBtn.disabled = true;
     });
 
@@ -225,13 +228,15 @@ function setupSocketListeners() {
         console.log('📊 Game state received:', data);
         gameState = { ...gameState, ...data };
         
-        // If waiting, update Lobby UI
+        // If waiting (1v1/Multi), update Lobby UI
         if (data.status === 'waiting') {
             updateLobbyUI(gameState);
         } else {
-            // Active game
-            document.getElementById('game-lobby-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
+            // Active game - Hide lobby, show game screen
+            const lobby = document.getElementById('game-lobby-screen');
+            const gameScreen = document.getElementById('game-screen');
+            if (lobby) lobby.classList.add('hidden');
+            if (gameScreen) gameScreen.classList.remove('hidden');
             updateGameUI();
         }
     });
@@ -2273,3 +2278,36 @@ function renderMultiHand(deck) {
          target.appendChild(div);
     });
 }
+
+// Logo Rotation Feature
+(function() {
+    const title = document.getElementById('game-title');
+    if (!title) return;
+
+    const styles = ['logo-style-1', 'logo-style-6', 'logo-style-10'];
+    let currentStyle = '';
+
+    function rotateLogo() {
+        // Remove current style
+        if (currentStyle) {
+            title.classList.remove(currentStyle);
+        }
+
+        // Pick a new random style (different from current if possible, but random as requested)
+        // User said "randomisti", so true random is fine.
+        const randomIndex = Math.floor(Math.random() * styles.length);
+        currentStyle = styles[randomIndex];
+        
+        // Apply new style
+        title.classList.add(currentStyle);
+        
+        console.log('🔄 Logo rotated to:', currentStyle);
+    }
+
+    // Initial call
+    rotateLogo();
+
+    // Set interval (5 seconds)
+    setInterval(rotateLogo, 5000);
+})();
+

@@ -161,7 +161,7 @@ export function createSinglePlayerGame(socketId: string, playerName?: string): {
         playerB: null,
         currentTurn: 'playerA',
         activeQuestion: null,
-        status: 'waiting', // Unified Lobby: Start as waiting
+        status: 'active', // Direct Start for Single Player
         visibility: 'private', // Single player is always private
         winner: null,
         answeredQuestions: [],
@@ -169,6 +169,18 @@ export function createSinglePlayerGame(socketId: string, playerName?: string): {
         mode: 'single',
         systemDeck: systemDeck
     };
+
+    // Serve first question immediately
+    if (game.systemDeck && game.systemDeck.length > 0) {
+        const firstQId = game.systemDeck[0];
+        game.systemDeck.shift();
+        
+        game.activeQuestion = {
+            from: 'SYSTEM',
+            to: socketId,
+            questionId: firstQId
+        };
+    }
 
     games.set(gameId, game);
     return { gameId, playerId };

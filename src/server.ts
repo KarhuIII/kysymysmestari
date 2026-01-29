@@ -296,14 +296,29 @@ io.on('connection', async (socket: Socket) => {
         const response: CreateGameResponse = { gameId, playerId };
         socket.emit('game_created', response);
         
-        // Send initial state for Lobby
+        // Send initial state immediately
         const { getGame } = require('./gameManager');
         const game = getGame(gameId);
         if (game) {
              const state = getPlayerGameState(game, 'playerA');
              socket.emit('game_state', state);
+             
+             // Show first question immediately for SP
+             if (game.activeQuestion) {
+                 const q = getQuestion(game.activeQuestion.questionId);
+                 if (q) {
+                     const clientQ: ClientQuestion = { 
+                         id: q.id, 
+                         question: q.question, 
+                         options: q.options, 
+                         category: q.category, 
+                         cardType: q.cardType 
+                     };
+                     socket.emit('question_presented', { question: clientQ });
+                 }
+             }
         }
-        console.log(`Single Player Game created: ${gameId} by ${socket.id}`);
+        console.log(`Single Player Game started: ${gameId} by ${socket.id}`);
     });
 
     // Start 1v1 or Single Player Game (Manual Start)
