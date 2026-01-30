@@ -369,8 +369,15 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 async function showAuthenticatedUI() {
     document.querySelectorAll('.auth-required').forEach(el => el.classList.remove('hidden'));
     document.querySelectorAll('.auth-guest').forEach(el => el.classList.add('hidden'));
-    document.getElementById('auth-screen')?.classList.add('hidden');
-    document.getElementById('lobby-screen')?.classList.remove('hidden');
+    const authScreen = document.getElementById('auth-screen');
+    const isReturningFromAuth = authScreen && !authScreen.classList.contains('hidden');
+    
+    authScreen?.classList.add('hidden');
+    
+    // Only show main lobby if we are transitioning FROM the auth screen
+    if (isReturningFromAuth) {
+        document.getElementById('lobby-screen')?.classList.remove('hidden');
+    }
     document.getElementById('main-nav')?.style.setProperty('display', 'flex');
     
     // Fetch and display profile from Supabase
@@ -409,6 +416,11 @@ async function showAuthenticatedUI() {
 }
 
 function showUnauthenticatedUI() {
+    // If we are in guest mode, don't force the auth screen
+    if (localStorage.getItem('isGuest') === 'true') {
+        return;
+    }
+    
     document.querySelectorAll('.auth-required').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.auth-guest').forEach(el => el.classList.remove('hidden'));
     document.getElementById('auth-screen')?.classList.remove('hidden');

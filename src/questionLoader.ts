@@ -20,7 +20,7 @@ interface RawQuestion {
     card_type?: 'normal' | 'extra' | 'classic' | 'holo';
 }
 
-export function loadQuestions(): Question[] {
+export async function loadQuestions(): Promise<Question[]> {
     const dataDir = path.join(__dirname, '../data');
     const questions: Question[] = [];
 
@@ -32,7 +32,7 @@ export function loadQuestions(): Question[] {
 
     // Read all JSON files in the data directory
     // Now including 'questions.json' for manually added/edited questions
-    const files = fs.readdirSync(dataDir).filter(file =>
+    const files = (await fs.promises.readdir(dataDir)).filter(file =>
         (file.startsWith('batch_import_') && file.endsWith('.json')) ||
         file === 'questions.json'
     );
@@ -40,17 +40,11 @@ export function loadQuestions(): Question[] {
     for (const file of files) {
         try {
             const filePath = path.join(dataDir, file);
-            const fileContent = fs.readFileSync(filePath, 'utf-8');
+            const fileContent = await fs.promises.readFile(filePath, 'utf-8');
             let loadedData = JSON.parse(fileContent);
 
             // Handle both RawQuestion[] (batch) and Question[] (manual questions.json) structures
-            // If it's the manual questions.json, it might already store them as Question objects roughly,
-            // or we might strictly stick to one format.
-            // Simplified: If it's questions.json, we assume it stores Question[] directly (or close to it)
-            // If it's batch*, it's RawQuestion[]
-
             if (file === 'questions.json') {
-                // Assuming questions.json stores Question[] directly
                 const manualQuestions: Question[] = loadedData as Question[];
                 console.log(`Loading ${manualQuestions.length} manual questions from ${file}...`);
                 manualQuestions.forEach(q => {
@@ -63,9 +57,6 @@ export function loadQuestions(): Question[] {
                 console.log(`Loading ${rawQuestions.length} questions from ${file}...`);
 
                 for (const rawQ of rawQuestions) {
-                    // Skip inactive questions? Keeping them active for now based on user request "jatka"
-                    // if (!rawQ.active) continue;
-
                     // Map answers to options array and find correct index
                     const options: string[] = [];
                     let correctIndex = -1;
@@ -91,9 +82,9 @@ export function loadQuestions(): Question[] {
                         options: options,
                         correctIndex: correctIndex,
                         difficulty: rawQ.difficulty,
-                        category: rawQ.category_label || 'Yleistieto', // Use label as the primary category identifier
+                        category: rawQ.category_label || 'Yleistieto',
                         cardType: rawQ.card_type,
-                        _sourceFile: file // Track source
+                        _sourceFile: file 
                     });
                 }
             }

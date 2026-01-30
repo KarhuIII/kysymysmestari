@@ -83,11 +83,65 @@ let gameState = {
     myDeck: [],
     mySpecialHand: [],
     currentTurn: null,
-    status: null
+    isMyTurn: false,
+    mode: '1v1',
+    activeGameTab: 'cards' // NEW: 'cards' or 'specials'
 };
 
+// --- In-Game Tab Switching ---
+function switchGameTab(tabName) {
+    gameState.activeGameTab = tabName;
+    
+    // Update buttons
+    document.querySelectorAll('.game-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    
+    // Update panes
+    document.getElementById('deck-cards-tab').classList.toggle('active', tabName === 'cards');
+    document.getElementById('special-cards-tab').classList.toggle('active', tabName === 'specials');
+}
+
+// Add listeners to tabs (will be called once or during setup)
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.game-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchGameTab(btn.dataset.tab));
+    });
+});
+
+function updateHandTabVisibility() {
+    const cardsTab = document.querySelector('.game-tab[data-tab="cards"]');
+    const specialsTab = document.querySelector('.game-tab[data-tab="specials"]');
+    if (!cardsTab) return;
+
+    // Check if question (and thus answers) is active
+    const questionIsActive = questionArea && !questionArea.classList.contains('hidden');
+    
+    if (gameState.mode === 'single') {
+        if (questionIsActive) {
+            // Show as "Vastaukset"
+            cardsTab.classList.remove('hidden');
+            cardsTab.innerHTML = `Vastaukset <span id="cards-tab-count" class="tab-badge">${gameState.myDeck.length}</span>`;
+            // Ensure we are on this tab to see answers
+            if (gameState.activeGameTab !== 'cards') {
+                switchGameTab('cards');
+            }
+        } else {
+            // Hide "Kortit" if no question, switch to specials
+            cardsTab.classList.add('hidden');
+            if (gameState.activeGameTab === 'cards') {
+                switchGameTab('specials');
+            }
+        }
+    } else {
+        // Multi/1v1: Normal behavior
+        cardsTab.classList.remove('hidden');
+        cardsTab.innerHTML = `Kortit <span id="cards-tab-count" class="tab-badge">${gameState.myDeck.length}</span>`;
+    }
+}
+
 // DOM elements
-const statusText = document.getElementById('status-text');
+const logoContainer = document.getElementById('logo-container');
 const connectionStatus = document.getElementById('connection-status');
 const lobbyScreen = document.getElementById('lobby-screen');
 const gameScreen = document.getElementById('game-screen');
@@ -143,6 +197,22 @@ const approvalAcceptBtn = document.getElementById('approval-accept-btn');
 const approvalRejectBtn = document.getElementById('approval-reject-btn');
 const joinWaitingModal = document.getElementById('join-waiting-modal');
 
+// Lobby elements
+const startGameBtn = document.getElementById('start-game-btn');
+const leaveLobbyBtn = document.getElementById('leave-lobby-btn');
+const startGameLobbyScreen = document.getElementById('game-lobby-screen');
+
+// Create Game Modal elements
+const openCreateMenuBtn = document.getElementById('open-create-menu-btn');
+const createGameModal = document.getElementById('create-game-modal');
+const closeCreateModal = document.getElementById('close-create-modal');
+const modeBtns = document.querySelectorAll('.mode-btn');
+const countBtns = document.querySelectorAll('.count-btn');
+const playerCountGroup = document.getElementById('player-count-group');
+const createMaxPlayersInput = document.getElementById('create-max-players');
+const modeDescription = document.getElementById('mode-description');
+const confirmCreateGameBtn = document.getElementById('confirm-create-game-btn');
+
 const debugLog = document.getElementById('debug-log');
 
 function addDebugLog(msg) {
@@ -157,6 +227,7 @@ function addDebugLog(msg) {
 // Track selected questions
 let selectedQuestionIds = [];
 let nextQuestion = null; // Queue next question for single player flow
+let currentJoinRequestId = null; // Track who is asking to join
 
 // Socket events - wrapped in function for reconnection support
 function setupSocketListeners() {
@@ -167,8 +238,9 @@ function setupSocketListeners() {
         statusText.textContent = 'Yhdistetty';
         connectionStatus.classList.add('connected');
         
-        // Fetch profile immediately to update deck counts
+        // Fetch profile and available games immediately
         socket.emit('get_profile');
+        socket.emit('get_waiting_games');
     });
 
     socket.on('disconnect', () => {
@@ -181,35 +253,33 @@ function setupSocketListeners() {
         console.log('🎮 Game created:', data);
         gameState.gameId = data.gameId;
         gameState.myPlayerId = data.playerId;
-        
-        // Redirect logic: SP goes direct, Others go to Lobby
-        if (gameState.mode === 'single') {
-            console.log('🕹️ Single Player: Bypassing lobby');
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            const gameScreen = document.getElementById('game-screen');
-            if (gameScreen) gameScreen.classList.remove('hidden');
-        } else {
-            showLobbyScreen(data.gameId, true);
-        }
-        
+        // The game_joined or game_state from server will trigger actual UI change
         if (createGameBtn) createGameBtn.disabled = true;
     });
 
     socket.on('game_joined', (data) => {
         console.log('🚪 Game joined:', data);
-        if (joinWaitingModal) joinWaitingModal.classList.add('hidden'); // Hide waiting modal
-        if (data.success) {
-            gameState.myPlayerId = data.playerId;
-            gameState.mode = 'single'; // 1v1
-            showLobbyScreen(gameState.gameId || data.gameId, false); // Host=false
+        if (joinWaitingModal) joinWaitingModal.classList.add('hidden');
+        
+        gameState.gameId = data.gameId;
+        gameState.myPlayerId = data.playerId;
+        gameState.mode = data.mode;
+        
+        if (data.mode === 'single') {
+             console.log('🕹️ Single Player: Bypassing lobby');
+             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+             const gameScreen = document.getElementById('game-screen');
+             if (gameScreen) gameScreen.classList.remove('hidden');
         } else {
-            alert('Virhe: ' + data.error);
+             showLobbyScreen(data.gameId, data.isHost);
         }
     });
 
     socket.on('join_request', (data) => {
-        addDebugLog(`Liittymispyyntö: ${data.requesterName}`);
-        if (approvalMessage) approvalMessage.textContent = `${data.requesterName} haluaa liittyä peliin.`;
+        addDebugLog(`Liittymispyyntö: ${data.playerName}`);
+        // Store requester for resolution
+        currentJoinRequestId = data.playerId; 
+        if (approvalMessage) approvalMessage.textContent = `${data.playerName} haluaa liittyä peliin.`;
         if (approvalModal) approvalModal.classList.remove('hidden');
     });
 
@@ -226,18 +296,34 @@ function setupSocketListeners() {
 
     socket.on('game_state', (data) => {
         console.log('📊 Game state received:', data);
-        gameState = { ...gameState, ...data };
         
-        // If waiting (1v1/Multi), update Lobby UI
+        // Update local state
+        gameState = { 
+            ...gameState, 
+            ...data,
+            gameId: data.gameId,
+            mode: data.type, 
+            myScore: data.myScore,
+            myDeck: data.myDeck || [],
+            mySpecialHand: data.mySpecialHand || []
+        };
+        
         if (data.status === 'waiting') {
+            // Find if I am host
+            const me = (data.players || []).find(p => p.id === gameState.myPlayerId);
+            const isHost = me ? me.isHost : false;
+            showLobbyScreen(data.gameId, isHost);
             updateLobbyUI(gameState);
-        } else {
-            // Active game - Hide lobby, show game screen
-            const lobby = document.getElementById('game-lobby-screen');
-            const gameScreen = document.getElementById('game-screen');
-            if (lobby) lobby.classList.add('hidden');
-            if (gameScreen) gameScreen.classList.remove('hidden');
-            updateGameUI();
+        } else if (data.status === 'active') {
+             // Transition from Lobby to Game if needed
+             const lobbyScreen = document.getElementById('game-lobby-screen');
+             if (lobbyScreen && !lobbyScreen.classList.contains('hidden')) {
+                 startGameFromLobby(data);
+             } else {
+                 const gameScreen = document.getElementById('game-screen');
+                 if (gameScreen) gameScreen.classList.remove('hidden');
+                 updateGameUI();
+             }
         }
     });
 
@@ -299,82 +385,6 @@ function setupSocketListeners() {
 
 
 
-    // ==================== MULTI-PLAYER LISTENERS ====================
-
-    socket.on('multi_game_created', (data) => {
-        console.log('🎮 Multi-Game created:', data);
-        gameState.gameId = data.gameId;
-        gameState.myPlayerId = data.playerId;
-        showLobbyScreen(data.gameId, true);
-    });
-
-    socket.on('multi_game_joined', (data) => {
-         console.log('🚪 Multi-Game joined:', data);
-        if (typeof joinWaitingModal !== 'undefined' && joinWaitingModal) joinWaitingModal.classList.add('hidden');
-        gameState.gameId = data.gameId;
-        gameState.myPlayerId = data.playerId;
-        showLobbyScreen(data.gameId, false);
-    });
-
-    socket.on('multi_game_state', (data) => {
-        console.log('📊 Multi-Game state:', data);
-        // data contains: players (array), mode, status, settings, etc.
-        if (data.status === 'active') {
-             startGameFromLobby(data);
-             updateMultiGameUI(data);
-        } else {
-             updateLobbyUI(data);
-        }
-    });
-
-    socket.on('multi_game_started', () => {
-         console.log('🚀 Multi-Game started!');
-         showScreen('multi-game-screen');
-         document.body.classList.add('game-active');
-    });
-
-    socket.on('multi_question_presented', (data) => {
-         console.log('❓ Multi Answer Time:', data);
-         showMultiQuestion(data);
-    });
-
-    socket.on('multi_answer_received', (data) => {
-          // Feedback for answering
-          if (data.correct) {
-               showNotification('Oikein!', 'success');
-          } else {
-               showNotification('Väärin!', 'error');
-          }
-           // UI should update to "waiting for others"
-          const qArea = document.getElementById('multi-question-text');
-          if(qArea) qArea.innerHTML = '<h3>Vastaus rekisteröity. Odotetaan muita...</h3>';
-          document.getElementById('multi-answer-options').innerHTML = '';
-    });
-
-    socket.on('multi_round_result', (data) => {
-        console.log('🏁 Round Result:', data);
-        showMultiRoundResult(data);
-    });
-
-    socket.on('multi_game_over', (data) => {
-         console.log('🏆 Multi Game Over:', data);
-         showMultiGameOver(data);
-    });
-    
-    socket.on('waiting_multi_games_list', (games) => {
-         // Merge or handle separately? 
-         // For now, let's just log or maybe implement a separate list if user wants?
-         // User "Server List" usually implies generic. 
-         // Let's modify renderServerList to accept these too or call a variant.
-         console.log('Multi games list:', games);
-         renderServerList(games); // Unified render
-    });
-
-    socket.on('multi_deck', (deck) => {
-         // Receive deck cards for gameplay
-         // Render hand using existing logic but into multi-deck-area
-         renderMultiHand(deck);
-    });
 }
 
 // Initial socket setup
@@ -392,29 +402,27 @@ const surrenderBtn = document.getElementById('surrender-btn'); // New button
 
 if (approvalAcceptBtn) {
     approvalAcceptBtn.addEventListener('click', () => {
-        socket.emit('resolve_join_request', { decision: 'accept' });
+        socket.emit('resolve_join_request', { 
+            gameId: gameState.gameId, 
+            playerId: currentJoinRequestId, 
+            decision: 'accept' 
+        });
         approvalModal.classList.add('hidden');
     });
 }
 
 if (approvalRejectBtn) {
     approvalRejectBtn.addEventListener('click', () => {
-        socket.emit('resolve_join_request', { decision: 'reject' });
+        socket.emit('resolve_join_request', { 
+            gameId: gameState.gameId, 
+            playerId: currentJoinRequestId, 
+            decision: 'reject' 
+        });
         approvalModal.classList.add('hidden');
     });
 }
 
     // Create Game Modal Logic
-    const openCreateMenuBtn = document.getElementById('open-create-menu-btn');
-    const createGameModal = document.getElementById('create-game-modal');
-    const closeCreateModal = document.getElementById('close-create-modal');
-    const modeBtns = document.querySelectorAll('.mode-btn');
-    const countBtns = document.querySelectorAll('.count-btn'); // NEW
-    const playerCountGroup = document.getElementById('player-count-group');
-    const createMaxPlayersInput = document.getElementById('create-max-players'); // Hidden input
-    const modeDescription = document.getElementById('mode-description');
-    const confirmCreateGameBtn = document.getElementById('confirm-create-game-btn');
-
     let selectedMode = '1v1'; // Default
 
     const modeDescriptions = {
@@ -457,6 +465,21 @@ if (approvalRejectBtn) {
         });
     });
 
+    if (confirmCreateGameBtn) {
+        confirmCreateGameBtn.addEventListener('click', () => {
+            const isPublic = document.querySelector('input[name="visibility"]:checked').value === 'public';
+            const maxPlayers = parseInt(createMaxPlayersInput.value);
+            
+            console.log('🚀 Creating game:', { type: selectedMode, isPublic, maxPlayers });
+            socket.emit('create_game', { 
+                type: selectedMode, 
+                isPublic, 
+                maxPlayers: selectedMode === '1v1' ? 2 : maxPlayers 
+            });
+            createGameModal.classList.add('hidden');
+        });
+    }
+
     // Handle Player Count Buttons
     countBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -465,37 +488,6 @@ if (approvalRejectBtn) {
             createMaxPlayersInput.value = btn.dataset.count;
         });
     });
-
-    if (confirmCreateGameBtn) {
-        confirmCreateGameBtn.addEventListener('click', () => {
-            const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
-             
-            if (count !== 10) {
-                alert(`Sinun täytyy valita tasan 10 kysymyskorttia ennen pelin aloitusta! (Valittu: ${count})`);
-                return;
-            }
-
-            const visibility = document.querySelector('input[name="visibility"]:checked').value;
-            const maxPlayers = parseInt(createMaxPlayersInput.value);
-
-            console.log(`Starting game: Mode=${selectedMode}, Visibility=${visibility}, MaxPlayers=${maxPlayers}`);
-
-            if (selectedMode === '1v1') {
-                socket.emit('create_game', { targetScore: 5, visibility: visibility });
-            } else {
-                socket.emit('create_multi_game', { 
-                    mode: selectedMode, 
-                    maxPlayers: maxPlayers,
-                    targetScore: 5,
-                    visibility: visibility 
-                });
-            }
-            
-            createGameModal.classList.add('hidden');
-            // Show notification? 
-            // We wait for socket event to switch screen
-        });
-    }
 
     /* 
     createGameBtn.addEventListener('click', () => { ... old logic removed ... });
@@ -517,11 +509,6 @@ if (singlePlayerBtn) {
 }
 
 joinGameBtn.addEventListener('click', () => {
-    const count = parseInt(document.getElementById('active-deck-count').textContent || '0');
-    if (count !== 10) {
-        alert(`Sinun täytyy valita tasan 10 kysymyskorttia ennen peliin liittymistä! (Valittu: ${count})`);
-        return;
-    }
     const code = roomCodeInput.value.trim().toUpperCase();
     if (code.length === 6) {
         console.log('Joining game:', code);
@@ -566,6 +553,7 @@ if (backToLobbyBtn) {
     backToLobbyBtn.addEventListener('click', () => {
         lobbyMainGrid.classList.remove('hidden');
         lobbyServerSection.classList.add('hidden');
+        if (logoContainer) logoContainer.classList.remove('hidden');
     });
 }
 
@@ -629,6 +617,24 @@ if (deckTabBtns.length > 0) {
 
              // Show confirmation toast on tab switch as requested
              showNotification('Pakka tallennettu', 'success');
+        });
+    });
+}
+
+// Showroom Tabs
+const showroomTabBtns = document.querySelectorAll('.showroom-tabs .auth-tab');
+if (showroomTabBtns.length > 0) {
+    showroomTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+             // Deactivate all
+             showroomTabBtns.forEach(b => b.classList.remove('active'));
+             // Hide all showroom tab content (scoped to showroom to be safe)
+             document.querySelectorAll('#showroom-screen .tab-content').forEach(c => c.classList.add('hidden'));
+             
+             // Activate clicked
+             btn.classList.add('active');
+             const target = document.getElementById(btn.dataset.target);
+             if (target) target.classList.remove('hidden');
         });
     });
 }
@@ -702,6 +708,7 @@ function updateGameUI() {
     lobbyScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
     gameOverScreen.classList.add('hidden');
+    if (logoContainer) logoContainer.classList.add('hidden');
 
     // Make sure we hide result screen if it was left open (e.g. from previous game)
     // unless we are actually viewing a result?
@@ -714,65 +721,58 @@ function updateGameUI() {
         roleDisplay.textContent = gameState.myPlayerId === 'playerA' ? 'Olet pelaaja A (Aloittaja)' : 'Olet pelaaja B (Liittyjä)';
     }
 
-    // Update scores
-    // Update scores
+    // Update scores and VS list
     myScoreEl.textContent = gameState.myScore;
     
-    if (gameState.mode === 'single') {
-        // Single Player Adjustments
-        opponentScoreEl.parentElement.classList.add('hidden'); // Hide opponent score container
-        myScoreEl.parentElement.classList.add('hidden'); // Hide player score too (mystery mode)
-        const roleDisplay = document.getElementById('player-role-display');
-        if (roleDisplay) roleDisplay.textContent = 'Yksinpeli';
-        
-        // Hide VS badge container (parent of turn-indicator)
-        const turnIndicator = document.getElementById('turn-indicator');
-        if (turnIndicator && turnIndicator.parentElement) {
-             const vsBadge = turnIndicator.parentElement.querySelector('.vs-badge');
-             if (vsBadge) vsBadge.classList.add('hidden');
+    // Render opponents list
+    const vsArea = document.getElementById('vs-area') || document.querySelector('.vs-container');
+    if (vsArea) {
+        // Find other players
+        const others = (gameState.players || []).filter(p => p.id !== gameState.myPlayerId);
+        if (gameState.mode === 'single') {
+            vsArea.classList.add('hidden');
+        } else {
+            vsArea.classList.remove('hidden');
+            // Simplified rendering for now, can be improved to show a list of names/scores
+            if (others.length === 1) {
+                opponentScoreEl.parentElement.classList.remove('hidden');
+                opponentScoreEl.textContent = others[0].score;
+            } else {
+                // Multi-player: list all opponents or show sum? 
+                // Let's just update the single opponent score to represent the "leader" of opponents for now
+                const topOpponent = others.sort((a,b) => b.score - a.score)[0];
+                opponentScoreEl.textContent = topOpponent ? topOpponent.score : 0;
+            }
         }
-    } else {
-        opponentScoreEl.parentElement.classList.remove('hidden');
-        opponentScoreEl.textContent = gameState.opponentScore;
-        
-        // Show VS badge
-        const turnIndicator = document.getElementById('turn-indicator');
-        if (turnIndicator && turnIndicator.parentElement) {
-             const vsBadge = turnIndicator.parentElement.querySelector('.vs-badge');
-             if (vsBadge) vsBadge.classList.remove('hidden');
-        }
-    }
-
-    // Update round counter (if element exists or create one)
-    // ...
-
-    // Don't update turn/deck display if a question is currently being shown
-    if (!questionArea.classList.contains('hidden')) {
-        console.log('⚠️ Question is visible, skipping turn/deck update');
-        return;
-    }
-
-    if (gameState.isWaitingForAnswer) {
-        showWaiting(true);
-        return;
     }
 
     // Update turn indicator
     if (gameState.mode === 'single') {
-         turnIndicator.textContent = `Kysymys ${gameState.roundNumber}/10`;
-         turnIndicator.className = 'turn-indicator my-turn'; // Keep it active style
-         showDeck();
+         // Show round counter instead of score
+         const roundNum = gameState.roundNumber || 1;
+         const total = gameState.totalRounds || 10;
+         turnIndicator.textContent = `Kierros ${Math.min(roundNum, total)}/${total}`;
+         turnIndicator.className = 'turn-indicator my-turn'; 
     } else {
-        if (gameState.currentTurn === 'me') {
+        if (gameState.isMyTurn) {
             turnIndicator.textContent = 'Sinun vuorosi';
             turnIndicator.className = 'turn-indicator my-turn';
-            showDeck();
         } else {
-            turnIndicator.textContent = 'Vastustajan vuoro';
+            turnIndicator.textContent = 'Muiden vuoro';
             turnIndicator.className = 'turn-indicator opponent-turn';
             showWaiting(false);
         }
     }
+
+    // Always show/update deck but handle turn-based disabled state
+    // IMPORTANT: Skip this if we are in the middle of a question (especially in SP)
+    if (questionArea && questionArea.classList.contains('hidden')) {
+        showDeck();
+    } else {
+        console.log('🛡️ Skipping showDeck because question is active');
+        updateHandTabVisibility(); // Still update tabs (SP "Vastaukset" logic)
+    }
+
     renderSpecialHand();
 }
 
@@ -782,16 +782,32 @@ function updateGameUI() {
 
 function showDeck() {
     console.log('🃏 Showing deck, cards:', gameState.myDeck.length);
-    if (questionArea) questionArea.classList.add('hidden');
-    if (waitingMessage) waitingMessage.classList.add('hidden');
-    if (answerResult) answerResult.classList.add('hidden');
+    
+    // UI Hiding logic: Don't hide question if we are in single player and it's active
+    const questionIsActive = questionArea && !questionArea.classList.contains('hidden');
+    
+    if (!questionIsActive) {
+        if (questionArea) questionArea.classList.add('hidden');
+        if (waitingMessage) waitingMessage.classList.add('hidden');
+        if (answerResult) answerResult.classList.add('hidden');
+    }
+    
     if (deckArea) {
         deckArea.classList.remove('hidden');
-        deckArea.classList.remove('disabled');
+        updateHandTabVisibility(); // Ensure correct tabs shown
+
+        if (gameState.isMyTurn || gameState.mode === 'single') {
+            deckArea.classList.remove('disabled');
+        } else {
+            deckArea.classList.add('disabled');
+        }
         deckArea.classList.remove('options-active');
     }
 
     if (deckCount) deckCount.textContent = gameState.myDeckSize;
+    const cardsCountBadge = document.getElementById('cards-tab-count');
+    if (cardsCountBadge) cardsCountBadge.textContent = gameState.myDeck.length;
+
     const uiDeck = deckCards || document.getElementById('deck-cards');
     if (!uiDeck) {
         console.error('❌ Critical: Deck cards container (#deck-cards) not found!');
@@ -799,7 +815,7 @@ function showDeck() {
     }
 
     // Default table state for asker: show face down card if not hovering
-    if (gameState.currentTurn === 'me' && gameState.mode !== 'single') {
+    if (gameState.isMyTurn && gameState.mode !== 'single') {
         renderDefaultTableState();
     }
 
@@ -816,31 +832,41 @@ function showDeck() {
         const cat = (card.category || 'yleistieto').toLowerCase();
         const icon = categoryIcons[cat] || '❓';
 
-        // Use Slim Row style for in-game choice too!
-        div.className = `mini-row category-${cat}`;
+        // Use Predefined Ethereal Card Style (Match Deck Manager Zoom: 0.8)
+        div.className = `card-wrapper tcg-ethereal category-${cat}`;
+        div.dataset.id = card.id;
         
+        div.style.transform = 'scale(0.8)';
+        div.style.transformOrigin = 'top center';
+        div.style.margin = '0 -26px -73px -26px'; // Adjusted for 0.8 scale and centering
+
         div.innerHTML = `
-            <div class="mini-icon">${icon}</div>
-            <div class="mini-content">
-                <div class="mini-cat">${card.category || 'Yleistieto'}</div>
-                <div class="mini-q">${card.question}</div>
+            <div class="ethereal-inner" style="pointer-events:none;">
+                <div class="ethereal-category">${card.category || 'Yleistieto'}</div>
+                <div class="ethereal-circle">${icon}</div>
+                <div class="ethereal-question">${card.question}</div>
+                <div class="ethereal-footer">
+                    <span>ID: ${card.id.substring(0,4)}</span>
+                    <span>Lvl ${card.difficulty || 1}</span>
+                </div>
             </div>
-            <div class="mini-meta">Lvl ${card.difficulty || 1}</div>
         `;
 
-        div.addEventListener('click', () => {
-            console.log('🎯 Playing card:', card.id);
-            socket.emit('play_card', { questionId: card.id });
-        });
-
-        // Hover Preview Logic
-        div.addEventListener('mouseenter', () => {
-             if (gameState.currentTurn === 'me') {
-                 showPreviewCard(card);
-             }
-        });
+        if (gameState.isMyTurn) {
+            div.addEventListener('click', () => {
+                if (confirm(`Haluatko pelata kortin: ${card.question}?`)) {
+                    socket.emit('play_card', { cardId: card.id });
+                }
+            });
+        } else {
+            div.style.opacity = '0.5';
+            div.style.cursor = 'not-allowed';
+        }
+        
+        // Hover to preview on table
+        div.addEventListener('mouseenter', () => showPreviewCard(card));
         div.addEventListener('mouseleave', () => {
-             if (gameState.currentTurn === 'me') {
+             if (gameState.isMyTurn) {
                  clearPreviewCard();
              }
         });
@@ -921,10 +947,17 @@ function showQuestion(question) {
     answerResult.classList.add('hidden');
     questionArea.classList.remove('hidden');
 
-    // Clear area and ensure it's visible
+    // Clear area and ensure it's visible with fade animation
     questionArea.innerHTML = '';
-    questionArea.classList.remove('hidden');
-    questionArea.className = 'question-area'; // Reset classes
+    questionArea.classList.remove('hidden', 'fade-in'); // Remove fade-in explicitly
+    questionArea.className = 'question-area';
+    
+    // Force animation restart using requestAnimationFrame for reliable timing
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            questionArea.classList.add('fade-in');
+        });
+    });
     
     // Determine category and icon
     const cat = (question.category || 'yleistieto').toLowerCase();
@@ -940,7 +973,8 @@ function showQuestion(question) {
     // 1. Create Ethereal Card element
     const cardEl = document.createElement('div');
     cardEl.className = `card-wrapper tcg-ethereal category-${cat}`;
-    // Inline styles removed to allow CSS control for responsiveness
+    cardEl.style.transform = 'scale(0.85)';
+    cardEl.style.margin = '10px 0';
     
     cardEl.innerHTML = `
         <div class="ethereal-inner">
@@ -1022,6 +1056,9 @@ function showQuestion(question) {
         questionArea.insertBefore(cardEl, targetContainer);
     }
 
+    // Finalize UI state for SP
+    updateHandTabVisibility();
+    
     // Update special card buttons (enable skip if available)
     renderSpecialHand();
 }
@@ -1029,15 +1066,14 @@ function showQuestion(question) {
 function showAnswerResult(data) {
     console.log('📋 Showing answer result');
     
-    // Single Player: Skip result screen, auto-continue
+    // Single Player: Use toast notification (same style as "Pakka tallennettu")
     if (gameState.mode === 'single') {
-        questionArea.classList.add('hidden');
-        // Don't show answerResult screen, just wait for next question
-        // The next question will be queued via nextQuestion variable
-        if (nextQuestion) {
-            showQuestion(nextQuestion);
-            nextQuestion = null;
+        if (data.correct) {
+            showNotification('✅ Oikein! +1 piste', 'success');
+        } else {
+            showNotification('❌ Väärin', 'error');
         }
+        // Don't hide anything - server will send next question automatically
         return;
     }
     
@@ -1101,22 +1137,61 @@ function showOpponentAnswer(data) {
 }
 
 function showGameOver(data) {
-    console.log('🏆 Showing game over screen', data);
-    gameScreen.classList.add('hidden');
-    gameOverScreen.classList.remove('hidden');
+    console.log('🏆 ===== GAME OVER DEBUG =====');
+    console.log('🏆 data:', JSON.stringify(data, null, 2));
+    console.log('🏆 gameState.mode:', gameState.mode);
+    console.log('🏆 gameState.myPlayerId:', gameState.myPlayerId);
+    console.log('🏆 gameState.myScore:', gameState.myScore);
+    
+    // Exit compact game mode to show full game over screen
+    document.body.classList.remove('game-active');
+    console.log('🏆 Removed game-active from body');
+    
+    // Explicitly hide game screen using ID to ensure it works
+    const gs = document.getElementById('game-screen');
+    if (gs) gs.classList.add('hidden');
+    else console.error('🏆 CRITICAL: game-screen element not found!');
 
-    // Reconstruct score display to avoid detached DOM element issues on replay
+    // Also ensure other screens are hidden
+    const ps = document.getElementById('profile-screen');
+    if (ps) ps.classList.add('hidden');
+
+    const ls = document.getElementById('lobby-screen');
+    if (ls) ls.classList.add('hidden');
+
+    gameOverScreen.classList.remove('hidden');
+    console.log('🏆 gameOverScreen hidden:', gameOverScreen.classList.contains('hidden'));
+    console.log('🏆 gameScreen hidden:', gs ? gs.classList.contains('hidden') : 'N/A');
+
+    // Reconstruct score display with rankings
     const finalScoresDiv = document.querySelector('#game-over-screen .final-scores');
+    console.log('🏆 finalScoresDiv found:', !!finalScoresDiv);
+    
     if (finalScoresDiv) {
+        finalScoresDiv.innerHTML = '';
         if (gameState.mode === 'single') {
+            const myRank = data.rankings ? data.rankings.find(r => r.playerId === gameState.myPlayerId) : null;
+            const score = myRank ? myRank.score : (data.myScore || gameState.myScore || 0);
+            const total = data.totalQuestions || 10;
+            console.log('🏆 DEBUG SCORE: score=' + score + ', total=' + total);
             finalScoresDiv.innerHTML = `
-                <p>Oikein: <span id="final-my-score">${data.finalScore.you}</span>/10</p>
+                <div class="sp-final-score">
+                    <div class="sp-score-big">${score}/${total}</div>
+                    <div class="sp-score-label">oikein</div>
+                </div>
             `;
+            console.log('🏆 finalScoresDiv.innerHTML set to:', finalScoresDiv.innerHTML);
         } else {
-            finalScoresDiv.innerHTML = `
-                <p>Sinä: <span id="final-my-score">${data.finalScore.you}</span></p>
-                <p>Vastustaja: <span id="final-opponent-score">${data.finalScore.opponent}</span></p>
-            `;
+            // Leaderboard for multiplayer
+            const list = document.createElement('div');
+            list.className = 'rankings-list';
+            (data.rankings || []).forEach(r => {
+                const item = document.createElement('div');
+                item.className = `ranking-item ${r.playerId === gameState.myPlayerId ? 'highlight' : ''}`;
+                item.innerHTML = `<span>#${r.rank} ${r.name}</span> <span>${r.score} pistettä</span>`;
+                list.appendChild(item);
+            });
+            finalScoresDiv.appendChild(list);
         }
     }
 
@@ -1126,15 +1201,54 @@ function showGameOver(data) {
     loserMessage.classList.add('hidden');
     selectionConfirmed.classList.add('hidden');
 
+    // Handle Single Player end screen
+    if (gameState.mode === 'single') {
+        const score = data.rankings?.[0]?.score || gameState.myScore || 0;
+        const total = data.totalQuestions || 10;
+        
+        let titleText = '';
+        let resultText = '';
+        
+        if (data.perfectScore) {
+            titleText = '🎉 Täydellinen suoritus!';
+            gameOverTitle.textContent = titleText;
+            // Show question selection
+            if (data.availableQuestions && data.availableQuestions.length > 0) {
+                questionSelection.classList.remove('hidden');
+                renderAvailableQuestions(data.availableQuestions);
+            } else {
+                selectionConfirmed.classList.remove('hidden');
+                resultText = '🎉 Täydellinen! Kaikki oikein!';
+                selectionResult.textContent = resultText;
+            }
+        } else {
+            titleText = `Peli päättyi`;
+            gameOverTitle.textContent = titleText;
+            // No card selection for non-perfect
+            selectionConfirmed.classList.remove('hidden');
+            resultText = `Sait ${score} oikein. Yritä saada kaikki oikein saadaksesi uuden kortin!`;
+            selectionResult.textContent = resultText;
+        }
+        
+        console.log('🏆 DEBUG TITLE:', titleText);
+        console.log('🏆 DEBUG RESULT:', resultText);
+        console.log('🏆 gameOverTitle element:', gameOverTitle);
+        console.log('🏆 gameOverTitle.textContent:', gameOverTitle?.textContent);
+        console.log('🏆 selectionResult element:', selectionResult);
+        console.log('🏆 selectionResult.textContent:', selectionResult?.textContent);
+        console.log('🏆 selectionConfirmed hidden:', selectionConfirmed?.classList.contains('hidden'));
+        console.log('🏆 ===== END DEBUG =====');
+        return;
+    }
+
+    // Multiplayer winner/loser logic
     if (data.winner === 'you') {
         gameOverTitle.textContent = '🎉 Voitit!';
 
-        // Show question selection if there are available questions
         if (data.availableQuestions && data.availableQuestions.length > 0) {
             questionSelection.classList.remove('hidden');
             renderAvailableQuestions(data.availableQuestions);
         } else {
-            // No questions to select (answered none correctly or already owns all)
             selectionConfirmed.classList.remove('hidden');
             selectionResult.textContent = 'Ei valittavia kysymyksiä saatavilla.';
         }
@@ -1142,6 +1256,7 @@ function showGameOver(data) {
         gameOverTitle.textContent = '😔 Hävisit';
         loserMessage.classList.remove('hidden');
     }
+    console.log('🏆 Multiplayer title:', gameOverTitle?.textContent);
 }
 
 function renderAvailableQuestions(questions) {
@@ -1189,7 +1304,7 @@ confirmSelectionBtn.addEventListener('click', () => {
     }
 
     console.log('Confirming selection:', selectedQuestionIds);
-    socket.emit('select_questions', { questionIds: selectedQuestionIds });
+    socket.emit('select_end_questions', { selectedIds: selectedQuestionIds }); // Renamed emitter
 });
 
 // Handle selection confirmation from server
@@ -1434,6 +1549,12 @@ function renderDeckManager(profile) {
 
     const activeSet = new Set(profile.activeCards);
     document.getElementById('active-deck-count').textContent = activeSet.size;
+    
+    // Update total owned count
+    const totalOwnedCountElement = document.getElementById('total-owned-count');
+    if (totalOwnedCountElement && profile.ownedCardsDetails) {
+        totalOwnedCountElement.textContent = profile.ownedCardsDetails.length;
+    }
     
     // Toggle Grid Class
     if (viewMode === 'grid') {
@@ -1796,11 +1917,15 @@ function renderSpecialCollection(profile) {
 
 // --- SPECIAL CARDS IN GAME ---
 function renderSpecialHand() {
-    const container = document.getElementById('special-cards');
-    if (!container) return;
-    container.innerHTML = '';
+    const specialGrid = document.getElementById('special-cards');
+    const tabCount = document.getElementById('special-tab-count');
+    if (!specialGrid) return;
 
-    // If no special cards, hide/show logic?
+    specialGrid.innerHTML = '';
+    const specials = gameState.mySpecialHand || [];
+    
+    // Update badge count
+    if (tabCount) tabCount.textContent = specials.length;
     // gameState.mySpecialHand is array of strings e.g. ['skip']
     const mySpecials = gameState.mySpecialHand || [];
 
@@ -1832,15 +1957,17 @@ function renderSpecialHand() {
         const div = document.createElement('div');
         const meta = specialMeta[cardType] || { icon: '⭐', name: 'ERIKOIS', desc: cardType }; // Fallback shows ID
         
-        // Use Slim Row style
-        div.className = 'mini-row category-viihde special-card-game'; 
+        // Use Predefined Ethereal Special Card Style (Match Deck Manager Zoom: 0.8)
+        const specialClass = cardType.toLowerCase().replace('_', '-');
+        div.className = `card-wrapper tcg-ethereal special-${specialClass}`; 
         div.dataset.type = cardType;
-        div.style.width = '200px'; 
-        div.style.borderLeftColor = '#fdcb6e'; // Gold
-        div.style.cursor = 'pointer';
+        
+        div.style.transform = 'scale(0.8)';
+        div.style.transformOrigin = 'top center';
+        div.style.margin = '0 -26px -73px -26px'; 
 
         // Check if card is usable (e.g. is my turn)
-        const canUse = (gameState.currentTurn === gameState.myPlayerId);
+        const canUse = (gameState.isMyTurn);
         if (!canUse) {
             div.style.opacity = '0.5';
             div.style.cursor = 'not-allowed';
@@ -1848,10 +1975,14 @@ function renderSpecialHand() {
         }
 
         div.innerHTML = `
-            <div class="mini-icon">${meta.icon}</div>
-            <div class="mini-content">
-                <div class="mini-cat" style="color:#fdcb6e; font-size:0.6rem;">${meta.name}</div>
-                <div class="mini-q" style="font-size:0.8rem;">${meta.desc}</div>
+            <div class="ethereal-inner" style="pointer-events:none;">
+                <div class="ethereal-category">${meta.name}</div>
+                <div class="ethereal-circle">${meta.icon}</div>
+                <div class="ethereal-question" style="font-size: 0.9rem;">${meta.desc}</div>
+                <div class="ethereal-footer">
+                    <span>SPECIAL</span>
+                    <div class="rarity-dot special"></div>
+                </div>
             </div>
         `;
 
@@ -1866,7 +1997,7 @@ function renderSpecialHand() {
             }
         });
 
-        container.appendChild(div);
+        specialGrid.appendChild(div);
     });
 }
 
@@ -1922,178 +2053,16 @@ function renderDefaultTableState() {
     `;
 }
 
-// ==================== MULTI-PLAYER UI FUNCTIONS ====================
 
-function updateMultiLobbyUI(state) {
-    const list = document.getElementById('multi-players-list');
-    const count = document.getElementById('multi-player-count');
-    const modeInfo = document.getElementById('multi-mode-info');
-    
-    if (list) {
-        list.innerHTML = '';
-        state.players.forEach(p => {
-             const div = document.createElement('div');
-             div.className = 'player-item glass-panel';
-             div.style.padding = '10px';
-             div.style.display = 'flex';
-             div.style.justifyContent = 'space-between';
-             div.style.alignItems = 'center';
-             
-             div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:1.5rem;">👤</span>
-                    <span style="font-weight:bold;">${p.name} ${p.isHost ? '👑' : ''}</span>
-                </div>
-                <div class="score-badge">${p.score} pts</div>
-             `;
-             list.appendChild(div);
-        });
-    }
-
-    if (count) count.textContent = `Pelaajia: ${state.players.length}/${state.settings.maxPlayers}`;
-    if (modeInfo) modeInfo.textContent = `Pelimuoto: ${state.mode === 'round' ? 'Kierros (Kaikki vastaa)' : 'Valinta (Kysyjä valitsee)'}`;
-}
-
-function updateMultiGameUI(state) {
-    console.log('🔄 Updating Multi Game UI:', state);
-    toggleGameMode(true);
-    
-    // Switch screens
-    document.getElementById('game-lobby-screen').classList.add('hidden');
-    document.getElementById('game-screen').classList.add('hidden'); // Legacy screen? 
-    // Wait, do we use 'game-screen' for multi too? Or 'multi-game-screen'?
-    // In showScreen('multi-game-screen') call... 
-    // I don't have 'multi-game-screen' in HTML. I should use 'game-screen' but adapted.
-    // Let's assume we reuse 'game-screen'.
-    
-    const gameScreen = document.getElementById('game-screen');
-    gameScreen.classList.remove('hidden');
-    
-    // Update Scores
-    const myPlayer = state.players.find(p => p.id === gameState.myPlayerId);
-    if (myPlayer) {
-        document.getElementById('my-score').textContent = myPlayer.score;
-    }
-    
-    // Opponent Score? In multi we might have many.
-    // Maybe hide opponent score or show "Leaderboard"?
-    // For now, let's just show top opponent or something.
-    document.getElementById('opponent-score-container').classList.add('hidden'); // Hide simple VS score
-    
-    // Turn Indicator
-    const turnIndicator = document.getElementById('turn-indicator');
-    if (state.status === 'active') {
-         if (state.mode === 'round') {
-             turnIndicator.textContent = 'Kierros käynnissä';
-             turnIndicator.className = 'turn-indicator';
-         } else if (state.mode === 'choice') {
-             const asker = state.players.find(p => p.id === state.currentTurn);
-             if (state.currentTurn === gameState.myPlayerId) {
-                 turnIndicator.textContent = 'Sinun vuorosi valita!';
-                 turnIndicator.className = 'turn-indicator my-turn';
-             } else {
-                 turnIndicator.textContent = `${asker ? asker.name : 'Pelaaja'} valitsee...`;
-                 turnIndicator.className = 'turn-indicator opponent-turn';
-             }
-         }
-    }
-    
-    // Show Deck if my turn (or always if round mode?)
-    // In round mode, everyone answers? No, usually asker asks.
-    // "Round" mode description: "Kaikki vastaavat". So Asker asks, everyone else answers.
-    // So Asker needs deck.
-    
-    if (state.activeQuestion) {
-        // Question in progress
-        showMultiQuestion({
-            question: state.activeQuestion.card, // This might need adaptation
-            askerId: state.currentTurn, 
-            askerName: 'Kysyjä' // Todo: resolve name
-        });
-    } else {
-        // Waiting for asker
-        if (state.currentTurn === gameState.myPlayerId) {
-             showDeck();
-        } else {
-             showWaiting(false);
-        }
-    }
-}
-
-function renderMultiHand(deck) {
-    // Reuse existing logic, just update state
-    gameState.myDeck = deck;
-    gameState.myDeckSize = deck.length;
-    showDeck();
-}
-
-function showMultiQuestion(data) {
-    // Reuse showQuestion logic but adapt data
-    // data.question is the card object (or clientQuestion)
-    showQuestion(data.question);
-}
-
-function showMultiRoundResult(data) {
-    // Show toast or overlay?
-    if (data.correct) {
-        showNotification('Oikein! +1 Piste', 'success');
-    } else {
-        showNotification(`Väärin! Oikea: ${data.correctAnswer}`, 'error');
-    }
-}
-
-function showMultiGameOver(data) {
-    console.log('🏆 Multi Game Over');
-    document.getElementById('game-screen').classList.add('hidden');
-    const screen = document.getElementById('game-over-screen');
-    screen.classList.remove('hidden');
-    
-    document.getElementById('game-over-title').textContent = 'Peli Päättyi!';
-    
-    const resultsDiv = document.querySelector('#game-over-screen .final-scores');
-    resultsDiv.innerHTML = '<h3>Tulokset:</h3><ul style="list-style:none; padding:0;">';
-    
-    // Sort scores
-    const sorted = data.scores.sort((a,b) => b.score - a.score);
-    
-    sorted.forEach((s, i) => {
-        const isMe = s.playerId === gameState.myPlayerId;
-        const name = s.playerId === gameState.myPlayerId ? 'Sinä' : 'Pelaaja ' + s.playerId.substring(0,4);
-        const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ''));
-        
-        resultsDiv.innerHTML += `
-            <li style="padding:10px; background:rgba(255,255,255,0.1); margin:5px 0; border-radius:5px; ${isMe ? 'border:1px solid #6c5ce7;' : ''}">
-                <span style="font-size:1.2rem; margin-right:10px;">${medal}</span>
-                <span style="font-weight:bold;">${name}</span>
-                <span style="float:right;">${s.score} p</span>
-            </li>
-        `;
-    });
-    
-    resultsDiv.innerHTML += '</ul>';
-    
-    document.getElementById('question-selection').classList.add('hidden');
-    document.getElementById('loser-message').classList.add('hidden');
-}
 
 // ==================== LOBBY & NAVIGATION FUNCTIONS (FIXED) ====================
 
     // Updated Handlers for Lobby
-    const startGameBtn = document.getElementById('start-game-btn');
-    const leaveLobbyBtn = document.getElementById('leave-lobby-btn');
-
     if (startGameBtn) {
         startGameBtn.addEventListener('click', () => {
              console.log('👑 Host starting game...', gameState.mode);
-             
-             // Check mode to call correct socket event
-             if (gameState.gameMode === 'round' || gameState.gameMode === 'choice') {
-                 // Multiplayer (new logic)
-                 socket.emit('start_multi_game', { gameId: gameState.gameId });
-             } else {
-                 // 1v1 or Single Player (classic logic)
-                 socket.emit('start_game');
-             }
+             // Unified start_game works for 1v1 and Multi
+             socket.emit('start_game'); 
         });
     }
 
@@ -2101,18 +2070,13 @@ function showMultiGameOver(data) {
         leaveLobbyBtn.addEventListener('click', () => {
              if(confirm('Haluatko varmasti poistua aulasta?')) {
                  console.log('👋 Leaving lobby...');
-                 
-                 // Mode-aware leave
-                 if (gameState.mode === 'multi' || gameState.gameMode === 'round' || gameState.gameMode === 'choice') {
-                     socket.emit('leave_multi_game', { gameId: gameState.gameId });
-                 } else {
-                     socket.emit('leave_game', { gameId: gameState.gameId });
-                 }
+                 socket.emit('leave_game');
                  
                  // Reset UI locally
                  document.getElementById('game-lobby-screen').classList.add('hidden');
                  document.getElementById('lobby-screen').classList.remove('hidden');
                  document.body.classList.remove('game-active');
+                 if (logoContainer) logoContainer.classList.remove('hidden');
              }
         });
     }
@@ -2126,6 +2090,7 @@ function showLobbyScreen(gameId, isHost) {
     // Show Lobby
     const lobby = document.getElementById('game-lobby-screen');
     if (lobby) lobby.classList.remove('hidden');
+    if (logoContainer) logoContainer.classList.remove('hidden');
     
     // Update Info
     const codeEl = document.getElementById('lobby-room-code');
@@ -2134,12 +2099,10 @@ function showLobbyScreen(gameId, isHost) {
     // Controls
     const hostControls = document.getElementById('host-controls');
     const guestControls = document.getElementById('guest-controls');
-    // Note: ensure startBtn is re-queried or valid if declared globally
     
     if (isHost) {
         if (hostControls) hostControls.classList.remove('hidden');
         if (guestControls) guestControls.classList.add('hidden');
-        if (startGameBtn) startGameBtn.disabled = true; // Wait for players
     } else {
         if (hostControls) hostControls.classList.add('hidden');
         if (guestControls) guestControls.classList.remove('hidden');
@@ -2149,20 +2112,16 @@ function showLobbyScreen(gameId, isHost) {
     const pList = document.getElementById('lobby-player-list');
     if (pList) pList.innerHTML = '<div class="waiting-spinner"></div>';
     
-    // Try to request latest state if missing?
-    socket.emit('get_multi_game_state', { gameId: gameId });
+    // No need for separate multi_state request, game_state handles it
 }
 
 function updateLobbyUI(state) {
-    console.log('🔄 updateLobbyUI:', state); // Added Debug log
-    // Check IDs from index.html: lobby-player-list, lobby-player-count
+    console.log('🔄 updateLobbyUI:', state);
     const list = document.getElementById('lobby-player-list');
     const count = document.getElementById('lobby-player-count');
     const max = document.getElementById('lobby-max-players');
     
-    // Safety check for players array
     const players = state.players || [];
-    console.log(`👥 Players in state: ${players.length}`, players); // Added Debug log
     
     if (list) {
         list.innerHTML = '';
@@ -2175,14 +2134,13 @@ function updateLobbyUI(state) {
              div.style.justifyContent = 'space-between';
              div.style.alignItems = 'center';
              
-             // Check if me
              const isMe = p.id === gameState.myPlayerId;
              if (isMe) div.style.border = '1px solid #00b894';
              
              div.innerHTML = `
                 <div style="display:flex; align-items:center; gap:10px;">
                     <span style="font-size:1.5rem;">${p.isHost ? '👑' : '👤'}</span>
-                    <span style="font-weight:bold;">${p.name}</span>
+                    <span style="font-weight:bold;">${p.name} ${isMe ? '(Sinä)' : ''}</span>
                 </div>
                 <div class="score-badge">${p.score}</div>
              `;
@@ -2191,16 +2149,16 @@ function updateLobbyUI(state) {
     }
 
     if (count) count.textContent = players.length;
-    // Fix: Check both settings.maxPlayers and root maxPlayers
-    const maxPlayers = (state.settings && state.settings.maxPlayers) ? state.settings.maxPlayers : (state.maxPlayers || '?');
-    if (max) max.textContent = maxPlayers;
+    if (max) max.textContent = state.maxPlayers || '?';
     
     // Host Logic
     const startBtn = document.getElementById('start-game-btn');
     const msg = document.getElementById('lobby-status-msg');
     
     if (startBtn) {
-        if (players.length >= 2) {
+        // In Single Player, we can start with 1 player
+        const minPlayers = (state.type === 'single') ? 1 : 2;
+        if (players.length >= minPlayers) {
             startBtn.disabled = false;
             if (msg) msg.textContent = 'Valmiina aloitukseen!';
         } else {
@@ -2208,19 +2166,6 @@ function updateLobbyUI(state) {
             if (msg) msg.textContent = 'Odotetaan lisää pelaajia...';
         }
     }
-    
-    // Verify Deck Rendering for "My Deck"
-     const deckPreview = document.getElementById('lobby-my-deck-preview');
-     if(deckPreview && state.players) {
-          const me = players.find(p => p.id === gameState.myPlayerId);
-          if (me && me.deckSize > 0) {
-                deckPreview.innerHTML = `<p style="text-align:center;">Valittuna ${me.deckSize} korttia</p>`;
-                // Ideally we show cards if available in data, but usually 'state' only has summaries.
-                // We rely on 'renderMultiHand' for full deck which comes separately.
-          } else {
-               deckPreview.innerHTML = '<p style="text-align:center; opacity:0.5;">Ei pakkaa valittu</p>';
-          }
-     }
 }
 
 function startGameFromLobby(state) {
@@ -2230,84 +2175,246 @@ function startGameFromLobby(state) {
      document.body.classList.add('game-active');
      
      // Update game UI initially
-     updateMultiGameUI(state);
+     updateGameUI();
 }
 
-// Re-implement updateMultiLobbyUI to redirect to updateLobbyUI
-function updateMultiLobbyUI(state) {
-    updateLobbyUI(state);
-}
 
-function renderMultiHand(deck) {
-    // Check where to render
-    const lobbyPreview = document.getElementById('lobby-my-deck-preview');
-    const gameDeckArea = document.getElementById('deck-cards'); // Reuse single player deck area?
-    
-    // If we are in lobby (game-lobby-screen not hidden)
-    const lobby = document.getElementById('game-lobby-screen');
-    const inLobby = !lobby.classList.contains('hidden');
-    
-    const target = inLobby ? lobbyPreview : gameDeckArea;
-    
-    if (!target) return;
-    target.innerHTML = '';
-    
-    const cards = deck.hand || deck; // Handle both formats
-    
-    cards.forEach(card => {
-         const div = document.createElement('div');
-         
-         if (inLobby) {
-             // Mini preview style
-             div.className = 'mini-card';
-             div.style.background = '#2d3436';
-             div.style.padding = '5px';
-             div.style.margin = '2px';
-             div.style.fontSize = '0.7em';
-             div.textContent = card.question.substring(0, 20) + '...';
-         } else {
-             // Game style (reuse card-btn class)
-             div.className = 'card-btn category-' + (card.category||'yleistieto').toLowerCase();
-             div.textContent = card.question;
-             div.onclick = () => {
-                 if (confirm(`Kysy: "${card.question}"?`)) {
-                     socket.emit('play_card_multi', { questionId: card.id });
-                 }
-             };
-         }
-         target.appendChild(div);
-    });
-}
-
-// Logo Rotation Feature
+// Logo Rotation / Glitch Feature
 (function() {
     const title = document.getElementById('game-title');
-    if (!title) return;
+    const toggle = document.getElementById('toggle-glitch-effect');
+    
 
-    const styles = ['logo-style-1', 'logo-style-6', 'logo-style-10'];
-    let currentStyle = '';
 
-    function rotateLogo() {
-        // Remove current style
-        if (currentStyle) {
-            title.classList.remove(currentStyle);
-        }
+    // Settings Modal Logic
+    const settingsModal = document.getElementById('settings-modal');
+    const openSettingsBtn = document.getElementById('open-settings-s-btn');
+    const closeSettingsBtn = document.getElementById('close-settings-modal');
 
-        // Pick a new random style (different from current if possible, but random as requested)
-        // User said "randomisti", so true random is fine.
-        const randomIndex = Math.floor(Math.random() * styles.length);
-        currentStyle = styles[randomIndex];
-        
-        // Apply new style
-        title.classList.add(currentStyle);
-        
-        console.log('🔄 Logo rotated to:', currentStyle);
+    // Attach listeners regardless of other elements
+    if (openSettingsBtn && settingsModal) {
+        openSettingsBtn.addEventListener('click', () => {
+             console.log('Open settings clicked');
+             settingsModal.classList.remove('hidden');
+        });
     }
 
-    // Initial call
-    rotateLogo();
+    if (closeSettingsBtn && settingsModal) {
+        closeSettingsBtn.addEventListener('click', () => {
+             settingsModal.classList.add('hidden');
+        });
+        
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.add('hidden');
+            }
+        });
+    }
 
-    // Set interval (5 seconds)
-    setInterval(rotateLogo, 5000);
+    // Stats Modal Logic
+    const statsModal = document.getElementById('stats-modal');
+    const openStatsBtn = document.getElementById('open-stats-btn');
+    const closeStatsBtn = document.getElementById('close-stats-modal');
+
+    if (openStatsBtn && statsModal) {
+        openStatsBtn.addEventListener('click', () => {
+             renderCardStats(currentProfile);
+             statsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeStatsBtn && statsModal) {
+        closeStatsBtn.addEventListener('click', () => {
+             statsModal.classList.add('hidden');
+        });
+        
+        statsModal.addEventListener('click', (e) => {
+            if (e.target === statsModal) {
+                statsModal.classList.add('hidden');
+            }
+        });
+    }
+
+    function renderCardStats(profile) {
+        const content = document.getElementById('stats-content');
+        if (!content) return;
+        
+        // Handle case where profile might not be fully loaded yet
+        if (!profile || !profile.ownedCardsDetails) {
+            content.innerHTML = '<p style="text-align:center; opacity:0.7;">Ladataan kortteja...</p>';
+            return;
+        }
+
+        const stats = {};
+        let total = 0;
+        
+        // Categories from icon map
+        const categories = [
+             'maantieto', 'kulttuuri', 'tiede', 'avaruus', 
+             'historia', 'aliens', 'urheilu', 'viihde', 'yleistieto'
+        ];
+
+        // Initialize
+        categories.forEach(cat => stats[cat] = 0);
+
+        // Count
+        profile.ownedCardsDetails.forEach(card => {
+            const cat = (card.category || 'yleistieto').toLowerCase();
+            if (stats[cat] !== undefined) {
+                stats[cat]++;
+            } else {
+                stats['muu'] = (stats['muu'] || 0) + 1;
+            }
+            total++;
+        });
+
+        // Icon map helper (duplicated from renderDeckManager for independency)
+        const categoryIcons = {
+            'maantieto': '🌍', 'kulttuuri': '🎨', 'tiede': '⚛️', 'avaruus': '🪐',
+            'historia': '📜', 'aliens': '👽', 'urheilu': '🏆', 'viihde': '🎬', 'yleistieto': '💡'
+        };
+
+        let html = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.1);">
+                <strong style="font-size:1.2rem;">Yhteensä</strong>
+                <span class="score-pill" style="font-size:1.2rem;">${total}</span>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:10px;">
+        `;
+
+        // Sort categories by count (descending)
+        const sortedCats = Object.entries(stats).sort((a,b) => b[1] - a[1]);
+
+        sortedCats.forEach(([cat, count]) => {
+            if (count > 0) {
+                const icon = categoryIcons[cat] || '❓';
+                // Capitalize
+                const catName = cat.charAt(0).toUpperCase() + cat.slice(1);
+                
+                html += `
+                    <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); text-align:center;">
+                        <div style="font-size:1.5rem; margin-bottom:5px;">${icon}</div>
+                        <div style="font-size:0.9rem; opacity:0.8; margin-bottom:5px;">${catName}</div>
+                        <div style="font-size:1.2rem; font-weight:bold; color:var(--primary-color);">${count}</div>
+                    </div>
+                `;
+            }
+        });
+
+        html += `</div>`;
+        content.innerHTML = html;
+    }
+
+    // Logo Logic
+    if (!title) return;
+
+    // Apply Glitch Cyber style permanently
+    title.classList.add('logo-style-6');
+
+    // Preference handling
+    let isGlitchEnabled = localStorage.getItem('glitch_enabled') !== 'false'; // Default to true
+    
+    // Sync toggle UI
+    if (toggle) {
+        toggle.checked = isGlitchEnabled;
+        toggle.addEventListener('change', (e) => {
+            isGlitchEnabled = e.target.checked;
+            localStorage.setItem('glitch_enabled', isGlitchEnabled);
+            console.log('Video settings changed:', isGlitchEnabled);
+            
+            // Immediate feedback
+            if (!isGlitchEnabled) {
+                title.classList.remove('glitch-flicker');
+            }
+        });
+    }
+
+    // Subtle random flicker effect
+    function flicker() {
+        if (!isGlitchEnabled) return;
+
+        // Random chance to flicker (30%)
+        if (Math.random() < 0.3) {
+            title.classList.add('glitch-flicker');
+            // Remove after short delay
+            setTimeout(() => {
+                title.classList.remove('glitch-flicker');
+            }, 50 + Math.random() * 150); // 50-200ms flicker
+        }
+    }
+
+    // Run flicker check every 2-4 seconds (random interval)
+    function scheduleNextFlicker() {
+        const delay = 2000 + Math.random() * 2000; // 2-4 seconds
+        setTimeout(() => {
+            flicker();
+            scheduleNextFlicker();
+        }, delay);
+    }
+
+    scheduleNextFlicker();
 })();
 
+// Global UI Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Settings Modal
+    const settingsModal = document.getElementById('settings-modal');
+    const openSettingsBtn = document.getElementById('open-settings-s-btn');
+    const closeSettingsBtn = document.getElementById('close-settings-modal');
+
+    if (openSettingsBtn && settingsModal) {
+        openSettingsBtn.addEventListener('click', () => {
+             console.log('Opening Settings Modal');
+             settingsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeSettingsBtn && settingsModal) {
+        closeSettingsBtn.addEventListener('click', () => {
+             settingsModal.classList.add('hidden');
+        });
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) settingsModal.classList.add('hidden');
+        });
+    }
+});
+
+// --- DEBUG HELPERS ---
+window.debugVictory = (mode = 'single') => {
+    console.log('🏆 Triggering Debug Victory for mode:', mode);
+    
+    // Set appropriate game state properties
+    gameState.mode = mode;
+    gameState.myPlayerId = 'debug_user';
+    gameState.myScore = 10;
+    
+    // Mock data based on mode
+    let data;
+    
+    if (mode === 'single') {
+        data = {
+            winner: 'you',
+            rankings: [{ playerId: 'debug_user', score: 10, name: 'Sinä' }],
+            myScore: 10,
+            totalQuestions: 10,
+            perfectScore: true, // Trigger "Täydellinen suoritus"
+            availableQuestions: [
+               { id: 'q1', question: 'Debug Question 1', category: 'tiede' },
+               { id: 'q2', question: 'Debug Question 2', category: 'historia' },
+               { id: 'q3', question: 'Debug Question 3', category: 'urheilu' }
+            ]
+        };
+    } else {
+        data = {
+            winner: 'you',
+            rankings: [
+                { playerId: 'debug_user', score: 15, name: 'Sinä', rank: 1 },
+                { playerId: 'opponent', score: 12, name: 'Vastustaja', rank: 2 }
+            ],
+            myScore: 15
+        };
+    }
+    
+    showGameOver(data);
+};
+console.log('🐛 Debug tools loaded. Use debugVictory() to test win screen.');

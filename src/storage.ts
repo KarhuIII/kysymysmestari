@@ -32,15 +32,19 @@ function isSupabaseUUID(userId: string): boolean {
 }
 
 // Ensure data files exist for guest storage
-function ensureFilesExist() {
-    if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    if (!fs.existsSync(PLAYERS_FILE)) {
-        fs.writeFileSync(PLAYERS_FILE, JSON.stringify({}, null, 2));
-    }
-    if (!fs.existsSync(HISTORY_FILE)) {
-        fs.writeFileSync(HISTORY_FILE, JSON.stringify({}, null, 2));
+async function ensureFilesExist() {
+    try {
+        if (!fs.existsSync(DATA_DIR)) {
+            await fs.promises.mkdir(DATA_DIR, { recursive: true });
+        }
+        if (!fs.existsSync(PLAYERS_FILE)) {
+            await fs.promises.writeFile(PLAYERS_FILE, JSON.stringify({}, null, 2));
+        }
+        if (!fs.existsSync(HISTORY_FILE)) {
+            await fs.promises.writeFile(HISTORY_FILE, JSON.stringify({}, null, 2));
+        }
+    } catch (err) {
+        console.error('Error ensuring files exist:', err);
     }
 }
 
@@ -49,13 +53,13 @@ let guestPlayersCache: Record<string, PlayerProfile> = {};
 let guestHistoryCache: Record<string, GameHistoryEntry[]> = {};
 
 // Load initial data for guests
-export function loadData() {
-    ensureFilesExist();
+export async function loadData() {
+    await ensureFilesExist();
     try {
-        const playersData = fs.readFileSync(PLAYERS_FILE, 'utf-8');
+        const playersData = await fs.promises.readFile(PLAYERS_FILE, 'utf-8');
         guestPlayersCache = JSON.parse(playersData);
 
-        const historyData = fs.readFileSync(HISTORY_FILE, 'utf-8');
+        const historyData = await fs.promises.readFile(HISTORY_FILE, 'utf-8');
         guestHistoryCache = JSON.parse(historyData);
     } catch (err) {
         console.error('Error loading guest data:', err);
@@ -65,26 +69,26 @@ export function loadData() {
 }
 
 // Save guest players to file
-function saveGuestPlayers() {
+async function saveGuestPlayers() {
     try {
-        fs.writeFileSync(PLAYERS_FILE, JSON.stringify(guestPlayersCache, null, 2));
+        await fs.promises.writeFile(PLAYERS_FILE, JSON.stringify(guestPlayersCache, null, 2));
     } catch (err) {
         console.error('Error saving guest players:', err);
     }
 }
 
 // Save guest history to file
-function saveGuestHistory() {
+async function saveGuestHistory() {
     try {
-        fs.writeFileSync(HISTORY_FILE, JSON.stringify(guestHistoryCache, null, 2));
+        await fs.promises.writeFile(HISTORY_FILE, JSON.stringify(guestHistoryCache, null, 2));
     } catch (err) {
         console.error('Error saving guest history:', err);
     }
 }
 
 // Create starter deck for new players
-function createStarterDeck(): { ownedCards: string[], activeCards: string[], ownedSpecialCards: string[], activeSpecialCards: string[] } {
-    const allQuestions = loadQuestions();
+async function createStarterDeck(): Promise<{ ownedCards: string[], activeCards: string[], ownedSpecialCards: string[], activeSpecialCards: string[] }> {
+    const allQuestions = await loadQuestions();
     
     // Starter deck: 15 random easy questions (difficulty <= 2)
     const starterCards = allQuestions
@@ -143,7 +147,7 @@ async function getOrCreateSupabaseProfileAsPlayerProfile(supabaseUserId: string,
     
     // If no player data or empty, create starter deck
     if (!playerData || playerData.owned_cards.length === 0) {
-        const starter = createStarterDeck();
+        const starter = await createStarterDeck();
         
         await updatePlayerData(supabaseUserId, {
             owned_cards: starter.ownedCards,
@@ -186,19 +190,19 @@ async function getOrCreateSupabaseProfileAsPlayerProfile(supabaseUserId: string,
 }
 
 // Guest profile management
-function getOrCreateGuestProfile(username: string): PlayerProfile {
+async function getOrCreateGuestProfile(username: string): Promise<PlayerProfile> {
     if (guestPlayersCache[username]) {
         // Migration for existing profiles
         const p = guestPlayersCache[username];
         if (!p.ownedSpecialCards) {
             p.ownedSpecialCards = ['SKIP', 'JOKER', 'SWAP_SELF', 'SKIP', 'JOKER', 'SWAP_SELF'];
             p.activeSpecialCards = ['SKIP', 'JOKER', 'SWAP_SELF'];
-            saveGuestPlayers();
+            await saveGuestPlayers();
         }
         return p;
     }
 
-    const starter = createStarterDeck();
+    const starter = await createStarterDeck();
 
     const newProfile: PlayerProfile = {
         username,
@@ -216,7 +220,7 @@ function getOrCreateGuestProfile(username: string): PlayerProfile {
     };
 
     guestPlayersCache[username] = newProfile;
-    saveGuestPlayers();
+    await saveGuestPlayers();
     return newProfile;
 }
 
@@ -282,7 +286,7 @@ export async function updateActiveDeck(
         profile.activeSpecialCards = activeSpecialCards as SpecialCardType[];
     }
 
-    saveGuestPlayers();
+    await saveGuestPlayers();
     return { success: true };
 }
 
@@ -315,7 +319,7 @@ export async function addCardsToCollection(
     const uniqueNew = newCardIds.filter(id => !profile.ownedCards.includes(id));
     profile.ownedCards.push(...uniqueNew);
 
-    saveGuestPlayers();
+    await saveGuestPlayers();
 }
 
 // Update stats (hybrid)
@@ -340,7 +344,7 @@ export async function updateStats(
     if (result === 'loss') profile.stats.losses++;
     if (result === 'draw') profile.stats.draws++;
 
-    saveGuestPlayers();
+    await saveGuestPlayers();
 }
 
 // Legacy alias
@@ -371,7 +375,7 @@ export async function logGameHistory(
         guestHistoryCache[username] = [];
     }
     guestHistoryCache[username].push(entry);
-    saveGuestHistory();
+    await saveGuestHistory();
 }
 
 // Get player history (hybrid)

@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kysymysmestari - 1v1 Tietovisa</title>
-  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="theme.css?v=24">
+  <link rel="stylesheet" href="card_styles.css">
 </head>
 
 <body>
@@ -78,6 +79,8 @@
         </div>
       </div>
     </div>
+
+
 
     <!-- Dev tools removed - using proper auth now -->
 
@@ -218,7 +221,7 @@
         <div class="debug-header">Debug Log</div>
         <div id="debug-log" class="debug-log"></div>
       </div>
-    </div>
+
 
 
     <!-- NEW: Game Lobby Screen (Waiting Room) -->
@@ -260,6 +263,7 @@
       <h2>Pelaajaprofiili</h2>
       
       <!-- Profile Edit Section (auth-required) -->
+      <!-- Profile Edit Section (auth-required) -->
       <div class="profile-edit-section auth-required">
         <div class="profile-header">
           <div class="avatar-section">
@@ -295,10 +299,20 @@
                 <option value="DE">🇩🇪 Saksa</option>
               </select>
             </div>
-            <button id="save-profile-btn" class="btn btn-primary">Tallenna muutokset</button>
-            <p class="profile-message hidden" id="profile-save-message"></p>
+            <!-- End of Input Groups -->
+            </div>
           </div>
+          <!-- End of Profile Header (Flex Row) -->
         </div>
+
+        <!-- Buttons moved here (Full Width) -->
+        <div class="form-actions" style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <button id="save-profile-btn" class="btn btn-primary" style="padding: 12px; font-weight:600; width: 100%; max-width: 250px;">Tallenna muutokset</button>
+            <button id="open-settings-s-btn" class="btn btn-ghost" style="padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 250px;">
+                <span style="font-size: 1.2rem;">⚙️</span> Avaa asetukset
+            </button>
+        </div>
+        <p class="profile-message hidden" id="profile-save-message" style="text-align:center; margin-top:10px;"></p>
       </div>
 
       <!-- Stats Section -->
@@ -345,7 +359,7 @@
           <!-- Actions (Stats + Settings) -->
           <div class="deck-actions">
               <div class="deck-stats">
-                  <span>Valittu: <span id="active-deck-count">0</span>/10</span>
+                  <span>Valittu: <span id="active-deck-count">0</span>/10 <span style="opacity:0.5; margin:0 5px;">|</span> <span id="open-stats-btn" style="cursor:pointer; border-bottom:1px dotted rgba(255,255,255,0.5);">Kortteja: <span id="total-owned-count">0</span></span></span>
               </div>
               <button id="deck-settings-toggle" class="btn btn-secondary small" title="Suodatus & Järjestys">
                   <span>⚙️</span>
@@ -403,69 +417,178 @@
 
     <!-- Showroom Screen -->
     <div id="showroom-screen" class="screen hidden">
-        <h2>🎨 Logojen Showroom</h2>
-        <p class="section-desc" style="text-align:center;">Valitse suosikkisi tulevaksi pelin logoksi!</p>
+        <h2>🎨 Showroom</h2>
         
-        <div class="showroom-grid">
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-1">Kysymysmestari</h1>
+        <!-- Tabs -->
+        <div class="showroom-tabs" style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+            <button class="auth-tab active" data-target="tab-showroom-logos">Logot</button>
+            <button class="auth-tab" data-target="tab-showroom-cards">Kortit</button>
+        </div>
+
+        <!-- Tab Content: Logos -->
+        <div id="tab-showroom-logos" class="tab-content">
+            <p class="section-desc" style="text-align:center;">Valitse suosikkisi tulevaksi pelin logoksi!</p>
+            <div class="showroom-grid">
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-1">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Neon Glow</div>
                 </div>
-                <div class="showroom-label">Neon Glow</div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-2">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Retro Pixel</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-3">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Gradient Flow</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-4">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">3D Pop</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-5">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Elegant Serif</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-6" data-text="Kysymysmestari">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Glitch Cyber</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-7">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Bubble Gum</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-8">KYSYMYSMESTARI</h1>
+                    </div>
+                    <div class="showroom-label">Sci-Fi Tech</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-9">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Minimal Thin</div>
+                </div>
+                <div class="showroom-item">
+                    <div class="css-logo-container">
+                        <h1 class="logo-style-10">Kysymysmestari</h1>
+                    </div>
+                    <div class="showroom-label">Arcade Outline</div>
+                </div>
             </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-2">Kysymysmestari</h1>
+        </div>
+
+        <!-- Tab Content: Cards -->
+        <div id="tab-showroom-cards" class="tab-content hidden" style="overflow-y: auto; max-height: calc(100vh - 200px); padding-bottom: 50px;">
+            
+            <p class="section-desc" style="text-align:center;">Kortit (Ethereal Teema)</p>
+
+            <div class="showroom-card-grid">
+                
+                <!-- 1. Perus -->
+                <div class="card-preview">
+                    <div class="card-wrapper" style="transform: scale(0.9); transform-origin: top center;">
+                         <div class="tcg-ethereal category-maantieto">
+                            <div class="ethereal-inner">
+                                <div class="ethereal-category">MAANTIETO</div>
+                                <div class="ethereal-circle">🌍</div>
+                                <div class="ethereal-question">Mikä on Suomen pääkaupunki?</div>
+                                <div class="ethereal-footer">
+                                    <span>BASIC</span>
+                                    <span>#001</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="showroom-label" style="text-align:center; margin-top:10px;">Perus</div>
                 </div>
-                <div class="showroom-label">Retro Pixel</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-3">Kysymysmestari</h1>
+
+                <!-- 2. Erikois -->
+                 <div class="card-preview">
+                    <div class="card-wrapper" style="transform: scale(0.9); transform-origin: top center;">
+                         <div class="tcg-ethereal special-skip">
+                            <div class="ethereal-inner">
+                                <div class="ethereal-category">TOIMINTO</div>
+                                <div class="ethereal-circle">⏭️</div>
+                                <div class="ethereal-question">Ohita vuoro</div>
+                                <div class="ethereal-footer">
+                                    <span>SPECIAL</span>
+                                    <span>#S01</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="showroom-label" style="text-align:center; margin-top:10px;">Erikois (Skip)</div>
                 </div>
-                <div class="showroom-label">Gradient Flow</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-4">Kysymysmestari</h1>
+
+                <!-- 3. Holo -->
+                <div class="card-preview">
+                    <div class="card-wrapper" style="transform: scale(0.9); transform-origin: top center;">
+                         <div class="tcg-ethereal category-tiede rarity-holo">
+                            <div class="ethereal-inner">
+                                <div class="ethereal-category">TIEDE</div>
+                                <div class="ethereal-circle">🧬</div>
+                                <div class="ethereal-question">Mikä on veden kemiallinen kaava?</div>
+                                <div class="ethereal-footer">
+                                    <span>HOLO</span>
+                                    <span>#H05</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="showroom-label" style="text-align:center; margin-top:10px;">Holo</div>
                 </div>
-                <div class="showroom-label">3D Pop</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-5">Kysymysmestari</h1>
+
+                <!-- 4. Epic -->
+                <div class="card-preview">
+                    <div class="card-wrapper" style="transform: scale(0.9); transform-origin: top center;">
+                         <div class="tcg-ethereal category-historia rarity-epic">
+                            <div class="ethereal-inner">
+                                <div class="ethereal-category">HISTORIA</div>
+                                <div class="ethereal-circle">⚔️</div>
+                                <div class="ethereal-question">Minä vuonna Rooman valtakunta hajosi?</div>
+                                <div class="ethereal-footer">
+                                    <span>EPIC</span>
+                                    <span>#E12</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="showroom-label" style="text-align:center; margin-top:10px;">Epic</div>
                 </div>
-                <div class="showroom-label">Elegant Serif</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-6" data-text="Kysymysmestari">Kysymysmestari</h1>
+
+                <!-- 5. Legendary -->
+                <div class="card-preview">
+                     <div class="card-wrapper" style="transform: scale(0.9); transform-origin: top center;">
+                         <div class="tcg-ethereal special-joker rarity-legendary">
+                            <div class="ethereal-inner">
+                                <div class="ethereal-category">LEGENDARY</div>
+                                <div class="ethereal-circle">👑</div>
+                                <div class="ethereal-question">JOKERI: Kysy mitä vain!</div>
+                                <div class="ethereal-footer">
+                                    <span>LEGENDARY</span>
+                                    <span>#L01</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="showroom-label" style="text-align:center; margin-top:10px;">Legendary</div>
                 </div>
-                <div class="showroom-label">Glitch Cyber</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-7">Kysymysmestari</h1>
-                </div>
-                <div class="showroom-label">Bubble Gum</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-8">KYSYMYSMESTARI</h1>
-                </div>
-                <div class="showroom-label">Sci-Fi Tech</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-9">Kysymysmestari</h1>
-                </div>
-                <div class="showroom-label">Minimal Thin</div>
-            </div>
-            <div class="showroom-item">
-                <div class="css-logo-container">
-                    <h1 class="logo-style-10">Kysymysmestari</h1>
-                </div>
-                <div class="showroom-label">Arcade Outline</div>
+
             </div>
         </div>
     </div>
@@ -474,6 +597,11 @@
 
     <div id="game-screen" class="screen hidden theme-ethereal">
       
+      <!-- Game Logo -->
+      <div class="game-screen-logo">
+        <h1 class="logo-style-6" data-text="Kysymysmestari">Kysymysmestari</h1>
+      </div>
+
       <!-- Close/Surrender Button -->
       <button id="surrender-btn" class="close-modal" style="top:15px; right:15px; width:40px; height:40px; font-size:1.5rem; background:rgba(255, 71, 87, 0.2); border:1px solid rgba(255, 71, 87, 0.5);" title="Luovuta peli">✕</button>
 
@@ -521,24 +649,29 @@
               <button id="continue-btn" class="btn btn-primary" style="margin-top:20px;">Jatka</button>
           </div>
           
-          <!-- Special Cards Layout: Now inside active area flow to prevent overlap but absolutely positioned to right? 
-               User asked to prevent overlap even on narrow screens. 
-               Safe bet: Separate container BELOW answers or TO THE RIGHT.
-               Let's put it as a sibling to question-area but styled in CSS to be "sidebar" or "bottom-bar".
-               Actually, I will remove the inline styles here and handle it in CSS.
-          -->
-      <!-- Special Cards -->
-      <div id="special-hand-area" class="special-hand-area">
-        <div id="special-cards" class="special-cards"></div>
-      </div>
-      </div>
-
-      <!-- PLAYER HAND (Bottom) -->
       <div id="deck-area" class="hand-area hidden">
-           <div id="deck-cards" class="deck-cards" style="width:100%; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;"></div>
+           <!-- In-Game Tabs -->
+           <div class="game-hand-tabs">
+               <button class="game-tab active" data-tab="cards">Kortit <span id="cards-tab-count" class="tab-badge">0</span></button>
+               <button class="game-tab" data-tab="specials">Erikois <span id="special-tab-count" class="tab-badge">0</span></button>
+           </div>
+           
+           <!-- Questions Tab Content -->
+           <div id="deck-cards-tab" class="tab-pane active">
+               <div id="deck-cards" class="deck-cards"></div>
+           </div>
+
+           <!-- Specials Tab Content -->
+           <div id="special-cards-tab" class="tab-pane">
+               <div id="special-cards" class="special-cards"></div>
+           </div>
       </div>
 
     </div>
+  </div> <!-- Close game-screen -->
+
+
+    
 
     <!-- Game Over Screen -->
     <div id="game-over-screen" class="screen hidden theme-ethereal">
@@ -572,8 +705,7 @@
         <button id="exit-game-btn" class="btn btn-secondary">Poistu</button>
       </div>
     </div>
-    
-    <!-- Join Approval Modal (Host) -->
+
     <div id="approval-modal" class="modal hidden">
         <div class="modal-content glass-panel" style="background: var(--surface-card, #1e272e); text-align: center; max-width: 400px; width: 90%; padding: 2rem; border: 1px solid rgba(255,255,255,0.1);">
             <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Liittymispyyntö</h3>
@@ -737,7 +869,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="auth.js?v=2"></script>
   <script src="auth_ui.js?v=2"></script>
-  <script src="client.js?v=3"></script>
+  <script src="client.js?v=13"></script>
   
   <script>
     // Global debug logger
@@ -770,6 +902,40 @@
         window.mobileLog('Page loaded. Version: 2');
     })();
   </script>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content glass-panel" style="background: var(--surface-card, #1e272e); width: 90%; max-width: 400px; padding: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+            <span class="close-modal" id="close-settings-modal">&times;</span>
+            <h3 style="margin-bottom: 1.5rem; text-align:center;">Asetukset</h3>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display:block; margin-bottom:0.8rem; color:var(--text-secondary); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Grafiikka</label>
+                
+                <div class="checkbox-wrapper" style="display:flex; align-items:center; gap:15px; padding:12px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid rgba(255,255,255,0.05); transition:all 0.2s;">
+                    <input type="checkbox" id="toggle-glitch-effect" checked style="width:20px; height:20px; accent-color:var(--primary-color); cursor:pointer;">
+                    <label for="toggle-glitch-effect" style="margin:0; cursor:pointer; color:rgba(255,255,255,0.9); flex:1;">Päälogon animaatio</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                 <label style="display:block; margin-bottom:0.8rem; color:var(--text-secondary); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Tietoja</label>
+                 <p style="font-size:0.8rem; opacity:0.6; text-align:center;">Kysymysmestari v1.0.2</p>
+                 <p style="font-size:0.8rem; opacity:0.4; text-align:center;">Client v11</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="modal hidden">
+        <div class="modal-content glass-panel" style="background: var(--surface-card, #1e272e); width: 90%; max-width: 500px; padding: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+            <span class="close-modal" id="close-stats-modal">&times;</span>
+            <h3 style="margin-bottom: 1.5rem; text-align:center;">Korttitilastot</h3>
+            <div id="stats-content" style="max-height: 60vh; overflow-y: auto;">
+                <!-- Stats injected here -->
+            </div>
+        </div>
+    </div>
 </body>
+
 
 </html>

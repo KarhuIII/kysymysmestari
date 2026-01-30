@@ -3,60 +3,66 @@ export interface Question { id: string; question: string; options: string[]; cor
 export type SpecialCardType = 'SWAP_OPPONENT' | 'SWAP_SELF' | 'JOKER' | 'MIRROR' | 'SKIP';
 
 export interface Player {
-    id: string;
-    name?: string; // Added for Lobby UI
+    id: string;        // socket.id
+    playerId: string;  // persistent player identifier (e.g., "player_abc123" or guest ID)
+    name: string;      // display name
     score: number;
-    deck: string[]; // Array of question IDs
-    specialHand: SpecialCardType[]; // Array of special cards
+    deck: string[];
+    specialHand: SpecialCardType[];
 }
 
 export interface PlayerProfile {
-    username: string; // Acts as ID for now
-    ownedCards: string[]; // All unlocked question IDs
-    activeCards: string[]; // Currently selected deck
-    ownedSpecialCards: SpecialCardType[]; // Unlocked special cards
-    activeSpecialCards: SpecialCardType[]; // Selected specialist cards
+    // ... (keeps same)
+    username: string; 
+    ownedCards: string[]; 
+    activeCards: string[]; 
+    ownedSpecialCards: SpecialCardType[]; 
+    activeSpecialCards: SpecialCardType[]; 
     stats: {
         wins: number;
         losses: number;
         draws: number;
         gamesPlayed: number;
     };
-    created: number; // Timestamp
-    supabaseUserId?: string; // For authenticated users
-    displayName?: string; // Visible name for other players
+    created: number; 
+    supabaseUserId?: string; 
+    displayName?: string; 
 }
 
 export interface ActiveQuestion {
-    from: string; // Player ID who asked
-    to: string; // Player ID who answers
+    from: string;      // asker playerId
+    to: string[];      // who should answer
     questionId: string;
+    answers: Map<string, number | null>; // playerId -> answerIndex
 }
 
 export interface QuestionAnswer {
     questionId: string;
-    askedBy: 'playerA' | 'playerB';
-    answeredBy: 'playerA' | 'playerB';
+    askedBy: string;    // playerId
+    answeredBy: string; // playerId
     correct: boolean;
 }
 
+export type GameMode = 'single' | 'classic' | 'multi';
+export type MultiMode = 'round' | 'choice';
+
 export interface Game {
     id: string;
-    playerA: Player | null;
-    playerB: Player | null;
-    currentTurn: 'playerA' | 'playerB';
+    type: GameMode;
+    multiMode?: MultiMode;
+    players: Map<string, Player>;  // playerId -> Player
+    playerOrder: string[];
+    currentAskerIndex: number;
+    hostId: string;
+    maxPlayers: number;
     activeQuestion: ActiveQuestion | null;
     status: 'waiting' | 'active' | 'finished';
     visibility: 'public' | 'private';
-    winner: string | null;
-    answeredQuestions: QuestionAnswer[]; // Track Q&A history for winner selection
-    pendingJoinRequest?: {
-        socketId: string;
-        username: string;
-    } | null;
+    winner: string | null;          // playerId of winner
+    answeredQuestions: QuestionAnswer[];
     targetScore: number;
-    mode?: 'multi' | 'single';
-    systemDeck?: string[]; // Queue of questions for single player mode
+    pendingJoinRequests: Map<string, { socketId: string; username: string }>;
+    systemDeck?: string[];         // for 'single' mode
 }
 
 // Client-safe question (without correct answer)
