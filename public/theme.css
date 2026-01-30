@@ -447,18 +447,8 @@ select {
 }
 
 .game-screen-logo h1 {
-  font-family: "Segoe UI", sans-serif;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #fff;
-  font-size: 1.2rem;
-  letter-spacing: 2px;
-  background: linear-gradient(to right, #6c5ce7, #a29bfe);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 15px rgba(108, 92, 231, 0.3);
   margin: 0;
+  font-size: 1.5rem;
 }
 
 .scores-bar {

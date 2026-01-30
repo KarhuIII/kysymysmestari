@@ -270,6 +270,7 @@ function setupSocketListeners() {
              document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
              const gameScreen = document.getElementById('game-screen');
              if (gameScreen) gameScreen.classList.remove('hidden');
+             if (logoContainer) logoContainer.classList.add('hidden'); // Fix for single player bypass
         } else {
              showLobbyScreen(data.gameId, data.isHost);
         }
